@@ -75,8 +75,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           PR: ${{ github.event.pull_request.number }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        # The merge commit's author is the Actions bot's noreply address, never an account's own email.
         run: |
-          gh pr merge "$PR" -R "$GITHUB_REPOSITORY" --squash --match-head-commit "$HEAD_SHA" --delete-branch
+          gh pr merge "$PR" -R "$GITHUB_REPOSITORY" --squash --match-head-commit "$HEAD_SHA" --delete-branch \
+            --author-email "41898282+github-actions[bot]@users.noreply.github.com"
           echo "merged=true" >> "$GITHUB_OUTPUT"
 
   publish:
