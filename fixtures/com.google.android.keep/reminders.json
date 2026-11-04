@@ -1,0 +1,28 @@
+{
+  "fixture": 1,
+  "package": "com.google.android.keep",
+  "source": "synthetic",
+  "scrubbed": true,
+  "notes": "Synthetic reminders.",
+  "samples": [
+    {
+      "name": "timed reminder",
+      "notification": {
+        "posted": 1767000000000, "when": 1767024000000, "category": "reminder", "channel": "reminders",
+        "title": "Call the dentist", "text": "Ask about the Thursday opening",
+        "actions": [ { "title": "Done" }, { "title": "Snooze" } ]
+      },
+      "expect": { "title": "call the dentist", "line": "reminder · 4:00 pm" }
+    },
+    {
+      "name": "untitled note",
+      "notification": { "posted": 1767000000000, "category": "reminder", "text": "Water the plants" },
+      "expect": { "title": "water the plants", "line": "reminder" }
+    },
+    {
+      "name": "share notice",
+      "notification": { "posted": 1767000000000, "category": "social", "title": "Sam shared a note with you", "text": "Groceries" },
+      "expect": { "match": false }
+    }
+  ]
+}

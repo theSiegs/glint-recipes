@@ -1,0 +1,28 @@
+{
+  "recipe": "glint.recipe/1",
+  "id": "youtube-new",
+  "rev": 2,
+  "name": "youtube",
+  "app": { "package": "com.google.android.youtube", "label": "YouTube" },
+  "meta": {
+    "status": "built-in",
+    "author": "Glint",
+    "updated": "2026-11-03",
+    "notes": "Built in, from public knowledge; still to be checked on real samples. Count only, off by default (noisy). Upload and download progress gets its own face."
+  },
+  "enabled": false,
+  "source": {
+    "notification": {
+      "match": { "notCategories": ["promo", "recommendation"] },
+      "key": "id",
+      "expire": "1d"
+    }
+  },
+  "fields": {},
+  "faces": [
+    { "kind": "progress", "title": "uploading", "value": "{percent}", "line": "{percent}", "when": "progress" },
+    { "kind": "count", "count": "{count}", "label": "new videos", "when": "count>1" },
+    { "kind": "count", "count": "{count}", "label": "new video", "when": "count==1" }
+  ],
+  "tap": "notification"
+}

@@ -1,0 +1,41 @@
+{
+  "recipe": "glint.recipe/1",
+  "id": "google-home-door",
+  "rev": 2,
+  "name": "home",
+  "app": { "package": "com.google.android.apps.chromecast.app", "label": "Google Home" },
+  "meta": {
+    "status": "built-in",
+    "author": "Glint",
+    "updated": "2026-11-03",
+    "notes": "Built in, from public knowledge; still to be checked on real samples. Doorbell and camera events: the camera's name as the title, what it saw as the text, a snapshot as a big picture. If Home Assistant already sees the cameras, prefer an HA tile. Channel ids are guesses. A doorbell ring may come as category call; only the event's wording is relied on."
+  },
+  "source": {
+    "notification": {
+      "match": {
+        "notCategories": ["promo", "recommendation", "sys", "status", "progress"],
+        "anchors": ["(?i)\\bdoor|\\bperson\\b|someone|package|motion|\\bring|\\bseen\\b|\\bdetected\\b"],
+        "exclude": ["(?i)\\bupdate available\\b|\\bnew features?\\b|\\btry\\b"],
+        "lang": ["en"]
+      },
+      "key": "field:camera",
+      "hold": "30m",
+      "expire": "2h"
+    }
+  },
+  "fields": {
+    "camera": { "from": ["title"], "then": ["firstLine", "lower", "shorten:24"], "required": true },
+    "event": {
+      "from": ["text", "bigText"],
+      "regex": "(?i)(?P<v>someone(?: is)? at the door|someone rang the doorbell|doorbell rang|package (?:seen|detected|delivered)|person (?:seen|detected)|motion (?:seen|detected)|animal (?:seen|detected))",
+      "lang": ["en"],
+      "then": ["lower"],
+      "map": { "someone is at the door": "someone at the door", "someone rang the doorbell": "doorbell", "doorbell rang": "doorbell", "person detected": "person seen", "motion detected": "motion", "motion seen": "motion", "package detected": "package seen" },
+      "required": true
+    }
+  },
+  "faces": [
+    { "kind": "headline", "title": "{event}", "line": "{camera} · {time}" }
+  ],
+  "tap": "notification"
+}

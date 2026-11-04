@@ -1,0 +1,24 @@
+{
+  "fixture": 1,
+  "package": "com.google.android.gm",
+  "source": "synthetic",
+  "scrubbed": true,
+  "notes": "Synthetic: three threads up at once, with their summary.",
+  "together": true,
+  "samples": [
+    { "name": "first", "notification": { "posted": 1767000000000, "category": "email", "group": "alex@example.com", "title": "Alex Rivera", "text": "Lunch on Friday?" } },
+    { "name": "second", "notification": { "posted": 1767000600000, "category": "email", "group": "alex@example.com", "title": "Sam", "text": "Photos from Saturday" } },
+    {
+      "name": "summary",
+      "notification": {
+        "posted": 1767001200000, "category": "email", "group": "alex@example.com", "summary": true, "template": "InboxStyle", "title": "3 new messages",
+        "lines": ["Library   Your hold is ready", "Sam   Photos from Saturday", "Alex Rivera   Lunch on Friday?"]
+      }
+    },
+    {
+      "name": "third",
+      "notification": { "posted": 1767001200000, "category": "email", "group": "alex@example.com", "title": "Library", "text": "Your hold is ready" },
+      "expect": { "kind": "count", "title": "3", "line": "new mail", "faces": 2 }
+    }
+  ]
+}

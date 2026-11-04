@@ -1,0 +1,29 @@
+{
+  "fixture": 1,
+  "package": "com.google.android.apps.chromecast.app",
+  "source": "synthetic",
+  "scrubbed": true,
+  "notes": "Synthetic camera and doorbell events, and an app notice that must be left alone.",
+  "samples": [
+    {
+      "name": "doorbell",
+      "notification": { "posted": 1767000000000, "category": "call", "template": "BigPictureStyle", "title": "Front door", "text": "Someone is at the door" },
+      "expect": { "title": "someone at the door", "line": "front door · 9:20 am" }
+    },
+    {
+      "name": "person",
+      "notification": { "posted": 1767000000000, "category": "event", "template": "BigPictureStyle", "title": "Driveway", "text": "Person seen" },
+      "expect": { "title": "person seen", "line": "driveway · 9:20 am" }
+    },
+    {
+      "name": "package",
+      "notification": { "posted": 1767000000000, "category": "event", "title": "Front door", "text": "Package detected" },
+      "expect": { "title": "package seen" }
+    },
+    {
+      "name": "app notice",
+      "notification": { "posted": 1767000000000, "title": "New features for your home", "text": "Try the new camera history view." },
+      "expect": { "match": false }
+    }
+  ]
+}

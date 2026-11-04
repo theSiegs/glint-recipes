@@ -1,0 +1,19 @@
+{
+  "fixture": 1,
+  "package": "com.google.android.youtube",
+  "source": "synthetic",
+  "scrubbed": true,
+  "notes": "Synthetic: a new upload from a followed channel, and an upload in progress.",
+  "samples": [
+    {
+      "name": "new upload",
+      "notification": { "posted": 1767000000000, "category": "social", "template": "BigPictureStyle", "title": "Garden Weekly uploaded: Planting bulbs in fall", "text": "Garden Weekly" },
+      "expect": { "kind": "count", "title": "1", "line": "new video" }
+    },
+    {
+      "name": "uploading",
+      "notification": { "posted": 1767000000000, "category": "progress", "ongoing": true, "progress": 40, "max": 100, "title": "Uploading 1 video", "text": "40%" },
+      "expect": { "kind": "progress", "title": "uploading", "line": "40%" }
+    }
+  ]
+}

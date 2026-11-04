@@ -1,0 +1,5 @@
+Vendored from Glint's :glint-recipes module (glint-recipes/src/main/kotlin).
+Glint commit: 736af40c8d465466267757b6145026b485f7e205
+Glint branch: glint/xlearner
+Synced: 2026-11-04
+Update with: checker/sync-from-glint.sh <path-to-glint-checkout>

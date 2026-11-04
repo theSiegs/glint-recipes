@@ -1,0 +1,50 @@
+{
+  "recipe": "glint.recipe/1",
+  "id": "southwest-flight",
+  "rev": 1,
+  "name": "southwest",
+  "app": { "package": "com.southwestairlines.mobile", "label": "Southwest" },
+  "meta": {
+    "status": "unverified",
+    "author": "Glint",
+    "updated": "2026-11-02",
+    "notes": "Written from public knowledge: the push wording and the channel ids are guesses. Capture real samples on the next trip and add channel ids to match."
+  },
+  "source": {
+    "notification": {
+      "match": {
+        "notCategories": ["promo"],
+        "anchors": ["(?i)\\bflight\\b|\\bgate\\b|\\bboard|check.?in|delay|cancel"],
+        "exclude": ["(?i)\\bsale\\b|\\bfares? from\\b|\\boffer\\b|\\bpoints\\b"],
+        "lang": ["en"]
+      },
+      "key": "field:flight",
+      "merge": true,
+      "hold": "18h",
+      "expire": "24h"
+    }
+  },
+  "fields": {
+    "flight": { "from": ["title", "text", "bigText"], "regex": "(?i)flight\\s*#?\\s*(?P<v>\\d{1,4})", "lang": ["en"], "required": true },
+    "status": {
+      "from": ["title", "text"],
+      "regex": "(?i)(?P<v>delayed|cancell?ed|now boarding|on time|check.?in is open|time to check in|gate change)",
+      "lang": ["en"],
+      "then": ["lower"],
+      "map": { "time to check in": "check-in is open", "check in is open": "check-in is open", "checkin is open": "check-in is open", "cancelled": "canceled" }
+    },
+    "gate": { "from": ["text", "bigText", "title"], "regex": "(?i)\\bgate\\s+(?P<v>[A-Z]?\\d{1,3}[A-Z]?)\\b", "lang": ["en"], "then": ["lower"], "hold": "18h" },
+    "boards": { "from": ["text", "bigText"], "regex": "(?i)boards?\\w*\\s+(?:at\\s+|begins\\s+at\\s+)?(?P<v>\\d{1,2}:\\d{2}\\s*[AaPp]\\.?[Mm]\\.?)", "lang": ["en"], "then": ["time"] },
+    "departs": { "from": ["text", "bigText"], "regex": "(?i)depart\\w*\\s+(?:at\\s+)?(?P<v>\\d{1,2}:\\d{2}\\s*[AaPp]\\.?[Mm]\\.?)", "lang": ["en"], "then": ["time"], "stale": "12h" },
+    "to": { "from": ["text", "bigText", "title"], "regex": "\\bto\\s+(?P<v>[A-Z]{3})\\b", "lang": ["en"], "then": ["lower"] }
+  },
+  "faces": [
+    { "kind": "headline", "title": "{status}", "line": "flight {flight}", "peek": "departs {departs}", "when": ["status", "departs"] },
+    { "kind": "headline", "title": "{status}", "line": "flight {flight}", "when": ["status", "!departs"] },
+    { "kind": "headline", "title": "gate {gate}", "line": "to {to}", "when": "gate" },
+    { "kind": "headline", "title": "gate {gate}", "line": "flight {flight}", "when": ["gate", "!to"] },
+    { "kind": "headline", "title": "boards {boards}", "line": "flight {flight}", "when": "boards" },
+    { "kind": "headline", "title": "flight {flight}", "line": "{text}", "when": ["!status", "!gate", "!boards"] }
+  ],
+  "tap": "notification"
+}

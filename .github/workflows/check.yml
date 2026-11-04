@@ -1,0 +1,93 @@
+# The checker in CI (README.md, "How a recipe gets in"): every recipe against the schema, its
+# fixtures and the catalog rules, plus a dry run of the index builder. A pull request from a branch of
+# this repo that only touches recipes/, fixtures/ or revoked.txt is squash-merged when it passes, and
+# the signed publish runs in the same workflow run (a GITHUB_TOKEN merge starts no push run).
+name: check
+
+on:
+  pull_request:
+  push:
+    branches-ignore: [main] # main is checked by publish.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+          cache-dependency-path: checker/*.gradle.kts
+
+      - name: Check the catalog
+        run: ./checker/gradlew -p checker check --no-daemon
+
+      - name: Index dry run (unsigned)
+        run: python3 tools/build_index.py --out "$RUNNER_TEMP/site"
+
+  automerge:
+    needs: check
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.base.ref == 'main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      merged: ${{ steps.merge.outputs.merged }}
+    steps:
+      - name: Only catalog files changed?
+        id: scope
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          files="$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/files" --jq '.[] | .filename, (.previous_filename // empty)')"
+          printf '%s\n' "$files"
+          other="$(printf '%s\n' "$files" | grep -vE '^(recipes/[^/]+\.json|fixtures/[^/]+/[^/]+\.json|revoked\.txt)$' || true)"
+          if [ -n "$files" ] && [ -z "$other" ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Not auto-merged: the pull request changes files outside recipes/, fixtures/ and revoked.txt."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Squash-merge
+        id: merge
+        if: steps.scope.outputs.ok == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          gh pr merge "$PR" -R "$GITHUB_REPOSITORY" --squash --match-head-commit "$HEAD_SHA" --delete-branch
+          echo "merged=true" >> "$GITHUB_OUTPUT"
+
+  publish:
+    needs: automerge
+    if: needs.automerge.outputs.merged == 'true'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/publish.yml
+    with:
+      ref: main
+    secrets:
+      EXCHANGE_SIGNING_KEY: ${{ secrets.EXCHANGE_SIGNING_KEY }}

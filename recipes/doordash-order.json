@@ -1,0 +1,47 @@
+{
+  "recipe": "glint.recipe/1",
+  "id": "doordash-order",
+  "rev": 1,
+  "name": "doordash",
+  "app": { "package": "com.dd.doordash", "label": "DoorDash" },
+  "meta": {
+    "status": "unverified",
+    "author": "Glint",
+    "updated": "2026-11-02",
+    "notes": "The order notification as public reports describe it: ongoing, with a progress bar and an arrival time. Whether it is a Live Update is unconfirmed; channel ids are guesses."
+  },
+  "source": {
+    "notification": {
+      "match": {
+        "notCategories": ["promo"],
+        "anchors": ["(?i)order|dasher|on the way|arriving|delivered|preparing|picked up"],
+        "exclude": ["(?i)\\b\\d+% off\\b|\\bpromo\\b|\\bdashpass\\b"],
+        "lang": ["en"]
+      },
+      "key": "group",
+      "pick": "ongoing",
+      "merge": true,
+      "hold": "2h",
+      "expire": "6h"
+    }
+  },
+  "fields": {
+    "status": {
+      "from": ["title"],
+      "regex": "(?i)(?P<v>preparing|picked up|on the way|arriving|almost there|delivered|order confirmed|heading to)",
+      "lang": ["en"],
+      "then": ["lower"],
+      "map": { "heading to": "on the way", "order confirmed": "confirmed", "almost there": "arriving" },
+      "required": true
+    },
+    "eta": { "from": ["text", "bigText", "subText"], "regex": "(?i)(?P<v>\\d{1,2}:\\d{2}\\s*[AaPp]\\.?[Mm]\\.?)", "lang": ["en"], "then": ["time"], "stale": "1h" },
+    "store": { "from": ["text", "bigText"], "regex": "(?i)\\bfrom\\s+(?P<v>[^.,]{2,40})", "lang": ["en"], "then": ["lower", "shorten:24"] }
+  },
+  "faces": [
+    { "kind": "progress", "title": "{status}", "line": "arrives {eta}", "value": "{progress}", "max": "{max}", "when": ["status", "eta", "progress"] },
+    { "kind": "headline", "title": "{status}", "line": "arrives {eta}", "peek": "{store}", "when": ["status", "eta"] },
+    { "kind": "headline", "title": "{status}", "line": "{store}", "when": ["status", "store"] },
+    { "kind": "headline", "title": "{status}", "line": "doordash", "when": "status" }
+  ],
+  "tap": "notification"
+}

@@ -1,0 +1,49 @@
+{
+  "fixture": 1,
+  "package": "com.amazon.mShop.android.shopping",
+  "source": "synthetic",
+  "scrubbed": true,
+  "notes": "Synthetic delivery pushes and one deal. Replace with captured samples.",
+  "samples": [
+    {
+      "name": "arriving today",
+      "notification": {
+        "posted": 1767000000000, "tag": "order-1", "channel": "shipment_updates",
+        "title": "Arriving today", "text": "Your package with Wireless earbuds will arrive today by 8 PM."
+      },
+      "expect": { "title": "arriving today", "line": "by 8 pm", "peek": "wireless earbuds" }
+    },
+    {
+      "name": "out for delivery",
+      "notification": {
+        "posted": 1767010000000, "tag": "order-1", "channel": "shipment_updates",
+        "title": "Out for delivery", "text": "Your Wireless earbuds is out for delivery."
+      },
+      "expect": { "title": "out for delivery", "line": "wireless earbuds" }
+    },
+    {
+      "name": "delivered",
+      "notification": {
+        "posted": 1767020000000, "tag": "order-1", "channel": "shipment_updates",
+        "title": "Delivered", "text": "Your package was left at the front door."
+      },
+      "expect": { "title": "delivered", "line": "the front door", "peek": "2:53 pm" }
+    },
+    {
+      "name": "shipped",
+      "notification": {
+        "posted": 1767000000000, "tag": "order-2", "channel": "shipment_updates",
+        "title": "Shipped: Kitchen scale", "text": "Your Kitchen scale has shipped."
+      },
+      "expect": { "title": "shipped", "line": "kitchen scale" }
+    },
+    {
+      "name": "deal",
+      "notification": {
+        "posted": 1767000000000, "channel": "deals", "category": "promo",
+        "title": "Today's deals for you", "text": "Up to 40% off on headphones."
+      },
+      "expect": { "match": false }
+    }
+  ]
+}

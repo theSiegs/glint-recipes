@@ -1,0 +1,23 @@
+{
+  "fixture": 1,
+  "package": "com.google.android.apps.tasks",
+  "source": "synthetic",
+  "scrubbed": true,
+  "notes": "Synthetic due-task reminders.",
+  "samples": [
+    {
+      "name": "due today",
+      "notification": {
+        "posted": 1767000000000, "category": "reminder",
+        "title": "Return library books", "text": "Due today",
+        "actions": [ { "title": "Mark complete" } ]
+      },
+      "expect": { "title": "return library books", "line": "due today" }
+    },
+    {
+      "name": "timed",
+      "notification": { "posted": 1767000000000, "when": 1767013200000, "category": "reminder", "title": "Pay the water bill" },
+      "expect": { "title": "pay the water bill", "line": "due 1:00 pm" }
+    }
+  ]
+}

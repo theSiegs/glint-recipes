@@ -1,0 +1,19 @@
+{
+  "fixture": 1,
+  "package": "com.amazon.mShop.android.shopping",
+  "source": "synthetic",
+  "scrubbed": true,
+  "notes": "Synthetic: two orders up at once; the newest leads, the count face says two packages.",
+  "together": true,
+  "samples": [
+    {
+      "name": "older order",
+      "notification": { "posted": 1767000000000, "tag": "order-2", "title": "Shipped: Kitchen scale", "text": "Your Kitchen scale has shipped." }
+    },
+    {
+      "name": "newer order",
+      "notification": { "posted": 1767005000000, "tag": "order-1", "title": "Arriving today", "text": "Your package with Wireless earbuds will arrive today by 8 PM." },
+      "expect": { "title": "arriving today", "faces": 4 }
+    }
+  ]
+}

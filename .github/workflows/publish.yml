@@ -1,0 +1,102 @@
+# Signed publishing (README.md, "How a recipe gets in"): checks the catalog, builds site/ per the
+# glint.exchange/1 contract, signs index.json with EXCHANGE_SIGNING_KEY, verifies the signature
+# against the committed public key, uploads site/ as an artifact, and deploys it to GitHub Pages once
+# the repo is public. check.yml calls it after an auto-merge (a GITHUB_TOKEN merge starts no push run).
+name: publish
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      ref:
+        description: The ref to publish (check.yml passes main after merging).
+        type: string
+        default: ""
+    secrets:
+      EXCHANGE_SIGNING_KEY:
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+env:
+  # The key the signing secret belongs to; change both together when rotating (README.md).
+  EXCHANGE_PUBLIC_KEY: keys/exchange-1.pub
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+          persist-credentials: false
+
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+          cache-dependency-path: checker/*.gradle.kts
+
+      - name: Check the catalog
+        run: ./checker/gradlew -p checker check --no-daemon
+
+      - name: Build, sign and verify the index
+        env:
+          EXCHANGE_SIGNING_KEY: ${{ secrets.EXCHANGE_SIGNING_KEY }}
+        run: |
+          if [ -z "$EXCHANGE_SIGNING_KEY" ]; then
+            echo "::error::EXCHANGE_SIGNING_KEY is not set"; exit 1
+          fi
+          key="$RUNNER_TEMP/signing.pem"
+          (umask 077; printf '%s\n' "$EXCHANGE_SIGNING_KEY" > "$key")
+          trap 'shred -u "$key" 2>/dev/null || rm -f "$key"' EXIT
+          python3 tools/build_index.py --out site --key "$key" --verify "$EXCHANGE_PUBLIC_KEY"
+
+      - name: Verify again with openssl alone
+        run: |
+          d="$RUNNER_TEMP/verify"; mkdir -p "$d"
+          { printf '302a300506032b6570032100' | xxd -r -p; base64 -d "$EXCHANGE_PUBLIC_KEY"; } > "$d/pub.der"
+          base64 -d site/index.json.sig > "$d/index.sig"
+          test "$(stat -c %s "$d/index.sig")" = 64
+          openssl pkeyutl -verify -rawin -pubin -keyform DER -inkey "$d/pub.der" -in site/index.json -sigfile "$d/index.sig"
+          python3 -c "import json; i=json.load(open('site/index.json')); print('seq', i['seq'], '·', len(i['apps']), 'apps ·', len(i['revoked']), 'revoked')"
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: exchange-site
+          path: site/
+          if-no-files-found: error
+
+      - name: Pages artifact
+        if: ${{ !github.event.repository.private }}
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: site/
+
+      - name: Pages skipped while private
+        if: ${{ github.event.repository.private }}
+        run: echo "::notice::The repo is private, so site/ is only uploaded as the exchange-site artifact. Pages deploys once it is public."
+
+  deploy:
+    needs: build
+    if: ${{ !github.event.repository.private }}
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

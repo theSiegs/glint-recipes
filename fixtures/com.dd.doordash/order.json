@@ -1,0 +1,41 @@
+{
+  "fixture": 1,
+  "package": "com.dd.doordash",
+  "source": "synthetic",
+  "scrubbed": true,
+  "notes": "Synthetic: one order from confirmed to delivered. Replace with captured samples.",
+  "samples": [
+    {
+      "name": "preparing",
+      "notification": {
+        "posted": 1767000000000, "ongoing": true, "group": "order", "progress": 1, "max": 4,
+        "title": "Preparing your order", "text": "Estimated arrival 9:55 AM from Corner Noodle Bar"
+      },
+      "expect": { "kind": "progress", "title": "preparing", "line": "arrives 9:55 am" }
+    },
+    {
+      "name": "on the way",
+      "notification": {
+        "posted": 1767001200000, "ongoing": true, "group": "order", "progress": 3, "max": 4,
+        "title": "Your Dasher is on the way", "text": "Arriving at 9:52 AM"
+      },
+      "expect": { "kind": "progress", "title": "on the way", "line": "arrives 9:52 am", "faces": 3 }
+    },
+    {
+      "name": "delivered",
+      "notification": {
+        "posted": 1767002400000, "group": "order",
+        "title": "Your order was delivered", "text": "Enjoy your meal from Corner Noodle Bar."
+      },
+      "expect": { "kind": "headline", "title": "delivered", "line": "corner noodle bar" }
+    },
+    {
+      "name": "promo",
+      "notification": {
+        "posted": 1767000000000, "category": "promo",
+        "title": "40% off tonight", "text": "Order dinner from local favorites."
+      },
+      "expect": { "match": false }
+    }
+  ]
+}

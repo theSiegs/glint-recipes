@@ -1,0 +1,4 @@
+# LF everywhere, so a recipe hashes the same on every checkout (index.json carries its SHA-256).
+* text=auto eol=lf
+*.bat text eol=crlf
+*.jar binary

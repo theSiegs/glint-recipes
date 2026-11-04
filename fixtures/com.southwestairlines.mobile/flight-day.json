@@ -1,0 +1,57 @@
+{
+  "fixture": 1,
+  "package": "com.southwestairlines.mobile",
+  "source": "synthetic",
+  "scrubbed": true,
+  "notes": "Synthetic: one trip's pushes as public reports describe them, each read alone. Replace with captured samples.",
+  "samples": [
+    {
+      "name": "check-in open",
+      "notification": {
+        "posted": 1767000000000, "channel": "trip_alerts",
+        "title": "Time to check in", "text": "Check in now for Flight 1234 to DEN, departing at 9:40 AM."
+      },
+      "expect": { "kind": "headline", "title": "check-in is open", "line": "flight 1234", "peek": "departs 9:40 am" }
+    },
+    {
+      "name": "gate assigned",
+      "notification": {
+        "posted": 1767003600000, "channel": "trip_alerts",
+        "title": "Flight 1234 update", "text": "Your flight to DEN will depart from gate B12."
+      },
+      "expect": { "title": "gate b12", "line": "to den" }
+    },
+    {
+      "name": "boarding",
+      "notification": {
+        "posted": 1767007200000, "channel": "trip_alerts",
+        "title": "Flight 1234 is now boarding", "text": "Boarding at gate B12. Have your boarding pass ready."
+      },
+      "expect": { "title": "now boarding", "line": "flight 1234", "faces": 2 }
+    },
+    {
+      "name": "delayed",
+      "notification": {
+        "posted": 1767004000000, "channel": "trip_alerts",
+        "title": "Flight 1234 is delayed", "text": "Flight 1234 to DEN now departs at 10:25 AM."
+      },
+      "expect": { "title": "delayed", "peek": "departs 10:25 am" }
+    },
+    {
+      "name": "boarding time",
+      "notification": {
+        "posted": 1767001000000, "channel": "trip_alerts",
+        "title": "Flight 1234 reminder", "text": "Boarding begins at 9:15 AM at gate C4."
+      },
+      "expect": { "title": "gate c4", "line": "flight 1234" }
+    },
+    {
+      "name": "sale",
+      "notification": {
+        "posted": 1767000500000, "channel": "marketing",
+        "title": "Fall sale: fares from $49", "text": "Book by Friday for travel this winter."
+      },
+      "expect": { "match": false }
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "fixture": 1,
+  "package": "com.google.android.gm",
+  "source": "synthetic",
+  "scrubbed": true,
+  "notes": "Synthetic: one new thread, with and without a category; the group summary alone; what Gmail posts besides mail (left alone).",
+  "samples": [
+    {
+      "name": "one thread",
+      "notification": {
+        "posted": 1767000000000, "category": "email", "channel": "^nc_inbox", "template": "BigTextStyle", "group": "alex@example.com",
+        "title": "Alex Rivera", "text": "Lunch on Friday?", "bigText": "Lunch on Friday?\nThere's a new place near the park.",
+        "subText": "alex@example.com",
+        "actions": [ { "title": "Archive", "semantic": "archive" }, { "title": "Reply", "semantic": "reply" } ]
+      },
+      "expect": { "kind": "headline", "title": "Lunch on Friday?", "line": "new mail", "peek": "9:20 am", "faces": 1 }
+    },
+    {
+      "name": "no category",
+      "notification": {
+        "posted": 1767000000000, "template": "BigTextStyle", "title": "Sam", "text": "Photos from Saturday",
+        "bigText": "Photos from Saturday\nHere they are.", "subText": "alex@example.com"
+      },
+      "expect": { "kind": "headline", "title": "Photos from Saturday", "line": "new mail", "faces": 1 }
+    },
+    {
+      "name": "summary alone",
+      "notification": {
+        "posted": 1767000000000, "category": "email", "summary": true, "template": "InboxStyle", "group": "alex@example.com",
+        "title": "2 new messages", "text": "alex@example.com", "subText": "alex@example.com",
+        "lines": ["Alex Rivera   Lunch on Friday?", "Sam   Photos from Saturday"]
+      },
+      "expect": { "kind": "count", "title": "2", "line": "new mail", "faces": 1 }
+    },
+    {
+      "name": "sending",
+      "notification": { "posted": 1767000000000, "category": "progress", "ongoing": true, "indeterminate": true, "title": "Sending message" },
+      "expect": { "match": false }
+    },
+    {
+      "name": "couldn't send",
+      "notification": { "posted": 1767000000000, "category": "err", "title": "Couldn't send message", "text": "Tap to try again" },
+      "expect": { "match": false }
+    },
+    {
+      "name": "chat",
+      "notification": {
+        "posted": 1767000000000, "category": "msg", "template": "MessagingStyle", "title": "Jordan", "text": "See you soon",
+        "messages": [ { "sender": "Jordan", "text": "See you soon", "time": 1767000000000 } ]
+      },
+      "expect": { "match": false }
+    },
+    {
+      "name": "meet call",
+      "notification": { "posted": 1767000000000, "category": "call", "template": "CallStyle", "title": "Jordan", "text": "Incoming call" },
+      "expect": { "match": false }
+    }
+  ]
+}

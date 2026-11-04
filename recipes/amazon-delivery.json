@@ -1,0 +1,48 @@
+{
+  "recipe": "glint.recipe/1",
+  "id": "amazon-delivery",
+  "rev": 1,
+  "name": "amazon",
+  "app": { "package": "com.amazon.mShop.android.shopping", "label": "Amazon Shopping" },
+  "meta": {
+    "status": "unverified",
+    "author": "Glint",
+    "updated": "2026-11-02",
+    "notes": "Delivery pushes as public reports describe them; channel ids are guesses. Deals are left out by category and wording until real channel ids are known."
+  },
+  "source": {
+    "notification": {
+      "match": {
+        "notCategories": ["promo", "recommendation"],
+        "anchors": ["(?i)arriving|out for delivery|delivered|shipped|delayed|on its way|package"],
+        "exclude": ["(?i)\\bdeals?\\b|\\b\\d+% off\\b|\\bsale\\b|\\bprime day\\b"],
+        "lang": ["en"]
+      },
+      "key": "tag",
+      "merge": true,
+      "hold": "72h",
+      "expire": "3d"
+    }
+  },
+  "fields": {
+    "status": {
+      "from": ["title", "text"],
+      "regex": "(?i)(?P<v>arriving today|arriving tomorrow|out for delivery|delivered|delayed|shipped|on its way)",
+      "lang": ["en"],
+      "then": ["lower"],
+      "map": { "on its way": "shipped" },
+      "required": true
+    },
+    "by": { "from": ["text", "bigText"], "regex": "(?i)\\bby\\s+(?P<v>\\d{1,2}(?::\\d{2})?\\s*[AaPp]\\.?[Mm])", "lang": ["en"], "then": ["lower"], "stale": "1d" },
+    "item": { "from": ["text", "bigText"], "regex": "(?i)(?:package with|your)\\s+(?:package with\\s+)?(?P<v>[^.]{3,60}?)\\s+(?:will|is|was|has)\\b", "lang": ["en"], "then": ["lower", "shorten:32"] },
+    "spot": { "from": ["text", "bigText"], "after": "left at", "lang": ["en"], "then": ["lower", "shorten:24"] }
+  },
+  "faces": [
+    { "kind": "headline", "title": "{status}", "line": "by {by}", "peek": "{item}", "when": ["status", "by"] },
+    { "kind": "headline", "title": "delivered", "line": "{spot}", "peek": "{time}", "when": ["status==delivered", "spot"] },
+    { "kind": "headline", "title": "{status}", "line": "{item}", "when": ["status", "item"] },
+    { "kind": "headline", "title": "{status}", "line": "amazon", "when": "status" },
+    { "kind": "count", "count": "{keys}", "label": "packages", "when": "keys>1" }
+  ],
+  "tap": "notification"
+}
