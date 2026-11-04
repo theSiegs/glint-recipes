@@ -39,9 +39,15 @@ Run the same steps locally (JDK 17 or newer, Python 3):
 ./checker/gradlew -p checker check                                     # the whole catalog
 ./checker/gradlew -p checker run --args="../recipes ../fixtures ../revoked.txt"
 ./checker/gradlew -p checker learn --args="fixtures/com.dd.doordash"   # the shape learner, no AI
+./checker/gradlew -p checker installDist                              # both as jars, for the intake's drafting job
 python tools/build_index.py --out site                                 # unsigned dry run
 python tools/build_index.py --out site --key test.pem --verify test.pub
 ```
+
+Drafted recipes come from the private intake's nightly job as pull requests from `draft/<package>`
+branches: a `learned` recipe and `fixtures/<package>/drafted.json`, a synthetic fixture the job
+writes with `checker/src/catalog/.../DraftFixture.kt` from a few scrubbed shapes. They go through the
+same check and auto-merge as any other pull request.
 
 `checker/sync-from-glint.sh <path-to-glint-checkout>` re-copies the checker's sources from Glint;
 `checker/VERSION` names the Glint commit they came from.
