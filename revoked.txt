@@ -1,3 +1,4 @@
 # Recipes withdrawn from the tile exchange. One per line: a recipe id (every rev) or id@rev
 # (that rev only). Glint never uses a revoked recipe, even from its cache, and deletes the cached file.
 # Lines starting with # are comments.
+# Example lines: southwest-flight (every rev), amazon-delivery@1 (rev 1 only).
