@@ -1,0 +1,157 @@
+# Glint's common words (recipes/SPEC.md §10): the only words the sample scrubber keeps as they are.
+# Every other word, in any case, becomes a placeholder of the same shape (Xxxx, xxxx, XXXX).
+# One list for the phone (glint-recipes Scrubber), the catalog's checker and the tile exchange's
+# relay (glint-recipes-intake relay/src/words.js): change it in all three; their tests pin its digest.
+# Frequent English words and words apps use in notifications. Never a word that is also a common
+# first name or surname (bill, rose, grace, hunter, brown, mason...), a place or a brand.
+# Whitespace-separated, lowercase ASCII; a line starting with # is a comment.
+
+# single letters (seats, gates, terminals)
+a b c d e f g h i j k l m n o p q r s t u v w x y z
+
+# function words
+about above across after afterwards again against ago all almost alone along already also although always
+am among an and another any anybody anyone anything anyway anywhere are aren't around as at away back be
+because been before behind being below beside besides between beyond both but by can can't cannot could
+couldn't did didn't do does doesn't doing don't done down during each either else elsewhere enough even
+ever every everybody everyone everything everywhere except few for from further had hadn't has hasn't have
+haven't having he he'd he'll he's her here here's hers herself him himself his how how's however i i'd
+i'll i'm i've if in inside instead into is isn't it it'd it'll it's its itself just least less let let's
+like many may maybe me meanwhile might mine more most mostly much must my myself near nearly neither never
+next no nobody none nor not nothing now nowhere of off often on once one ones only onto or other others
+otherwise our ours ourselves out outside over own per perhaps quite rather really same several shall she
+she'd she'll she's should shouldn't since so some somebody someone something sometimes somewhere soon
+still such than that that'll that's the their theirs them themselves then there there'll there's
+therefore these they they'd they'll they're they've this those though through throughout thru thus till
+to together too toward towards under unless unlike until up upon us very via was wasn't we we'd we'll
+we're we've well were weren't what what's whatever when whenever where where's wherever whether which
+while who who's whoever whole whom whose why will with within without won't would wouldn't yes yet you
+you'd you'll you're you've your yours yourself yourselves
+ok okay oh hey hi hello thanks thank please sorry welcome bye goodbye cheers congrats congratulations
+yeah yep nope wow oops alright
+
+# numbers and order
+zero two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen
+seventeen eighteen nineteen twenty thirty forty fifty sixty seventy eighty ninety hundred hundreds
+thousand thousands million millions billion first second third fourth fifth last latest half quarter
+double single twice triple dozen number numbers count total totals amount amounts plus minus percent
+average  maximum min minimum
+
+# time
+time times timer timers today tonight tomorrow yesterday later morning mornings afternoon afternoons
+evening evenings night nights overnight midnight noon day days daily week weeks weekly weekday weekdays
+weekend weekends month months monthly year years yearly annual hour hours hourly minute minutes seconds
+moment moments date dates calendar calendars schedule schedules scheduled early earlier earliest late
+lately recent recently past future anytime instant instantly immediately shortly duration period
+monday tuesday wednesday thursday friday saturday sunday
+january february march april june july august september october november december
+jan feb mar apr jun jul aug sep sept oct nov dec mon tue tues wed thu thur thurs fri sat sun
+pm min mins hr hrs sec secs eta est pst cst mst edt pdt cdt mdt utc gmt
+
+# verbs and their forms
+accept accepted accepting accepts access accessed act action actions activate activated active add added
+adding adds adjust adjusted agree agreed alert alerted allow allowed allowing allows answer answered
+answers appear appeared appears apply applied applies approve approved approval arrive arrived arrives
+arriving ask asked asking asks assign assigned attach attached attempt attempted attempts attend attending
+available avoid await awaiting backed become becomes began begin beginning begins begun belong block
+blocked book booked booking bookings boost bought break bring brings brought browse build building built
+buy buying call called calling calls came cancel canceled canceling cancelled cancelling cancels care
+catch caught change changed changes changing charge charged charges charging check checked checking
+checkout checks choose chose chosen claim claimed claims clean cleaned clear cleared click clicked close
+closed closes closing collect collected come comes coming comment commented comments complete completed
+completes completing confirm confirmed confirming confirms connect connected connecting continue continued
+continues continuing copied copy correct cost costs create created creates creating cut decide decided
+decline declined delay delayed delays delete deleted deleting deliver delivered delivering delivers depart
+departed departing departs detect detected detects disable disabled disconnect disconnected discover
+dismiss dismissed display displayed download downloaded downloading downloads draft drafts drive driving
+drop dropped drops earn earned edit edited editing edits email emailed emails enable enabled end ended
+ending ends enjoy enter entered error errors estimate estimated expect expected expecting expire expired
+expires expiring explore extend extended fail failed failing fails failure fill filled find finding finds
+finish finished finishes finishing fix fixed follow followed following follows forgot forget forward
+forwarded found free get gets getting give given gives giving go goes going gone got gotten had handle
+handled happen happened happening happens has hear heard held help helped helping helps hide hit hold
+holding holds identify import imported improve improved include included includes including increase
+increased install installed installing invite invited invites join joined joining joins keep keeping keeps
+kept knew know known knows land landed landing lands launch launched learn learned leave leaves leaving
+left limit limited link linked links list listed listen listening lists live load loaded loading lock
+locked log logged login look looked looking looks lose losing lost love loved made make makes making
+manage managed mark marked match matched matches mean means meet meeting meetings mention mentioned
+mentions met miss missed missing move moved moves moving muted name named need needed needs note noted
+notes notice noticed notify notified offer offered offers open opened opening opens order ordered ordering
+orders paid pair paired pass passed pause paused pay paying payment payments pending pick picked picking
+pickup place placed places plan planned plans play played playing plays post posted posting posts prepare
+prepared preparing press print process processed processing protect protected provide provided publish
+published purchase purchased push pushed put puts queue queued raise ran rate rated reach reached read
+reading reads ready receive received receives receiving record recorded recording redeem redeemed refresh
+refreshed refund refunded refunds reject rejected release released remain remaining remember remind
+reminded reminder reminders remove removed removes removing renew renewed renews repeat repeated replace
+replaced replied replies reply replying report reported reports request requested requests require
+required requires reschedule rescheduled reserve reserved reset resolved respond response rest restart
+restarted restore restored resume resumed retry return returned returning returns review reviewed reviews
+ride rides ring ringing run running runs said save saved saves saving saw say says scan scanned search
+searched searching see seeing seem seen select selected sell send sending sends sent serve served set sets
+setting settings setup share shared shares sharing ship shipped shipping ships show showed showing shown
+shows sign signed signing skip skipped sleep sold sort speak spend spent start started starting starts stay
+stayed stop stopped stopping stops store stored stream streaming submit submitted subscribe subscribed
+subscription subscriptions succeed success successful successfully suggest suggested suggestion
+suggestions support supported swipe switch switched sync synced syncing take taken takes taking talk tap
+tapped tell test tested text texted think thought told took touch track tracked tracking tracks transfer
+transferred travel tried tries trigger try trying turn turned turning turns type typed unlock unlocked
+unread unsubscribe update updated updates updating upgrade upgraded upload uploaded uploading uploads use
+used uses using verified verify view viewed viewing views visit visited wait waited waiting waits wake
+walk want wanted wants warn warned warning warnings watch watched watching went win won work worked
+working works write writing written wrong wrote
+
+# what apps' notifications are about
+account accounts activity address ad ads chat chats alarm alarms album albums announcement announcements app apps
+application archive archived arrival arrivals article articles assistant audio backup badge bag bags
+baggage balance banner battery  board boarding boards boarded booking box boxes browser bus calendar
+camera cameras car card cards cart carrier carousel cash category channel channels chapter charger
+checkin chef class classes cloud code codes comment confirmation connection connections contact contacts
+content conversation conversations coupon coupons courier course credit cycle dasher data deadline deal
+deals default delivery deliveries departure departures detail details device devices digest direction
+directions discount doc docs document documents door doorbell doors driver drivers dropoff episode
+episodes estimate event events fare fares fee fees feed file files flight flights folder folders friend
+friends game games gate gates gift gifts group groups guest guests headphones home hotel inbox invoice item
+items itinerary job jobs kitchen label lesson library lights lineup location locations mail mailbox map
+maps meal meals media member members menu message messages messaging mic microphone mode motion movie
+movies music network news newsletter note notification notifications offer order package packages page
+pages parcel parcels parking pass passenger passengers password path payment phone photo photos pickup
+platform player playlist podcast podcasts point points post  prices privacy product products profile
+progress promo promos promotion promotions purchase queue receipt receipts recommendation recommendations
+record reminder rental reservation reservations restaurant restaurants result results return reward
+rewards ride room route row sale sales schedule score scores screen seat seats security sensor server
+service services session shift shipment shipments shop shopper shoppers shopping show shows signal site
+song songs speaker sports station stations status statuses step steps stop store stores story stories
+stream subject subscription summary system task tasks team teams temperature terminal thread threads
+ticket tickets tip tips title to-do todo topic track traffic train trains transaction transactions trip
+trips tv update upload user username vehicle verification video videos voice voicemail volume wallet
+watch weather web website wifi window workout zone
+
+# adjectives and adverbs
+able actual added additional almost alone also any approximately automatic automatically back bad basic
+big blue busy certain cheap clean clear closed cold common complete cool correct current currently daily
+dark deep different digital direct due easy empty entire exact exactly expected expired express extra
+fair false familiar far fast final finally fine free fresh full general global good great happy hard
+heavy high higher hot huge important inactive incoming incorrect invalid just key large larger last late
+left less light likely limited little local long longer low lower main major manual many minor mobile
+much near nearby necessary new newer newest nice normal official old older only open optional orange
+original outgoing overdue paid partial personal pink plain popular possible premium previous primary
+private public purple quick quickly quiet ready real recent red regular remaining remote right safe
+secure separate short silent similar simple slow small smart soft special standard still strong
+successful sure temporary top total true unable unavailable unknown unpaid upcoming urgent useful
+usual usually valid various warm weak wide yellow
+
+# general nouns
+age air amount anything area arm back bed bit body break business case center change
+ child children choice city company control country couple course cup dinner door end
+energy example experience eye face fact family fan fans field fire floor food form friend front fun game
+girl boy hand head heart help history hole house idea information interest issue issues kid
+kids kind language  level life line lines lot lunch man men meal minute moment money morning mother
+father name needs night office part party people person place plan point power problem problems program
+question questions reason rest result right road room rule rules side sound space spot staff star stars
+start state step story student students study stuff system table team thing things today top
+town water way ways woman women word words work world
+breakfast dinner coffee tea drink drinks lunch snack pizza burger salad sandwich
+morning tonight weekend holiday holidays birthday birthdays anniversary
+dog cat pet pets baby

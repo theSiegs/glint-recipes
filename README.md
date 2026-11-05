@@ -60,13 +60,16 @@ Base URL (configurable in Glint; default `https://thesiegs.github.io/glint-recip
 
   ```
   {"format":"glint.exchange/1","seq":<int, increases every publish>,"issued":"<ISO-8601 UTC>",
-   "apps":{"<package>":{"id":"<recipe id>","rev":<int>,"sha256":"<lowercase hex of the recipe file bytes>"}},
+   "apps":{"<package>":{"id":"<recipe id>","rev":<int>,"sha256":"<lowercase hex of the recipe file bytes>",
+                        "status":"<the recipe's meta.status>"}},
    "revoked":["<recipe id>" | "<recipe id>@<rev>", ...]}
   ```
 
   One entry per package: the catalog's best recipe for it (status `verified`, then `built-in`, then
   `unverified`, then the highest rev; drafts and revoked recipes are left out). `seq` is the Unix time
-  of the publish run in seconds, so it only grows. Unknown keys are ignored.
+  of the publish run in seconds, so it only grows. Unknown keys are ignored. Glint deals a live
+  tile, and turns an app's tile live by itself, only for a `verified` or `built-in` entry; an
+  `unverified` or `learned` one is held off until it is checked against real notifications.
 - `index.json.sig`: base64 (standard, no line breaks) of the raw 64-byte **Ed25519** signature over
   the exact bytes of `index.json`.
 - `r/<id>.<rev>.json`: the recipe file, an exact copy, immutable per rev. Glint trusts it only if its

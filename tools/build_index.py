@@ -6,7 +6,8 @@
 Writes, per the glint.exchange/1 contract (README.md):
   site/index.json        one entry per package: its best recipe (status verified > built-in >
                          unverified > learned, then the highest rev), the SHA-256 of the exact
-                         file bytes, seq (Unix seconds of the run), issued, and the revoked list
+                         file bytes and its status, seq (Unix seconds of the run), issued, and
+                         the revoked list
   site/r/<id>.<rev>.json exact copies of the recipe files
   site/index.json.sig    with --key: base64 of the raw 64-byte Ed25519 signature over index.json
                          (signed with `openssl pkeyutl -sign -rawin`)
@@ -146,7 +147,8 @@ def main():
         r = best[pkg]
         with open(os.path.join(a.out, "r", f'{r["id"]}.{r["rev"]}.json'), "wb") as f:
             f.write(r["bytes"])
-        apps[pkg] = {"id": r["id"], "rev": r["rev"], "sha256": hashlib.sha256(r["bytes"]).hexdigest()}
+        # status: Glint deals and turns on by itself only "verified" and "built-in" ones.
+        apps[pkg] = {"id": r["id"], "rev": r["rev"], "sha256": hashlib.sha256(r["bytes"]).hexdigest(), "status": r["status"]}
     index = {
         "format": FORMAT,
         "seq": seq,
