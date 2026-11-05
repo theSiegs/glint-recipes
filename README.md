@@ -11,10 +11,13 @@ with the tile exchange switched on, it fetches the rest from here.
 |---|---|
 | `recipes/<id>.json` | One recipe per file, in the `glint.recipe/1` format (Glint's `recipes/SPEC.md`). |
 | `fixtures/<package>/*.json` | Synthetic or scrubbed sample notifications for one app, each with what its recipe should draw. |
+| `categories.json` | App categories: one line per Android package, written by the intake's nightly classifier (below). |
+| `categories-overrides.json` | Hand corrections to the categories; they always win. |
 | `revoked.txt` | Recipes withdrawn from the exchange: one `id` or `id@rev` per line. |
 | `keys/exchange-1.pub`, `keys/exchange-2.pub` | The publishing public keys (base64 of the raw 32-byte Ed25519 key). |
 | `checker/` | A standalone copy of Glint's recipe checker and shape learner (Kotlin), with its own Gradle build. |
 | `tools/build_index.py` | Builds and signs the published site (Python, standard library only). |
+| `tools/check_categories.py` | Checks the two categories files and merges them for publishing (and `tools/test_check_categories.py`). |
 
 Only recipe files and synthetic or scrubbed fixtures live here. There is no one's real notification
 content, and there are no app icons, logos or other artwork: a recipe names an app by its package
@@ -22,7 +25,8 @@ and describes text, nothing more.
 
 ## How a recipe gets in
 
-1. A pull request adds or changes files under `recipes/`, `fixtures/` or `revoked.txt`.
+1. A pull request adds or changes files under `recipes/`, `fixtures/`, `revoked.txt` or the
+   categories files (see "App categories").
 2. `check.yml` builds the checker and checks every recipe against the schema and its fixtures. The
    catalog also refuses any recipe or fixture for a chat app or a health or payment app, the generic
    recipe (it is built into Glint), a recipe with no fixtures, and any fixture that isn't marked
@@ -41,6 +45,8 @@ Run the same steps locally (JDK 17 or newer, Python 3):
 ./checker/gradlew -p checker run --args="../recipes ../fixtures ../revoked.txt"
 ./checker/gradlew -p checker learn --args="fixtures/com.dd.doordash"   # the shape learner, no AI
 ./checker/gradlew -p checker installDist                              # both as jars, for the intake's drafting job
+python tools/check_categories.py                                       # the categories files
+python -m unittest discover -s tools                                   # the checker's tests
 python tools/build_index.py --out site                                 # unsigned dry run
 python tools/build_index.py --out site --key test.pem --verify test.pub
 ```
@@ -69,6 +75,47 @@ learner's own words). Even merged, a `learned` recipe isn't dealt or turned on b
 the scrubber's common-word list (`checker/src/main/resources/glint/common-words.txt`);
 `checker/VERSION` names the Glint commit they came from.
 
+## App categories
+
+`categories.json` says what kind of app a package is: `game`, `video`, `audio`, `image`, `social`,
+`news`, `maps`, `productivity`, `accessibility` or `messaging` (Hearth HA's app categories), or
+`unknown`. Glint uses it for an app's glyph when nothing else says what the app is, and passes it to
+Hearth HA's screen time as `catalog_categories` (Hearth prefers the category the app declares itself).
+
+```json
+"com.roblox.client": {"category": "game", "name": "Roblox", "source": "play:GAME_ADVENTURE", "checked": "2026-11-05"},
+```
+
+The intake's nightly classifier writes it: Google Play's own genre for the app, mapped by a fixed rule;
+an AI only for genres too broad to map (Entertainment, Lifestyle, Education...) and apps not on Play,
+and `unknown` when it isn't sure. `name` is the app's Play title (left out if it might hold an email
+address, link or phone number), `source` says where the category came from, `checked` when. About 40
+new apps a night, plus a re-check of entries older than 90 days. Its pull requests from a
+`categories/*` branch **merge on their own** when `tools/check_categories.py` passes: the schema,
+categories from the list above, Android package names, no personal data (a name is one short line; every
+other value has a fixed form), and at most 60 apps added, removed or changed per pull request.
+
+### Changing a category
+
+Never edit `categories.json` by hand (the classifier owns it). Put the fix in
+**`categories-overrides.json`**, which always wins:
+
+```json
+{
+  "format": "glint.categories-overrides/1",
+  "apps": {
+    "com.example.player": "video",
+    "com.example.notagame": "unknown",
+    "com.example.maps": {"category": "maps", "name": "Example Maps"}
+  }
+}
+```
+
+A value is a category, `unknown` (publish no category for that app), or an object with a `category`
+and/or a `name`. The classifier leaves an overridden app alone. Either commit to `main` (the push
+publishes) or open a one-line pull request from a branch of this repo: it is checked and merged on its
+own, and the merge publishes. Phones pick it up at their next update check with the tile exchange on.
+
 ## Published format (`glint.exchange/1`)
 
 Base URL (configurable in Glint; default `https://thesiegs.github.io/glint-recipes/`):
@@ -79,7 +126,8 @@ Base URL (configurable in Glint; default `https://thesiegs.github.io/glint-recip
   {"format":"glint.exchange/1","seq":<int, increases every publish>,"issued":"<ISO-8601 UTC>",
    "apps":{"<package>":{"id":"<recipe id>","rev":<int>,"sha256":"<lowercase hex of the recipe file bytes>",
                         "status":"<the recipe's meta.status>"}},
-   "revoked":["<recipe id>" | "<recipe id>@<rev>", ...]}
+   "revoked":["<recipe id>" | "<recipe id>@<rev>", ...],
+   "categories":{"path":"c/<first 16 hex of sha256>.json","sha256":"<lowercase hex of the file bytes>","count":<int>}}
   ```
 
   One entry per package: the catalog's best recipe for it (status `verified`, then `built-in`, then
@@ -87,6 +135,10 @@ Base URL (configurable in Glint; default `https://thesiegs.github.io/glint-recip
   of the publish run in seconds, so it only grows. Unknown keys are ignored. Glint deals a live
   tile, and turns an app's tile live by itself, only for a `verified` or `built-in` entry; an
   `unverified` or `learned` one is held off until it is checked against real notifications.
+- `c/<hash>.json`: the app categories, `{"format":"glint.categories/1","apps":{"<package>":{"category":"game","name":"Roblox"}}}`,
+  with the overrides applied and `unknown` left out (an app may have only a `name`). Named by its
+  content, so it never changes under a cached index; trusted only if its SHA-256 equals the index's
+  `categories` entry. An index without `categories` is fine (older Glint ignores the key).
 - `index.json.sig`: base64 (standard, no line breaks) of the raw 64-byte **Ed25519** signature over
   the exact bytes of `index.json`.
 - `r/<id>.<rev>.json`: the recipe file, an exact copy, immutable per rev. Glint trusts it only if its
@@ -116,7 +168,8 @@ The tile exchange is off in Glint by default. When it is **off**, Glint never co
 or anything else for it. When it is **on**:
 
 - Glint fetches this small signed index with its usual update check, and a recipe only when you place
-  that app's tile or accept a dealt one.
+  that app's tile or accept a dealt one. It fetches the app categories file with the index when that
+  file changes; which apps are on the phone is never sent anywhere for it.
 - For an app with no recipe (or one that broke), Glint may share that app's **scrubbed notification
   layouts**: which fields a notification uses and their shape, with words replaced by placeholders
   (`Xxxx`) and digits by `9`. Never the content of your notifications, and no account, user or device

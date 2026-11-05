@@ -9,6 +9,9 @@ Writes, per the glint.exchange/1 contract (README.md):
                          file bytes and its status, seq (Unix seconds of the run), issued, and
                          the revoked list
   site/r/<id>.<rev>.json exact copies of the recipe files
+  site/c/<sha256[:16]>.json  the app categories (categories.json with categories-overrides.json
+                         applied, tools/check_categories.py), named by content; the index's
+                         "categories" entry gives its path, SHA-256 and count
   site/index.json.sig    with --key: base64 of the raw 64-byte Ed25519 signature over index.json
                          (signed with `openssl pkeyutl -sign -rawin`)
 With --verify, the signature is checked with openssl against each raw base64 public key given
@@ -26,6 +29,9 @@ import subprocess
 import sys
 import tempfile
 import time
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import check_categories  # noqa: E402
 
 FORMAT = "glint.exchange/1"
 RANK = {"verified": 3, "built-in": 2, "unverified": 1, "learned": 0}  # "draft" is never published
@@ -156,11 +162,29 @@ def main():
         "apps": apps,
         "revoked": revoked,
     }
+    # App categories (README.md, "App categories"): one file, trusted through the index's SHA-256.
+    # An added key, so an older Glint (which ignores unknown keys) reads the index as before.
+    try:
+        cats, overrides = check_categories.load(a.root)
+    except check_categories.Bad as e:
+        fail(str(e))
+    published = check_categories.merged(cats, overrides)
+    if published:
+        doc = json.dumps({"format": check_categories.FORMAT, "apps": published},
+                         ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+        digest = hashlib.sha256(doc).hexdigest()
+        path = f"c/{digest[:16]}.json"
+        os.makedirs(os.path.join(a.out, "c"))
+        with open(os.path.join(a.out, path), "wb") as f:
+            f.write(doc)
+        index["categories"] = {"path": path, "sha256": digest,
+                               "count": sum(1 for v in published.values() if "category" in v)}
     index_bytes = json.dumps(index, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
     index_path = os.path.join(a.out, "index.json")
     with open(index_path, "wb") as f:
         f.write(index_bytes)
-    print(f"index.json: seq {seq}, {len(apps)} apps, {len(revoked)} revoked")
+    print(f"index.json: seq {seq}, {len(apps)} apps, {len(revoked)} revoked, "
+          f"{index['categories']['count'] if 'categories' in index else 0} app categories")
 
     if a.key:
         sig = sign(index_path, a.key)

@@ -70,6 +70,11 @@ jobs:
           test "$(stat -c %s "$d/index.sig")" = 64
           openssl pkeyutl -verify -rawin -pubin -keyform DER -inkey "$d/pub.der" -in site/index.json -sigfile "$d/index.sig"
           python3 -c "import json; i=json.load(open('site/index.json')); print('seq', i['seq'], '·', len(i['apps']), 'apps ·', len(i['revoked']), 'revoked')"
+          # The categories file is trusted through the index: its SHA-256 must match the entry.
+          if jq -e '.categories' site/index.json >/dev/null; then
+            test "$(sha256sum "site/$(jq -r .categories.path site/index.json)" | cut -d' ' -f1)" = "$(jq -r .categories.sha256 site/index.json)"
+            echo "categories: $(jq -r .categories.count site/index.json) apps, $(jq -r .categories.path site/index.json)"
+          fi
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
