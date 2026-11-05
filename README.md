@@ -1,9 +1,9 @@
 # Glint tile exchange catalog
 
 This is the catalog behind Glint's **community live tile exchange**: small data files ("recipes")
-that tell the Glint launcher how to turn one app's notifications into a calm live tile (a delivery's
-status, a flight's gate, a count of new mail). Glint ships a few of them built in; with the tile
-exchange switched on, it can fetch the rest from here.
+that tell the Glint launcher how to turn one app's notifications into a live tile (a delivery's
+status, a flight's gate, a count of new mail). Glint ships the ones for a few Google apps built in;
+with the tile exchange switched on, it fetches the rest from here.
 
 ## What's here
 
