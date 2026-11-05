@@ -33,8 +33,8 @@ and describes text, nothing more.
    `"scrubbed": true` or `"synthetic": true` or that holds something that looks like an email address,
    phone number or link.
 3. When the check passes and the pull request comes from a branch of this repo and touches nothing
-   else, it is squash-merged automatically, unless it is a drafted recipe (below), which waits for
-   the owner's merge.
+   else, it is merged automatically (main fast-forwards to its commits, so the pull request must be
+   on top of main), unless it is a drafted recipe (below), which waits for the owner's merge.
 4. `publish.yml` then checks the catalog again, builds the index, signs it, verifies the signature
    against the committed public key and publishes the site.
 

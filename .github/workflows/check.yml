@@ -1,6 +1,7 @@
 # The checker in CI (README.md, "How a recipe gets in"): every recipe against the schema, its
 # fixtures and the catalog rules, plus a dry run of the index builder. A pull request from a branch of
-# this repo that only touches recipes/, fixtures/ or revoked.txt is squash-merged when it passes, and
+# this repo that only touches recipes/, fixtures/, revoked.txt or the categories files is merged (main
+# fast-forwards to it) when it passes, and
 # the signed publish runs in the same workflow run (a GITHUB_TOKEN merge starts no push run).
 # Drafted recipes never merge themselves (README, "Drafted recipes wait for the owner"): a pull
 # request from a draft/* branch, or one with a recipe whose status is "learned", whose notes say a
@@ -94,6 +95,7 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: false
+          fetch-depth: 0 # main too, to see whether the pull request fast-forwards it
 
       - name: Drafted? Then it waits for the owner
         id: drafted
@@ -125,17 +127,24 @@ jobs:
             echo "held=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Squash-merge
+      - name: Merge (fast-forward)
         id: merge
         if: steps.scope.outputs.ok == 'true' && steps.drafted.outputs.held == 'false'
         env:
           GH_TOKEN: ${{ github.token }}
-          PR: ${{ github.event.pull_request.number }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        # The merge commit's author is the Actions bot's noreply address, never an account's own email.
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        # main moves to the pull request's own commits (GitHub then marks it merged), so no commit is made
+        # here and none carries an account's email. GitHub refuses a squash merge's author email for the
+        # Actions bot, and without one a squash commit would carry the pull request author's.
         run: |
-          gh pr merge "$PR" -R "$GITHUB_REPOSITORY" --squash --match-head-commit "$HEAD_SHA" --delete-branch \
-            --author-email "41898282+github-actions[bot]@users.noreply.github.com"
+          remote="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          if ! git merge-base --is-ancestor origin/main "$HEAD_SHA"; then
+            echo "::notice::Not auto-merged: the pull request isn't on top of main; update its branch (or merge it by hand)."
+            exit 0
+          fi
+          git push -q "$remote" "$HEAD_SHA:refs/heads/main"
+          git push -q "$remote" --delete "$HEAD_REF" || true
           echo "merged=true" >> "$GITHUB_OUTPUT"
 
   publish:
