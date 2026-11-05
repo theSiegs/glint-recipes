@@ -2,6 +2,10 @@
 # fixtures and the catalog rules, plus a dry run of the index builder. A pull request from a branch of
 # this repo that only touches recipes/, fixtures/ or revoked.txt is squash-merged when it passes, and
 # the signed publish runs in the same workflow run (a GITHUB_TOKEN merge starts no push run).
+# Drafted recipes never merge themselves (README, "Drafted recipes wait for the owner"): a pull
+# request from a draft/* branch, or one with a recipe whose status is "learned", whose notes say a
+# model touched it ("by AI", what the intake's drafting job writes), or a fixture whose source is
+# "learned", waits for the owner's merge.
 name: check
 
 on:
@@ -68,9 +72,45 @@ jobs:
             echo "ok=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.scope.outputs.ok == 'true'
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+
+      - name: Drafted? Then it waits for the owner
+        id: drafted
+        if: steps.scope.outputs.ok == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          why=""
+          case "$HEAD_REF" in draft/*) why="it comes from a draft/ branch" ;; esac
+          files="$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/files" --jq '.[] | select(.status != "removed") | .filename')"
+          while IFS= read -r f; do
+            [ -n "$why" ] && break
+            [ -f "$f" ] || continue
+            case "$f" in
+              recipes/*.json)
+                if jq -e '(.meta.status // "") == "learned" or ((.meta.notes // "") | test("\\bby AI\\b"))' "$f" >/dev/null 2>&1; then
+                  why="$f was learned or touched by a model"
+                fi ;;
+              fixtures/*.json)
+                if jq -e '(.source // "") == "learned"' "$f" >/dev/null 2>&1; then why="$f holds learned shapes"; fi ;;
+            esac
+          done <<< "$files"
+          if [ -n "$why" ]; then
+            echo "::notice::Not auto-merged: a drafted recipe waits for the owner's merge ($why)."
+            echo "held=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "held=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Squash-merge
         id: merge
-        if: steps.scope.outputs.ok == 'true'
+        if: steps.scope.outputs.ok == 'true' && steps.drafted.outputs.held == 'false'
         env:
           GH_TOKEN: ${{ github.token }}
           PR: ${{ github.event.pull_request.number }}

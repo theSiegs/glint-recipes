@@ -29,7 +29,8 @@ and describes text, nothing more.
    `"scrubbed": true` or `"synthetic": true` or that holds something that looks like an email address,
    phone number or link.
 3. When the check passes and the pull request comes from a branch of this repo and touches nothing
-   else, it is squash-merged automatically.
+   else, it is squash-merged automatically, unless it is a drafted recipe (below), which waits for
+   the owner's merge.
 4. `publish.yml` then checks the catalog again, builds the index, signs it, verifies the signature
    against the committed public key and publishes the site.
 
@@ -47,9 +48,25 @@ python tools/build_index.py --out site --key test.pem --verify test.pub
 Drafted recipes come from the private intake's nightly job as pull requests from `draft/<package>`
 branches: a `learned` recipe and `fixtures/<package>/drafted.json`, a synthetic fixture the job
 writes with `checker/src/catalog/.../DraftFixture.kt` from a few scrubbed shapes. They go through the
-same check and auto-merge as any other pull request.
+same check as any other pull request.
 
-`checker/sync-from-glint.sh <path-to-glint-checkout>` re-copies the checker's sources from Glint;
+### Drafted recipes wait for the owner
+
+A drafted recipe is never merged automatically. `check.yml` holds back any pull request from a
+`draft/*` branch, and any that adds or changes a recipe whose `meta.status` is `learned` or whose
+notes say a model touched it ("by AI", which the intake's drafting job writes), or a fixture whose
+`source` is `learned`. The check still runs; the owner reads the recipe and merges it by hand, and
+the merge publishes it as any push to `main` does. Every other pull request keeps the auto-merge.
+
+Why: a drafted recipe's quality bar today is only "it draws a face", and the model may write the
+tile's words from scrubbed text a phone sent. The human merge stays until two things exist: a check
+that shows a draft beats the generic tile (it draws something the generic one wouldn't, on most of
+its shapes), and model-written words restricted to a known vocabulary (the common-word list and the
+learner's own words). Even merged, a `learned` recipe isn't dealt or turned on by Glint on its own
+(see the index's `status`).
+
+`checker/sync-from-glint.sh <path-to-glint-checkout>` re-copies the checker's sources from Glint, and
+the scrubber's common-word list (`checker/src/main/resources/glint/common-words.txt`);
 `checker/VERSION` names the Glint commit they came from.
 
 ## Published format (`glint.exchange/1`)

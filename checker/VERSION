@@ -3,3 +3,4 @@ Glint commit: 736af40c8d465466267757b6145026b485f7e205
 Glint branch: glint/xlearner
 Synced: 2026-11-04
 Update with: checker/sync-from-glint.sh <path-to-glint-checkout>
+Also: Scrub.kt and resources/glint/common-words.txt from Glint branch glint/xscrub (2026-11-05), ahead of the rest.
