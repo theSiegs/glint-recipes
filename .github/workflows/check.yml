@@ -1,8 +1,8 @@
 # The checker in CI (README.md, "How a recipe gets in"): every recipe against the schema, its
 # fixtures and the catalog rules, plus a dry run of the index builder. A pull request from a branch of
 # this repo that only touches recipes/, fixtures/, revoked.txt or the categories files is merged (main
-# fast-forwards to it) when it passes, and
-# the signed publish runs in the same workflow run (a GITHUB_TOKEN merge starts no push run).
+# fast-forwards to it) when it passes, and the job then starts publish.yml on main (a GITHUB_TOKEN push
+# starts no push run, but a workflow_dispatch does; on main, so the github-pages environment allows it).
 # Drafted recipes never merge themselves (README, "Drafted recipes wait for the owner"): a pull
 # request from a draft/* branch, or one with a recipe whose status is "learned", whose notes say a
 # model touched it ("by AI", what the intake's drafting job writes), or a fixture whose source is
@@ -69,10 +69,9 @@ jobs:
       github.event.pull_request.base.ref == 'main'
     runs-on: ubuntu-24.04
     permissions:
+      actions: write # start publish.yml after merging
       contents: write
       pull-requests: write
-    outputs:
-      merged: ${{ steps.merge.outputs.merged }}
     steps:
       - name: Only catalog files changed?
         id: scope
@@ -145,17 +144,4 @@ jobs:
           fi
           git push -q "$remote" "$HEAD_SHA:refs/heads/main"
           git push -q "$remote" --delete "$HEAD_REF" || true
-          echo "merged=true" >> "$GITHUB_OUTPUT"
-
-  publish:
-    needs: automerge
-    if: needs.automerge.outputs.merged == 'true'
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    uses: ./.github/workflows/publish.yml
-    with:
-      ref: main
-    secrets:
-      EXCHANGE_SIGNING_KEY: ${{ secrets.EXCHANGE_SIGNING_KEY }}
+          gh workflow run publish.yml -R "$GITHUB_REPOSITORY" --ref main
