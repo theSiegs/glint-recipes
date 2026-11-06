@@ -1,14 +1,14 @@
 {
   "recipe": "glint.recipe/1",
   "id": "amazon-delivery",
-  "rev": 1,
+  "rev": 2,
   "name": "amazon",
   "app": { "package": "com.amazon.mShop.android.shopping", "label": "Amazon Shopping" },
   "meta": {
     "status": "unverified",
     "author": "Glint",
-    "updated": "2026-11-02",
-    "notes": "Delivery pushes as public reports describe them; channel ids are guesses. Deals are left out by category and wording until real channel ids are known."
+    "updated": "2026-11-05",
+    "notes": "Delivery pushes as public reports describe them; channel ids are guesses. Deals are left out by category and wording until real channel ids are known. Each package up is one face (its current state); the count of packages is a flip."
   },
   "source": {
     "notification": {
@@ -42,7 +42,7 @@
     { "kind": "headline", "title": "delivered", "line": "{spot}", "peek": "{time}", "when": ["status==delivered", "spot"] },
     { "kind": "headline", "title": "{status}", "line": "{item}", "when": ["status", "item"] },
     { "kind": "headline", "title": "{status}", "line": "amazon", "when": "status" },
-    { "kind": "count", "count": "{keys}", "label": "packages", "when": "keys>1" }
+    { "kind": "count", "count": "{keys}", "label": "packages", "when": "keys>1", "flip": true }
   ],
   "tap": "notification"
 }

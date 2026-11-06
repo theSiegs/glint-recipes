@@ -38,7 +38,7 @@ object Sources {
     val Names = listOf(
         "title", "text", "bigText", "subText", "infoText", "summaryText", "conversationTitle", "shortCritical",
         "lines", "lines[n]", "message", "sender", "messages", "progress", "max", "when", "posted",
-        "channel", "category", "group", "tag", "template", "all", "action:<semantic>", "extra:<key>",
+        "channel", "category", "group", "tag", "template", "all", "action:<semantic>",
     )
     private val Plain = setOf(
         "title", "text", "bigText", "subText", "infoText", "summaryText", "conversationTitle", "shortCritical",
@@ -48,8 +48,7 @@ object Sources {
     private val LineAt = Regex("^lines\\[(\\d{1,2})]$")
 
     fun isKnown(name: String): Boolean = name in Plain || LineAt.matches(name) ||
-        name.startsWith("action:") && name.removePrefix("action:") in Semantics.Names ||
-        name.startsWith("extra:") && name.length > 6
+        name.startsWith("action:") && name.removePrefix("action:") in Semantics.Names
 
     fun read(name: String, n: NotificationSample): String? = when (name) {
         "title" -> n.title
@@ -77,7 +76,6 @@ object Sources {
         else -> when {
             LineAt.matches(name) -> n.lines.getOrNull(LineAt.matchEntire(name)!!.groupValues[1].toInt())
             name.startsWith("action:") -> name.removePrefix("action:").let { s -> n.actions.firstOrNull { it.semantic == s }?.title }
-            name.startsWith("extra:") -> n.extras[name.removePrefix("extra:")]
             else -> null
         }
     }?.takeIf { it.isNotBlank() }
@@ -86,13 +84,113 @@ object Sources {
 /**
  * The fields every recipe has without defining them (recipes/SPEC.md §5.2). Taken from the winning
  * notification, except [count] (matching notifications up) and [keys] (subjects up). [time] is when
- * it was posted and [at] its own `when` (a reminder's or an event's time), both as clock times.
+ * it was posted and [at] its own `when` (a reminder's or an event's time), both as clock times;
+ * `posted` and `when` are the same as times for a format (`{posted|ago}`, `{when|in}`), and `chrono`
+ * is a running chronometer's time ("12 min", up or down as the notification counts).
  */
 object Fields {
     val BuiltIn = setOf(
         "title", "text", "bigText", "subText", "infoText", "summaryText", "conversationTitle", "shortCritical",
         "sender", "message", "progress", "max", "percent", "count", "keys", "lineCount", "time", "at", "app",
+        "posted", "when", "chrono",
     )
+
+    /** Built-ins that are a time in ms, only worth showing through a format. */
+    val RawTimes = setOf("posted", "when")
+
+    /** Built-ins that change as the clock runs, so a face showing one needs the minute tick. */
+    val Ticking = setOf("chrono")
+}
+
+/**
+ * Relative times for faces (recipes/SPEC.md §5.4), Glint's quiet words: `{eta|in}` "in 12 min",
+ * `{eta|left}` "12 min", `{posted|ago}` "2 h ago", `{posted|for}` "12 min", `{posted|since}`
+ * "since 7:55 am", `{eta|clock}` "9:52 am", `{when|near}` "in 12 min" within the hour, else
+ * "1:00 pm". A value is a time in ms (`{posted}`, `{when}`, a field
+ * `from: "when"`) or a clock time ("9:52 am", "21:52": the nearest such time to now). A format that
+ * doesn't fit (a time already past for `in`) leaves the template unfilled, so the next face draws.
+ */
+object Times {
+    val Formats = listOf("in", "left", "ago", "for", "since", "clock", "near")
+    private const val MIN = 60_000L
+    private const val HOUR = 60 * MIN
+    private const val DAY = 24 * HOUR
+    private val Clock = Regex("(?i)\\b(\\d{1,2})(?::(\\d{2}))?\\s*([ap])\\.?\\s*m\\b\\.?|\\b(\\d{1,2}):(\\d{2})\\b")
+
+    fun format(format: String, value: String, ctx: RecipeContext): String? {
+        val t = parse(value, ctx) ?: return null
+        val d = t - ctx.now
+        return when (format) {
+            "in" -> when {
+                d < -MIN -> null
+                d < MIN -> "now"
+                else -> "in " + span(d, up = true)
+            }
+            "left" -> if (d < -MIN) null else if (d < MIN) "now" else span(d, up = true)
+            "ago" -> when {
+                d > MIN -> null
+                -d < MIN -> "just now"
+                -d < DAY -> span(-d, up = false, short = true) + " ago"
+                -d < 2 * DAY -> "yesterday"
+                else -> "${-d / DAY} d ago"
+            }
+            "for" -> if (d > MIN) null else span(maxOf(-d, MIN), up = false)
+            "since" -> if (d > MIN) null else "since " + clockTime(t, ctx.zone, ctx.h24)
+            "clock" -> clockTime(t, ctx.zone, ctx.h24)
+            // Within the hour as minutes ("in 12 min", "5 min ago"), else the clock time.
+            "near" -> when {
+                d >= HOUR || d <= -HOUR -> clockTime(t, ctx.zone, ctx.h24)
+                d >= MIN -> "in " + span(d, up = true)
+                d > -MIN -> "now"
+                else -> span(-d, up = false) + " ago"
+            }
+            else -> null
+        }
+    }
+
+    /** [value] as a time in ms: a number of ms, or a clock time taken as the nearest one to now. */
+    fun parse(value: String, ctx: RecipeContext): Long? {
+        val v = value.trim()
+        if (v.length >= 10 && v.all { it.isDigit() }) return v.toLongOrNull()?.takeIf { it > 0 }
+        val m = Clock.find(v) ?: return null
+        val (h, min) = if (m.groupValues[3].isNotEmpty()) {
+            val h12 = m.groupValues[1].toInt()
+            if (h12 !in 1..12) return null
+            val pm = m.groupValues[3].equals("p", ignoreCase = true)
+            (h12 % 12 + if (pm) 12 else 0) to (m.groupValues[2].toIntOrNull() ?: 0)
+        } else {
+            m.groupValues[4].toInt() to m.groupValues[5].toInt()
+        }
+        if (h !in 0..23 || min !in 0..59) return null
+        val day = java.time.Instant.ofEpochMilli(ctx.now).atZone(ctx.zone).toLocalDate()
+        val at = day.atTime(h, min).atZone(ctx.zone).toInstant().toEpochMilli()
+        // The nearest such time: "9:52 am" read at 11 pm is tomorrow's, at 1 am yesterday's.
+        return when {
+            at - ctx.now > 12 * HOUR -> at - DAY
+            ctx.now - at > 12 * HOUR -> at + DAY
+            else -> at
+        }
+    }
+
+    /** "12 min", "1 h 5 min", "3 h", "2 d": counting down rounds up, counting up rounds down. */
+    fun span(ms: Long, up: Boolean, short: Boolean = false): String {
+        val mins = if (up) (ms + MIN - 1) / MIN else ms / MIN
+        val h = mins / 60
+        val m = mins % 60
+        return when {
+            mins < 60 -> "${maxOf(mins, 1)} min"
+            mins >= 48 * 60 -> "${mins / (24 * 60)} d"
+            short || h >= 10 || m == 0L -> "$h h"
+            else -> "$h h $m min"
+        }
+    }
+
+    /** A running chronometer as words: the time left to [whenTime] counting down, else the time since it. */
+    fun chrono(whenTime: Long, countDown: Boolean, now: Long): String? = when {
+        whenTime <= 0 -> null
+        countDown -> if (whenTime - now < MIN) "now" else span(whenTime - now, up = true)
+        else -> span(maxOf(now - whenTime, MIN), up = false)
+    }
 }
 
 /** The transforms a field's `then` may list, in order (recipes/SPEC.md §5.3). */

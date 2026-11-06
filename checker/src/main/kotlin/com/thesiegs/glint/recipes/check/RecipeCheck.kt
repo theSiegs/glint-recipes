@@ -79,7 +79,7 @@ object RecipeCheck {
                 if (sample?.expect?.recipe != null && sample.expect.recipe != recipe.id) return@forEach
                 if (expect?.match != false) sets += set
                 if (expect == null || recipe.isGeneric && expect.recipe == null) return@forEach
-                val e = RecipeEngine.evaluate(recipe, set, contextFor(set))
+                val e = RecipeEngine.evaluate(recipe, set, contextFor(set, sample.now))
                 val label = "${fx.packageName}/${sample.name ?: "sample"}"
                 if (!expect.match) {
                     if (e.drew) failures += "$label: should be left alone, but drew \"${e.faces.first().title}\""
@@ -95,9 +95,14 @@ object RecipeCheck {
                 expect.line?.let { if (it != rest.line) failures += "$label: line \"${rest.line}\", expected \"$it\"" }
                 expect.peek?.let { if (it != rest.peek) failures += "$label: peek \"${rest.peek}\", expected \"$it\"" }
                 expect.faces?.let { if (it != e.faces.size) failures += "$label: ${e.faces.size} faces drew, expected $it" }
+                expect.titles?.let { if (it != e.faces.map { f -> f.title }) failures += "$label: faces ${e.faces.map { f -> f.title }}, expected $it" }
+                expect.faded?.let { if (it != rest.faded) failures += "$label: rest face ${if (rest.faded) "faded" else "not faded"}, expected ${if (it) "faded" else "not"}" }
+                expect.picture?.let { if (it != (rest.picture != null)) failures += "$label: rest face picture ${rest.picture}, expected ${if (it) "one" else "none"}" }
+                expect.stops?.let { if (it != rest.stops.size) failures += "$label: ${rest.stops.size} stops, expected $it" }
+                expect.points?.let { if (it != rest.points.size) failures += "$label: ${rest.points.size} points, expected $it" }
             }
         }
-        val coverage = Coverage.of(recipe, sets, ::contextFor)
+        val coverage = Coverage.of(recipe, sets) { contextFor(it) }
         return RecipeReport(name, recipe, problems, coverage, failures)
     }
 
@@ -105,9 +110,9 @@ object RecipeCheck {
         recipe.faces.flatMap { f -> listOfNotNull(f.title, f.line, f.peek, f.count, f.label, f.person, f.value, f.max) }
             .flatMap { com.thesiegs.glint.recipes.Templates.fields(it) }.distinct().filter { it !in values }
 
-    /** A fixture is read a minute after its newest sample, in English, at UTC, on a 12-hour clock. */
-    fun contextFor(set: List<NotificationSample>) = RecipeContext(
-        now = (set.maxOfOrNull { it.posted } ?: 0L) + 60_000L,
+    /** A fixture is read a minute after its newest sample (or at the sample's own [now]), in English, at UTC, on a 12-hour clock. */
+    fun contextFor(set: List<NotificationSample>, now: Long? = null) = RecipeContext(
+        now = now ?: ((set.maxOfOrNull { it.posted } ?: 0L) + 60_000L),
         language = "en",
         zone = ZoneOffset.UTC,
     )

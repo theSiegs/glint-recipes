@@ -27,7 +27,7 @@
         "posted": 1767007200000, "channel": "trip_alerts",
         "title": "Flight 1234 is now boarding", "text": "Boarding at gate B12. Have your boarding pass ready."
       },
-      "expect": { "title": "now boarding", "line": "flight 1234", "faces": 2 }
+      "expect": { "title": "now boarding", "line": "flight 1234", "titles": ["now boarding", "gate b12"] }
     },
     {
       "name": "delayed",

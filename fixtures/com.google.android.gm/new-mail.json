@@ -13,7 +13,7 @@
         "subText": "alex@example.com",
         "actions": [ { "title": "Archive", "semantic": "archive" }, { "title": "Reply", "semantic": "reply" } ]
       },
-      "expect": { "kind": "headline", "title": "Lunch on Friday?", "line": "new mail", "peek": "9:20 am", "faces": 1 }
+      "expect": { "kind": "headline", "title": "Lunch on Friday?", "line": "new mail · 1 min ago", "peek": "from Alex Rivera", "faces": 1 }
     },
     {
       "name": "no category",
@@ -21,7 +21,7 @@
         "posted": 1767000000000, "template": "BigTextStyle", "title": "Sam", "text": "Photos from Saturday",
         "bigText": "Photos from Saturday\nHere they are.", "subText": "alex@example.com"
       },
-      "expect": { "kind": "headline", "title": "Photos from Saturday", "line": "new mail", "faces": 1 }
+      "expect": { "kind": "headline", "title": "Photos from Saturday", "line": "new mail · 1 min ago", "peek": "from Sam", "faces": 1 }
     },
     {
       "name": "summary alone",
@@ -31,6 +31,12 @@
         "lines": ["Alex Rivera   Lunch on Friday?", "Sam   Photos from Saturday"]
       },
       "expect": { "kind": "count", "title": "2", "line": "new mail", "faces": 1 }
+    },
+    {
+      "name": "an hour later",
+      "notification": { "posted": 1767000000000, "category": "email", "template": "BigTextStyle", "title": "Library", "text": "Your hold is ready" },
+      "now": 1767007200000,
+      "expect": { "kind": "headline", "title": "Your hold is ready", "line": "new mail · 2 h ago", "peek": "from Library" }
     },
     {
       "name": "sending",

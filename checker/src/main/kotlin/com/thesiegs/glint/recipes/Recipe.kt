@@ -29,11 +29,11 @@ import kotlinx.serialization.json.decodeFromJsonElement
 data class Recipe(
     /** The format id, "glint.recipe/1" ([Recipes.FORMAT_ID]). A newer major still reads, with a warning. */
     val recipe: String = Recipes.FORMAT_ID,
-    /** Stable id, lowercase words and dashes ("southwest-flight"); also the file name. */
+    /** Stable id, lowercase words and dashes ("keep-reminder"); also the file name. */
     val id: String = "",
     /** The recipe's own revision, bumped on each change; the store keeps the highest. */
     val rev: Int = 1,
-    /** The tile's caption word, lowercase ("southwest"). */
+    /** The tile's caption word, lowercase ("keep"). */
     val name: String = "",
     val app: RecipeApp = RecipeApp(),
     val meta: RecipeMeta = RecipeMeta(),
@@ -42,7 +42,11 @@ data class Recipe(
     val source: RecipeSource = RecipeSource(),
     /** Named values pulled out of the notifications ([FieldRule]); the built-in fields come free. */
     val fields: Map<String, FieldRule> = emptyMap(),
-    /** 1..[Recipes.MAX_FACES] faces; the first that draws is the rest face, the others flip in turn. */
+    /**
+     * 1..[Recipes.MAX_FACES] faces, a ladder: the first that draws is the rest face and the rest of
+     * the ladder stays down (one current state). [FaceRule.flip] faces draw besides it, and each other
+     * subject up adds its own rest face (recipes/SPEC.md §6).
+     */
     val faces: List<FaceRule> = emptyList(),
     /** What a tap on the tile does: [Tap.Notification] (its own contentIntent, else the app) or [Tap.App]. */
     val tap: Tap = Tap.Notification,
@@ -57,7 +61,7 @@ data class Recipe(
 data class RecipeApp(
     /** The source app's package, or "*" for the generic recipe only. */
     @SerialName("package") val packageName: String = "",
-    /** The app's name as people know it ("Southwest"), for the import preview. */
+    /** The app's name as people know it ("Google Keep"), for the import preview. */
     val label: String? = null,
     /**
      * The app's `versionCode` range the recipe was written for: ">=1240000", "<2000", "1200-1300".
@@ -94,9 +98,9 @@ data class RecipeSource(val notification: NotificationSource? = null)
 data class NotificationSource(
     val match: RecipeMatch = RecipeMatch(),
     /**
-     * What one subject is: "tag", "group", "id" (each notification its own), "extra:<key>", or
-     * "field:<name>" (a field's value, e.g. a flight number). Values are held per subject; `{keys}`
-     * counts the subjects up.
+     * What one subject is: "tag", "group", "id" (each notification its own), or "field:<name>" (a
+     * field's value, e.g. a flight number). Values are held per subject; `{keys}` counts the subjects
+     * up; each subject up is one item, and the tile flips between items.
      */
     val key: String = "id",
     val pick: Pick = Pick.Newest,
@@ -106,6 +110,8 @@ data class NotificationSource(
     val hold: String? = null,
     /** A notification older than this no longer counts ("6h"); none by default. */
     val expire: String? = null,
+    /** Faces from a notification older than this draw dimmed ("4h"): still true, but not news. */
+    val fade: String? = null,
 )
 
 /**
@@ -149,8 +155,8 @@ data class RecipeMatch(
 
 /**
  * One field: where it comes from ([from], a source name or a list tried in order), then an optional
- * cut ([after], [before], [regex]), then [then] transforms, then [map]. A field with no value is
- * missing, and a face that needs it doesn't draw. A [regex], [after] or [before] field names the
+ * cut ([after], [regex]), then [then] transforms, then [map]. A field with no value is
+ * missing, and a face that needs it doesn't draw. A [regex] or [after] field names the
  * [lang] it's written for; in another language it's "not applicable", not broken. A [required]
  * field missing on 3 matched notifications running makes the recipe unwell.
  */
@@ -159,8 +165,6 @@ data class FieldRule(
     @Serializable(with = StringListSerializer::class) val from: List<String> = listOf("text"),
     /** The text after the first place this literal anchor occurs (case-insensitive), up to a break. */
     val after: String? = null,
-    /** The text before the first place this literal anchor occurs. */
-    val before: String? = null,
     /** A regex (RE2): the named group `v`, else group 1, else the whole match. */
     val regex: String? = null,
     @Serializable(with = StringListSerializer::class) val lang: List<String> = emptyList(),
@@ -177,9 +181,11 @@ data class FieldRule(
 
 /**
  * One face. [kind] picks Glint's own face for it ([FaceKind]); the texts are templates where
- * `{field}` is a field's value and everything else is the recipe's own words. A face draws only when
- * every field it names has a value and each [whenAll] condition holds. An [optIn] face (amounts,
- * names, health) draws only once the owner turns it on in tile settings.
+ * `{field}` is a field's value, `{field|in}` the same read as a time and said relative to now
+ * ([Times]), and everything else is the recipe's own words. A face draws only when every field it
+ * names has a value and each [whenAll] condition holds. Faces are a ladder: only the first that draws
+ * shows, unless [flip] (a different thing worth flipping to: a count, the latest subject). An [optIn]
+ * face (amounts, names, health) draws only once the owner turns it on in tile settings.
  */
 @Serializable
 data class FaceRule(
@@ -198,6 +204,14 @@ data class FaceRule(
     val max: String? = null,
     @SerialName("when") @Serializable(with = StringListSerializer::class) val whenAll: List<String> = emptyList(),
     @JsonNames("opt_in") val optIn: Boolean = false,
+    /** Not a rung of the ladder: drawn besides the rest face, as a flip (a count, the latest subject). */
+    val flip: Boolean = false,
+    /**
+     * The notification's own picture as the face's whole background, from Large up (calm tiles: the
+     * whole tile or nothing): "picture" (BigPicture: a doorbell snapshot, a video's thumbnail) or
+     * "largeIcon" (a cover, a product photo; only when it's big enough). Without one the face draws plain.
+     */
+    val picture: String? = null,
 )
 
 /** Glint's face kinds a recipe may map to (recipes/SPEC.md §6). An unknown kind is an error. */
@@ -216,8 +230,6 @@ enum class FaceKind {
 @Serializable
 enum class Pick {
     @SerialName("newest") Newest,
-    /** The most important first (importance, then priority), then the newest. */
-    @SerialName("priority") Priority,
     /** Ongoing ones first, then the newest. */
     @SerialName("ongoing") Ongoing,
 }
@@ -253,6 +265,8 @@ object Recipes {
     /** Text longer than this is cut before any regex runs. */
     const val MAX_INPUT = 2_000
     const val STALE_DAYS = 7
+    /** At most this many subjects (orders, flights) draw a face of their own; the tile flips between them. */
+    const val MAX_ITEMS = 3
     /** A required field missing on this many matched notifications running: the recipe is unwell. */
     const val UNWELL_AFTER = 3
     /** The generic recipe's id: any app with notifications, when it has no recipe of its own. */
@@ -289,7 +303,8 @@ object Recipes {
     private val PackageShape = Regex("^[A-Za-z][A-Za-z0-9_]*(\\.[A-Za-z0-9_]+)+$")
     private val FormatShape = Regex("^glint\\.recipe/(\\d+)$")
     // The closing brace escaped too: Android's ICU regex rejects a bare "}" (the JVM's accepts it).
-    internal val Placeholder = Regex("\\{([A-Za-z][A-Za-z0-9_]*)\\}")
+    // "{eta|in}": a field, then optionally a time format (Times).
+    internal val Placeholder = Regex("\\{([A-Za-z][A-Za-z0-9_]*)(?:\\|([A-Za-z]+))?\\}")
 
     /** Reads [text] as a recipe, checking it against the schema; never throws. */
     fun parse(text: String): Parsed {
@@ -329,6 +344,24 @@ object Recipes {
 
     private val FaceKinds = listOf("headline", "count", "message", "progress")
 
+    /** What a face's `picture` may be ([FaceRule.picture]). */
+    val Pictures = setOf("picture", "largeIcon")
+
+    /**
+     * Whether a tile drawing [r] must be looked at again as time passes (holds, expiries, fading,
+     * stale values, relative times): only those tiles take the shared minute tick.
+     */
+    fun needsClock(r: Recipe): Boolean {
+        val src = r.notification
+        if (src.hold != null || src.expire != null || src.fade != null) return true
+        if (r.fields.values.any { it.hold != null || it.stale != null }) return true
+        return r.faces.any { f ->
+            listOfNotNull(f.title, f.line, f.peek, f.count, f.label, f.person, f.value, f.max).any { t ->
+                Placeholder.findAll(t).any { it.groupValues[2].isNotEmpty() || it.groupValues[1] in Fields.Ticking }
+            }
+        }
+    }
+
     private val KnownKeys = setOf(
         "recipe", "id", "rev", "name", "app", "meta", "enabled", "source", "fields", "faces", "tap", "staleDays", "stale_days",
         "\$schema", "comment",
@@ -364,8 +397,11 @@ object Recipes {
         if (m.channels.isEmpty() && m.categories.isEmpty() && m.templates.isEmpty() && m.groups.isEmpty() && !r.isGeneric) {
             add(Problem("source.notification.match", "no untranslated signal (channels, categories, templates, groups): the recipe leans on wording alone", error = false))
         }
-        if (!Keys.isKnown(src.key, r.fields.keys)) add(Problem("source.notification.key", "\"tag\", \"group\", \"id\", \"extra:<key>\" or \"field:<a field>\""))
-        listOfNotNull(src.hold?.let { "source.notification.hold" to it }, src.expire?.let { "source.notification.expire" to it }).forEach { (k, v) ->
+        if (!Keys.isKnown(src.key, r.fields.keys)) add(Problem("source.notification.key", "\"tag\", \"group\", \"id\" or \"field:<a field>\""))
+        listOfNotNull(
+            src.hold?.let { "source.notification.hold" to it }, src.expire?.let { "source.notification.expire" to it },
+            src.fade?.let { "source.notification.fade" to it },
+        ).forEach { (k, v) ->
             if (Durations.parse(v) == null) add(Problem(k, "a duration like \"90m\", \"18h\" or \"2d\""))
         }
         if (r.staleDays !in 1..90) add(Problem("staleDays", "1 to 90 days"))
@@ -377,7 +413,7 @@ object Recipes {
             if (rule.from.isEmpty()) add(Problem("$at.from", "name at least one source"))
             rule.from.forEach { s -> if (!Sources.isKnown(s)) add(Problem("$at.from", "unknown source \"$s\" (${Sources.Names.joinToString()})")) }
             rule.regex?.let { regexProblem(it)?.let { p -> add(Problem("$at.regex", p)) } }
-            if ((rule.regex != null || rule.after != null || rule.before != null) && rule.lang.isEmpty()) {
+            if ((rule.regex != null || rule.after != null) && rule.lang.isEmpty()) {
                 add(Problem("$at.lang", "a regex or anchor names the language it's written for (\"lang\": [\"en\"])", error = false))
             }
             rule.then.forEach { t -> if (!Transforms.isKnown(t)) add(Problem("$at.then", "unknown transform \"$t\" (${Transforms.Names.joinToString()})")) }
@@ -391,8 +427,14 @@ object Recipes {
             val at = "faces[$i]"
             fun template(name: String, t: String?) {
                 if (t == null) return
-                Placeholder.findAll(t).map { it.groupValues[1] }.filter { it !in known }.forEach {
-                    add(Problem("$at.$name", "{$it} isn't a field (define it in \"fields\" or use a built-in: ${Fields.BuiltIn.joinToString()})"))
+                Placeholder.findAll(t).forEach { m ->
+                    val field = m.groupValues[1]
+                    val format = m.groupValues[2]
+                    if (field !in known) add(Problem("$at.$name", "{$field} isn't a field (define it in \"fields\" or use a built-in: ${Fields.BuiltIn.joinToString()})"))
+                    if (format.isNotEmpty() && format !in Times.Formats) add(Problem("$at.$name", "{$field|$format}: the time formats are ${Times.Formats.joinToString()}"))
+                    if (format.isEmpty() && field in Fields.RawTimes && field !in r.fields) {
+                        add(Problem("$at.$name", "{$field} is a time in ms; give it a format, as {$field|ago}", error = false))
+                    }
                 }
                 val words = Placeholder.replace(t, "")
                 if (words.length > MAX_LITERAL) add(Problem("$at.$name", "the recipe's own words are at most $MAX_LITERAL characters"))
@@ -408,6 +450,10 @@ object Recipes {
                 FaceKind.Progress -> if (f.title == null || f.value == null) add(Problem(at, "a progress face needs a title and a value"))
             }
             f.whenAll.forEach { c -> Conditions.problem(c, known)?.let { add(Problem("$at.when", it)) } }
+            f.picture?.let { p ->
+                if (p !in Pictures) add(Problem("$at.picture", "\"picture\" or \"largeIcon\""))
+                if (f.kind == FaceKind.Progress) add(Problem("$at.picture", "a progress face draws the live update face, with the app's own logo; no picture", error = false))
+            }
         }
         if (r.meta.status !in Statuses) add(Problem("meta.status", "\"unverified\", \"built-in\", \"verified\", \"draft\" or \"learned\"", error = false))
     }
@@ -497,7 +543,6 @@ object Semantics {
 object Keys {
     fun isKnown(key: String, fields: Set<String>): Boolean = when {
         key in setOf("tag", "group", "id") -> true
-        key.startsWith("extra:") -> key.length > 6
         key.startsWith("field:") -> key.removePrefix("field:") in fields
         else -> false
     }

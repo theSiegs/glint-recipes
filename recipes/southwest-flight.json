@@ -1,14 +1,14 @@
 {
   "recipe": "glint.recipe/1",
   "id": "southwest-flight",
-  "rev": 1,
+  "rev": 2,
   "name": "southwest",
   "app": { "package": "com.southwestairlines.mobile", "label": "Southwest" },
   "meta": {
     "status": "unverified",
     "author": "Glint",
-    "updated": "2026-11-02",
-    "notes": "Written from public knowledge: the push wording and the channel ids are guesses. Capture real samples on the next trip and add channel ids to match."
+    "updated": "2026-11-05",
+    "notes": "Written from public knowledge: the push wording and the channel ids are guesses. Capture real samples on the next trip and add channel ids to match. The flight's status is the face at rest; the gate and the boarding time are flips."
   },
   "source": {
     "notification": {
@@ -41,9 +41,9 @@
   "faces": [
     { "kind": "headline", "title": "{status}", "line": "flight {flight}", "peek": "departs {departs}", "when": ["status", "departs"] },
     { "kind": "headline", "title": "{status}", "line": "flight {flight}", "when": ["status", "!departs"] },
-    { "kind": "headline", "title": "gate {gate}", "line": "to {to}", "when": "gate" },
-    { "kind": "headline", "title": "gate {gate}", "line": "flight {flight}", "when": ["gate", "!to"] },
-    { "kind": "headline", "title": "boards {boards}", "line": "flight {flight}", "when": "boards" },
+    { "kind": "headline", "title": "gate {gate}", "line": "to {to}", "when": "gate", "flip": true },
+    { "kind": "headline", "title": "gate {gate}", "line": "flight {flight}", "when": ["gate", "!to"], "flip": true },
+    { "kind": "headline", "title": "boards {boards}", "line": "flight {flight}", "when": "boards", "flip": true },
     { "kind": "headline", "title": "flight {flight}", "line": "{text}", "when": ["!status", "!gate", "!boards"] }
   ],
   "tap": "notification"

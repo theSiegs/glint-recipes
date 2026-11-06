@@ -51,9 +51,23 @@ data class NotificationSample(
     val indeterminate: Boolean = false,
     /** Android 16's status-chip text (`android.shortCriticalText`). */
     val shortCritical: String? = null,
+    /** `android.showChronometer`: a running clock from `when` (up), or to it with [countDown]. */
+    val chronometer: Boolean = false,
+    /** `android.chronometerCountDown`. */
+    val countDown: Boolean = false,
+    /** ProgressStyle's segment lengths, in progress units (Android 16 Live Updates): the stops on the track. */
+    val segments: List<Int> = emptyList(),
+    /** ProgressStyle's points' positions, in progress units. */
+    val points: List<Int> = emptyList(),
+    /** ProgressStyle draws a tracker icon (a car, a plane) at the progress. */
+    val tracker: Boolean = false,
+    /** A picture is there (BigPicture's, or its icon): only that it is, never the image. */
+    val hasPicture: Boolean = false,
+    /** A large icon is there: only that it is. */
+    val hasLargeIcon: Boolean = false,
     /** The notification's own actions, in order: their words and semantics. */
     val actions: List<SampleAction> = emptyList(),
-    /** Other string extras, by key: read-only for keying, never shown unless a field asks by "extra:<key>". */
+    /** Other string extras, by key: only their keys count (the shape watch); a recipe never reads them. */
     val extras: Map<String, String> = emptyMap(),
 ) {
     /** The last message with a sender, else the last message. */
@@ -87,12 +101,16 @@ data class Fixture(
     val samples: List<FixtureSample> = emptyList(),
 )
 
-/** One sample of a [Fixture], with an optional [expect]. */
+/**
+ * One sample of a [Fixture], with an optional [expect]. [now] is when it's read (ms), for relative
+ * times and fading; by default a minute after the newest sample.
+ */
 @Serializable
 data class FixtureSample(
     val name: String? = null,
     val notification: NotificationSample = NotificationSample(),
     val expect: Expect? = null,
+    val now: Long? = null,
 )
 
 /**
@@ -110,6 +128,15 @@ data class Expect(
     val peek: String? = null,
     /** How many faces draw. */
     val faces: Int? = null,
+    /** The rest face draws dimmed (its notification is past the recipe's `fade`). */
+    val faded: Boolean? = null,
+    /** The rest face draws the notification's picture full-bleed. */
+    val picture: Boolean? = null,
+    /** How many stops (segment ends) and points the rest face's track has. */
+    val stops: Int? = null,
+    val points: Int? = null,
+    /** The faces' titles in order, rest face first, when the flips matter. */
+    val titles: List<String>? = null,
 )
 
 object Fixtures {

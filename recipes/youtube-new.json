@@ -1,16 +1,16 @@
 {
   "recipe": "glint.recipe/1",
   "id": "youtube-new",
-  "rev": 2,
+  "rev": 4,
   "name": "youtube",
   "app": { "package": "com.google.android.youtube", "label": "YouTube" },
   "meta": {
     "status": "built-in",
     "author": "Glint",
-    "updated": "2026-11-03",
-    "notes": "Built in, from public knowledge; still to be checked on real samples. Count only, off by default (noisy). Upload and download progress gets its own face."
+    "updated": "2026-11-05",
+    "notes": "Built in, from public knowledge; still to be checked on real samples. On (owner 2026-11-04): new videos as a count. Upload and download progress gets its own face. The latest video's thumbnail is the count's background from Large up, and its channel the quiet line."
   },
-  "enabled": false,
+  "enabled": true,
   "source": {
     "notification": {
       "match": { "notCategories": ["promo", "recommendation"] },
@@ -18,11 +18,13 @@
       "expire": "1d"
     }
   },
-  "fields": {},
+  "fields": {
+    "creator": { "from": ["title"], "regex": "^(?P<v>[^:\\n]{1,40}?)\\s+uploaded\\b", "lang": ["en"], "then": ["shorten:24"] }
+  },
   "faces": [
     { "kind": "progress", "title": "uploading", "value": "{percent}", "line": "{percent}", "when": "progress" },
-    { "kind": "count", "count": "{count}", "label": "new videos", "when": "count>1" },
-    { "kind": "count", "count": "{count}", "label": "new video", "when": "count==1" }
+    { "kind": "count", "count": "{count}", "label": "new videos", "peek": "latest from {creator}", "picture": "picture", "when": "count>1" },
+    { "kind": "count", "count": "{count}", "label": "new video", "peek": "from {creator}", "picture": "picture", "when": "count==1" }
   ],
   "tap": "notification"
 }

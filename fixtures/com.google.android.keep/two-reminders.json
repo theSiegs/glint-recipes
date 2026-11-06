@@ -1,0 +1,19 @@
+{
+  "fixture": 1,
+  "package": "com.google.android.keep",
+  "source": "synthetic",
+  "scrubbed": true,
+  "notes": "Synthetic: two reminders up at once. Each is one face, the newest at rest; the count is the last flip.",
+  "together": true,
+  "samples": [
+    {
+      "name": "later",
+      "notification": { "posted": 1767000000000, "when": 1767024000000, "category": "reminder", "title": "Call the dentist" }
+    },
+    {
+      "name": "just went off",
+      "notification": { "posted": 1767000600000, "when": 1767000600000, "category": "reminder", "title": "Take the bread out" },
+      "expect": { "title": "take the bread out", "line": "reminder · 1 min ago", "titles": ["take the bread out", "call the dentist", "2"] }
+    }
+  ]
+}

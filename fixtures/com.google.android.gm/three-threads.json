@@ -3,7 +3,7 @@
   "package": "com.google.android.gm",
   "source": "synthetic",
   "scrubbed": true,
-  "notes": "Synthetic: three threads up at once, with their summary.",
+  "notes": "Synthetic: three threads up at once, with their summary: the count with the latest sender at rest, flipping to the latest subject.",
   "together": true,
   "samples": [
     { "name": "first", "notification": { "posted": 1767000000000, "category": "email", "group": "alex@example.com", "title": "Alex Rivera", "text": "Lunch on Friday?" } },
@@ -18,7 +18,7 @@
     {
       "name": "third",
       "notification": { "posted": 1767001200000, "category": "email", "group": "alex@example.com", "title": "Library", "text": "Your hold is ready" },
-      "expect": { "kind": "count", "title": "3", "line": "new mail", "faces": 2 }
+      "expect": { "kind": "count", "title": "3", "line": "new mail", "peek": "latest from Library", "titles": ["3", "Your hold is ready"] }
     }
   ]
 }

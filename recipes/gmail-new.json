@@ -1,14 +1,14 @@
 {
   "recipe": "glint.recipe/1",
   "id": "gmail-new",
-  "rev": 2,
+  "rev": 3,
   "name": "gmail",
   "app": { "package": "com.google.android.gm", "label": "Gmail" },
   "meta": {
     "status": "built-in",
     "author": "Glint",
-    "updated": "2026-11-03",
-    "notes": "Built in, from public knowledge; still to be checked on real samples. New mail as Gmail posts it: one notification per thread (title the sender, text the subject, big text subject and snippet, sub text the account, Archive and Reply), grouped per account under an InboxStyle summary (\"3 new messages\", a line per thread). The unread count comes from that summary's number (English), else the threads up. The category isn't relied on (email when set); sending, sync and errors, Chat (MessagingStyle) and Meet calls are left out. Never shows the account. The sender's name is an optIn face."
+    "updated": "2026-11-05",
+    "notes": "Built in, from public knowledge; still to be checked on real samples. New mail as Gmail posts it: one notification per thread (title the sender, text the subject, big text subject and snippet, sub text the account, Archive and Reply), grouped per account under an InboxStyle summary (\"3 new messages\", a line per thread). The unread count comes from that summary's number (English), else the threads up. The category isn't relied on (email when set); sending, sync and errors, Chat (MessagingStyle) and Meet calls are left out. Never shows the account. One new thread: its subject, how long ago, and who it is from (as the plain Gmail tile shows the sender). Several: the unread count with the latest sender, flipping to the latest subject. The sender as the big line is an optIn face."
   },
   "source": {
     "notification": {
@@ -27,13 +27,15 @@
   },
   "fields": {
     "subject": { "from": ["text", "bigText"], "regex": "^(?P<v>[^@\\n]+)(?:\\n|$)", "then": ["firstLine", "shorten:60"] },
-    "unread": { "from": ["title"], "regex": "(?i)^(?P<v>\\d{1,4})\\s+new\\b", "lang": ["en"] }
+    "unread": { "from": ["title"], "regex": "(?i)^(?P<v>\\d{1,4})\\s+new\\b", "lang": ["en"] },
+    "who": { "from": ["title"], "regex": "^(?P<v>[^\\d\\n][^\\n]*)$", "then": ["shorten:24"] }
   },
   "faces": [
-    { "kind": "count", "count": "{unread}", "label": "new mail", "when": "unread>1" },
-    { "kind": "count", "count": "{count}", "label": "new mail", "when": ["!unread", "count>1"] },
-    { "kind": "headline", "title": "{subject}", "line": "new mail", "peek": "{time}" },
-    { "kind": "message", "person": "{title}", "line": "{subject}", "peek": "{time}", "optIn": true }
+    { "kind": "count", "count": "{unread}", "label": "new mail", "peek": "latest from {who}", "when": "unread>1" },
+    { "kind": "count", "count": "{count}", "label": "new mail", "peek": "latest from {who}", "when": "count>1" },
+    { "kind": "headline", "title": "{subject}", "line": "new mail · {posted|ago}", "peek": "from {who}" },
+    { "kind": "headline", "title": "{subject}", "line": "latest · {posted|ago}", "peek": "from {who}", "when": "unread>1|count>1", "flip": true },
+    { "kind": "message", "person": "{title}", "line": "{subject}", "peek": "{posted|ago}", "optIn": true, "flip": true }
   ],
   "tap": "notification"
 }

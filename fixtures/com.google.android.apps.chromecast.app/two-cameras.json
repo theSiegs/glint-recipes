@@ -1,0 +1,19 @@
+{
+  "fixture": 1,
+  "package": "com.google.android.apps.chromecast.app",
+  "source": "synthetic",
+  "scrubbed": true,
+  "notes": "Synthetic: two cameras' events up at once: the newest at rest, the other camera's as a flip (one item per face).",
+  "together": true,
+  "samples": [
+    {
+      "name": "doorbell",
+      "notification": { "posted": 1767000000000, "category": "call", "template": "BigPictureStyle", "hasPicture": true, "title": "Front door", "text": "Someone is at the door" }
+    },
+    {
+      "name": "driveway",
+      "notification": { "posted": 1767000300000, "category": "event", "template": "BigPictureStyle", "hasPicture": true, "title": "Driveway", "text": "Person detected" },
+      "expect": { "title": "person seen", "line": "driveway · 1 min ago", "picture": true, "titles": ["person seen", "someone at the door"] }
+    }
+  ]
+}

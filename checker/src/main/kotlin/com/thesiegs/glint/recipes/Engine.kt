@@ -1,5 +1,6 @@
 package com.thesiegs.glint.recipes
 
+import com.thesiegs.glint.recipes.learn.ShapeLearner
 import java.time.ZoneId
 
 /**
@@ -17,7 +18,11 @@ data class RecipeContext(
     val h24: Boolean = false,
 )
 
-/** One face as it will draw: count faces carry the number in [title] and the word in [line]; message faces the person in [title]. */
+/**
+ * One face as it will draw: count faces carry the number in [title] and the word in [line]; message
+ * faces the person in [title]. [item] is whose it is (0 the lead subject, 1.. the others up) and
+ * [key] the notification it was read from (a tap opens it, its picture is drawn from it).
+ */
 data class DrawnFace(
     val index: Int,
     val kind: FaceKind,
@@ -26,6 +31,17 @@ data class DrawnFace(
     val peek: String? = null,
     /** Progress faces: 0..1. */
     val fraction: Float? = null,
+    /** Progress faces: ProgressStyle's segment ends and points, each 0..1 along the track. */
+    val stops: List<Float> = emptyList(),
+    val points: List<Float> = emptyList(),
+    /** Progress faces: the app draws its own tracker icon. */
+    val tracker: Boolean = false,
+    /** "picture" or "largeIcon": the notification's own, as the face's whole background. */
+    val picture: String? = null,
+    /** Its notification is older than the recipe's `fade`: the face draws dimmed. */
+    val faded: Boolean = false,
+    val item: Int = 0,
+    val key: String? = null,
 )
 
 /** A field's last value for one subject: [value], the time of the notification it came from, and when it was last seen up. */
@@ -55,8 +71,10 @@ data class Evaluation(
     val notApplicable: Set<String>,
     val probation: Boolean,
     val held: HeldState,
-    /** How many of the app's notifications up this recipe didn't take. */
+    /** How many of the app's notifications up this recipe didn't take, of those that could carry its state ([ShapeLearner.isUseful]). */
     val unmatched: Int,
+    /** Each matched notification's subject, by its key ([HeldState] is kept by subject). */
+    val subjects: Map<String, String> = emptyMap(),
 ) {
     val drew: Boolean get() = faces.isNotEmpty()
 }
@@ -97,9 +115,6 @@ object RecipeEngine {
             val stale = Durations.parse(rule.stale) ?: return@forEach
             if (postedOf[k]?.let { ctx.now - it > stale } == true) own.remove(k)
         }
-        val missingRequired = if (winner == null) emptyList()
-        else recipe.fields.filter { (k, r) -> r.required && k !in notApplicable && k !in own }.keys.toList()
-
         // Held values fill what's missing, while their hold lasts; then the hold is brought up to date.
         val holdOf = { k: String -> Durations.parse(recipe.fields[k]?.hold) ?: Durations.parse(src.hold) }
         val keptForSubject = subject?.let { held.subjects[it] }.orEmpty()
@@ -110,6 +125,9 @@ object RecipeEngine {
             if (k !in values && ctx.now - hv.seen <= hold && (stale == null || ctx.now - hv.posted <= stale)) values[k] = hv.value
         }
         val newHeld = updateHeld(recipe, held, subject, own, postedOf, ctx.now, holdOf)
+        // Required means "the tile can't draw without it": a held value counts (a gate change without the flight number).
+        val missingRequired = if (winner == null) emptyList()
+        else recipe.fields.filter { (k, r) -> r.required && k !in notApplicable && k !in values }.keys.toList()
 
         // The built-ins (from the winner), under the recipe's own fields.
         val all = LinkedHashMap<String, String>()
@@ -121,7 +139,9 @@ object RecipeEngine {
             // Nothing up: only held values draw, never a "0" count or an empty headline.
             all.remove("count"); all.remove("keys")
         }
-        val faces = if (winner == null && values.isEmpty()) emptyList() else faces(recipe, all, ctx)
+        val leadPosted = winner?.posted ?: keptForSubject.values.maxOfOrNull { it.posted }
+        val faces = if (winner == null && values.isEmpty()) emptyList()
+        else tileFaces(recipe, all, ctx, winner, leadPosted, Lead(matched, subject, subjectOf, perNote, held, count, subjects.size))
         return Evaluation(
             recipeId = recipe.id,
             matched = matched,
@@ -132,8 +152,88 @@ object RecipeEngine {
             notApplicable = notApplicable,
             probation = !Versions.inRange(recipe.app.versions, ctx.versionCode),
             held = newHeld,
-            unmatched = ofApp.count { n -> !n.summary && matched.none { it.key == n.key } },
+            // Only what could carry the app's state counts (promos, summaries and the like say nothing about the recipe).
+            unmatched = ofApp.count { n -> !n.summary && ShapeLearner.isUseful(n) && matched.none { it.key == n.key } },
+            subjects = subjectOf,
         )
+    }
+
+    /** [held] without [subjects]: the owner dismissed their notifications, so nothing of them is kept. */
+    fun forget(held: HeldState, subjects: Set<String>): HeldState {
+        if (subjects.isEmpty() || subjects.none { it in held.subjects }) return held
+        val kept = held.subjects - subjects
+        return HeldState(kept, held.latest?.takeIf { it in kept })
+    }
+
+    /** What the other subjects' faces are read from, besides the lead's own values. */
+    private class Lead(
+        val matched: List<NotificationSample>, val subject: String?, val subjectOf: Map<String, String>,
+        val perNote: Map<String, Map<String, String>>, val held: HeldState, val count: Int, val keys: Int,
+    )
+
+    /**
+     * The tile's faces (recipes/SPEC.md §6): the lead subject's rest face (the first rung of the
+     * ladder that draws), each other subject's rest face (an order, a flight: one item per face, at
+     * most [Recipes.MAX_ITEMS] in all), then the lead's flip faces. A face the same as one before it
+     * is left out, so the tile never flips to what it already shows.
+     */
+    private fun tileFaces(
+        recipe: Recipe, values: Map<String, String>, ctx: RecipeContext, winner: NotificationSample?, posted: Long?, lead: Lead,
+    ): List<DrawnFace> {
+        val (rest, flips) = item(recipe, values, ctx, winner, 0, posted)
+        // Each other subject's own winner: the first of it in pick order (summaries are last).
+        val others = if (winner == null) emptyList() else lead.matched.asSequence()
+            .filter { !it.summary && lead.subjectOf[it.key] != lead.subject }
+            .distinctBy { lead.subjectOf[it.key] }
+            .take(Recipes.MAX_ITEMS - 1).toList()
+        val more = others.mapIndexedNotNull { i, n ->
+            val v = LinkedHashMap(builtIns(n, lead.count, lead.keys, ctx))
+            v.putAll(subjectValues(recipe, n, lead.subjectOf.getValue(n.key), lead, ctx))
+            item(recipe, v, ctx, n, i + 1, n.posted).first
+        }
+        return (listOfNotNull(rest) + more + flips).distinctBy { Triple(it.kind, it.title, it.line) }
+    }
+
+    /** Another subject's values: its winner's, merged from its other notifications, then its held ones (as the lead's). */
+    private fun subjectValues(recipe: Recipe, top: NotificationSample, s: String, lead: Lead, ctx: RecipeContext): Map<String, String> {
+        val src = recipe.notification
+        val own = LinkedHashMap<String, String>()
+        val postedOf = HashMap<String, Long>()
+        val sources = if (!src.merge) listOf(top)
+        else listOf(top) + lead.matched.filter { it.key != top.key && lead.subjectOf[it.key] == s }.sortedByDescending { it.posted }
+        for (n in sources) lead.perNote[n.key].orEmpty().forEach { (k, v) ->
+            if (k !in own) { own[k] = v; postedOf[k] = n.posted }
+        }
+        recipe.fields.forEach { (k, rule) ->
+            val stale = Durations.parse(rule.stale) ?: return@forEach
+            if (postedOf[k]?.let { ctx.now - it > stale } == true) own.remove(k)
+        }
+        lead.held.subjects[s].orEmpty().forEach { (k, hv) ->
+            val hold = Durations.parse(recipe.fields[k]?.hold) ?: Durations.parse(src.hold) ?: return@forEach
+            val stale = Durations.parse(recipe.fields[k]?.stale)
+            if (k !in own && ctx.now - hv.seen <= hold && (stale == null || ctx.now - hv.posted <= stale)) own[k] = hv.value
+        }
+        return own
+    }
+
+    /**
+     * One item's faces: its rest face, the first rung of the ladder (faces not [FaceRule.flip]) that
+     * draws, and, for the lead ([item] 0) only, the flip faces that draw. optIn faces draw only once
+     * turned on. A face from a notification posted before the recipe's `fade` draws dimmed.
+     */
+    private fun item(
+        recipe: Recipe, values: Map<String, String>, ctx: RecipeContext, from: NotificationSample?, item: Int, posted: Long?,
+    ): Pair<DrawnFace?, List<DrawnFace>> {
+        val fade = Durations.parse(recipe.notification.fade)
+        val faded = fade != null && posted != null && ctx.now - posted > fade
+        fun drawn(i: Int, f: FaceRule): DrawnFace? {
+            if (f.optIn && i !in ctx.optIn) return null
+            if (!f.whenAll.all { Conditions.holds(it, values) }) return null
+            return draw(i, f, values, ctx, from)?.copy(item = item, key = from?.key, faded = faded)
+        }
+        val rest = recipe.faces.withIndex().firstNotNullOfOrNull { (i, f) -> if (f.flip) null else drawn(i, f) }
+        val flips = if (item > 0) emptyList() else recipe.faces.withIndex().mapNotNull { (i, f) -> if (f.flip) drawn(i, f) else null }
+        return rest to flips
     }
 
     fun appMatches(recipe: Recipe, n: NotificationSample): Boolean =
@@ -177,7 +277,6 @@ object RecipeEngine {
 
     fun order(list: List<NotificationSample>, pick: Pick): List<NotificationSample> = when (pick) {
         Pick.Newest -> list.sortedByDescending { it.posted }
-        Pick.Priority -> list.sortedWith(compareByDescending<NotificationSample> { it.importance }.thenByDescending { it.priority }.thenByDescending { it.posted })
         Pick.Ongoing -> list.sortedWith(compareByDescending<NotificationSample> { it.ongoing || it.promoted }.thenByDescending { it.posted })
     }
 
@@ -199,7 +298,6 @@ object RecipeEngine {
         for (s in rule.from) {
             var v = Sources.read(s, n) ?: continue
             if (rule.after != null) v = after(v, rule.after) ?: continue
-            if (rule.before != null) v = before(v, rule.before) ?: continue
             if (rule.regex != null) v = Rx.capture(rule.regex, v) ?: continue
             var ok = true
             for (t in rule.then) {
@@ -224,18 +322,10 @@ object RecipeEngine {
         return rest.substring(0, end).trim().trimEnd('.', '!').takeIf { it.isNotEmpty() }
     }
 
-    private fun before(text: String, anchor: String): String? {
-        val i = text.indexOf(anchor, ignoreCase = true).takeIf { it > 0 } ?: return null
-        val head = text.substring(0, i)
-        val start = head.lastIndexOfAny(Breaks) + 1
-        return head.substring(start).trim().takeIf { it.isNotEmpty() }
-    }
-
     /** What one subject is ([NotificationSource.key]); a notification with no such value is its own. */
     fun subject(key: String, n: NotificationSample, values: Map<String, String>): String = when {
         key == "tag" -> n.tag?.let { "t:$it" }
         key == "group" -> n.group?.let { "g:$it" }
-        key.startsWith("extra:") -> n.extras[key.removePrefix("extra:")]?.let { "x:$it" }
         key.startsWith("field:") -> values[key.removePrefix("field:")]?.let { "f:${it.lowercase()}" }
         else -> null
     } ?: "k:${n.key}"
@@ -273,18 +363,17 @@ object RecipeEngine {
         if (w.lines.isNotEmpty()) put("lineCount", w.lines.size.toString())
         if (w.posted > 0) put("time", clockTime(w.posted, ctx.zone, ctx.h24))
         if (w.whenTime > 0) put("at", clockTime(w.whenTime, ctx.zone, ctx.h24))
+        // Raw times, for a format ({posted|ago}, {when|in}); a running chronometer as words.
+        if (w.posted > 0) put("posted", w.posted.toString())
+        if (w.whenTime > 0) put("when", w.whenTime.toString())
+        if (w.chronometer) Times.chrono(w.whenTime, w.countDown, ctx.now)?.let { put("chrono", it) }
     }
 
-    /** The faces that draw, in the recipe's order; optIn faces only once turned on. */
-    fun faces(recipe: Recipe, values: Map<String, String>, ctx: RecipeContext): List<DrawnFace> =
-        recipe.faces.mapIndexedNotNull { i, f ->
-            if (f.optIn && i !in ctx.optIn) return@mapIndexedNotNull null
-            if (!f.whenAll.all { Conditions.holds(it, values) }) return@mapIndexedNotNull null
-            draw(i, f, values)
+    private fun draw(i: Int, f: FaceRule, values: Map<String, String>, ctx: RecipeContext, from: NotificationSample?): DrawnFace? {
+        fun fill(t: String?): String? = t?.let { Templates.fill(it, values, ctx) }
+        val picture = f.picture?.takeIf { p ->
+            from != null && (p == "picture" && from.hasPicture || p == "largeIcon" && from.hasLargeIcon)
         }
-
-    private fun draw(i: Int, f: FaceRule, values: Map<String, String>): DrawnFace? {
-        fun fill(t: String?): String? = t?.let { Templates.fill(it, values) }
         // A template given that can't be filled stops the face; one not given is simply absent.
         fun need(t: String?): Pair<Boolean, String?> = if (t == null) true to null else fill(t).let { (it != null) to it }
         // The peek is the quiet extra: without its fields it's left off, the face still draws.
@@ -293,19 +382,19 @@ object RecipeEngine {
             FaceKind.Headline -> {
                 val title = fill(f.title) ?: return null
                 val (ok, line) = need(f.line)
-                if (!ok) null else DrawnFace(i, f.kind, title, line, peek)
+                if (!ok) null else DrawnFace(i, f.kind, title, line, peek, picture = picture)
             }
             FaceKind.Message -> {
                 val who = fill(f.person) ?: return null
                 val line = fill(f.line) ?: return null
-                DrawnFace(i, f.kind, who, line, peek)
+                DrawnFace(i, f.kind, who, line, peek, picture = picture)
             }
             FaceKind.Count -> {
                 val n = fill(f.count)?.trim() ?: return null
                 val number = n.replace(",", "").toLongOrNull() ?: return null
                 if (number <= 0) return null
                 val (ok, label) = need(f.label)
-                if (!ok) null else DrawnFace(i, f.kind, if (number > 99) "99+" else number.toString(), label, peek)
+                if (!ok) null else DrawnFace(i, f.kind, if (number > 99) "99+" else number.toString(), label, peek, picture = picture)
             }
             FaceKind.Progress -> {
                 val title = fill(f.title) ?: return null
@@ -317,18 +406,41 @@ object RecipeEngine {
                     if (cur == null || max == null || max <= 0f) null else cur / max
                 } ?: return null
                 val (ok, line) = need(f.line)
-                if (!ok) null else DrawnFace(i, f.kind, title, line, peek, fraction.coerceIn(0f, 1f))
+                if (!ok) return null
+                val (stops, points) = track(from)
+                DrawnFace(i, f.kind, title, line, peek, fraction.coerceIn(0f, 1f), stops, points, tracker = from?.tracker == true)
             }
         }
     }
+
+    /** ProgressStyle's segment ends and points along the track, 0..1 (as Glint's own Live Update face reads them). */
+    fun track(n: NotificationSample?): Pair<List<Float>, List<Float>> {
+        if (n == null) return emptyList<Float>() to emptyList()
+        val total = n.segments.sum().takeIf { it > 0 } ?: n.max?.takeIf { it > 0 } ?: return emptyList<Float>() to emptyList()
+        val stops = n.segments.runningReduce(Int::plus).dropLast(1).map { (it.toFloat() / total).coerceIn(0f, 1f) }
+        val points = n.points.map { (it.toFloat() / total).coerceIn(0f, 1f) }
+        return stops to points
+    }
 }
 
-/** `{field}` templates: every placeholder needs a value, else the template doesn't fill. */
+/**
+ * `{field}` templates: every placeholder needs a value, else the template doesn't fill. `{field|in}`
+ * says the value as a time relative to [RecipeContext.now] ([Times]); without a context, or when the
+ * format doesn't fit the value, it doesn't fill either.
+ */
 object Templates {
-    fun fill(template: String, values: Map<String, String>): String? {
+    fun fill(template: String, values: Map<String, String>, ctx: RecipeContext? = null): String? {
         var missing = false
         val out = Recipes.Placeholder.replace(template) { m ->
-            values[m.groupValues[1]] ?: run { missing = true; "" }
+            val v = values[m.groupValues[1]]
+            val format = m.groupValues[2]
+            val shown = when {
+                v == null -> null
+                format.isEmpty() -> v
+                ctx == null -> null
+                else -> Times.format(format, v, ctx)
+            }
+            shown ?: run { missing = true; "" }
         }
         return if (missing) null else out.trim().takeIf { it.isNotEmpty() }
     }

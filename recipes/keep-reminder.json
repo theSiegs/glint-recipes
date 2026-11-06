@@ -1,14 +1,14 @@
 {
   "recipe": "glint.recipe/1",
   "id": "keep-reminder",
-  "rev": 2,
+  "rev": 3,
   "name": "keep",
   "app": { "package": "com.google.android.keep", "label": "Google Keep" },
   "meta": {
     "status": "built-in",
     "author": "Glint",
-    "updated": "2026-11-03",
-    "notes": "Built in, from public knowledge; still to be checked on real samples. Keep's reminders: category reminder, the note's title as the title, its first words as the text, the reminder's time as when. The same shape as tasks-reminder. The category isn't relied on (reminder when set): share notices, sync and system ones are left out."
+    "updated": "2026-11-05",
+    "notes": "Built in, from public knowledge; still to be checked on real samples. Keep's reminders: category reminder, the note's title as the title, its first words as the text, the reminder's time as when. The same shape as tasks-reminder. The category isn't relied on (reminder when set): share notices, sync and system ones are left out. Within the hour the time reads \"5 min ago\". Each reminder up is one face; the count is a flip."
   },
   "source": {
     "notification": {
@@ -27,9 +27,9 @@
     "note": { "from": ["title", "text"], "then": ["firstLine", "lower", "shorten:40"] }
   },
   "faces": [
-    { "kind": "headline", "title": "{note}", "line": "reminder · {at}", "when": "at" },
-    { "kind": "headline", "title": "{note}", "line": "reminder", "when": "!at" },
-    { "kind": "count", "count": "{count}", "label": "reminders", "when": "count>1" }
+    { "kind": "headline", "title": "{note}", "line": "reminder · {when|near}" },
+    { "kind": "headline", "title": "{note}", "line": "reminder" },
+    { "kind": "count", "count": "{count}", "label": "reminders", "when": "count>1", "flip": true }
   ],
   "tap": "notification"
 }

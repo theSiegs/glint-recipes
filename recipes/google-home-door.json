@@ -1,41 +1,48 @@
 {
   "recipe": "glint.recipe/1",
   "id": "google-home-door",
-  "rev": 2,
+  "rev": 3,
   "name": "home",
   "app": { "package": "com.google.android.apps.chromecast.app", "label": "Google Home" },
   "meta": {
     "status": "built-in",
     "author": "Glint",
-    "updated": "2026-11-03",
-    "notes": "Built in, from public knowledge; still to be checked on real samples. Doorbell and camera events: the camera's name as the title, what it saw as the text, a snapshot as a big picture. If Home Assistant already sees the cameras, prefer an HA tile. Channel ids are guesses. A doorbell ring may come as category call; only the event's wording is relied on."
+    "updated": "2026-11-05",
+    "notes": "Built in, from public knowledge; still to be checked on real samples. Doorbell and camera events: the camera's name as the title, what it saw as the text, a snapshot as a big picture (the face's background from Large up), with how long ago. Doors and locks: \"front door open\", \"since 7:55 am\", for as long as the notification is up; closed or locked goes back to the plain tile. If Home Assistant already sees the cameras, prefer an HA tile. Channel ids are guesses. A doorbell ring may come as category call; only the event's wording is relied on."
   },
   "source": {
     "notification": {
       "match": {
         "notCategories": ["promo", "recommendation", "sys", "status", "progress"],
-        "anchors": ["(?i)\\bdoor|\\bperson\\b|someone|package|motion|\\bring|\\bseen\\b|\\bdetected\\b"],
+        "anchors": ["(?i)\\bdoor|\\bperson\\b|someone|package|motion|\\bring|\\bseen\\b|\\bdetected\\b|\\bopen(?:ed)?\\b|\\b(?:un)?locked\\b|\\bclosed\\b"],
         "exclude": ["(?i)\\bupdate available\\b|\\bnew features?\\b|\\btry\\b"],
         "lang": ["en"]
       },
-      "key": "field:camera",
-      "hold": "30m",
-      "expire": "2h"
+      "key": "field:camera"
     }
   },
   "fields": {
-    "camera": { "from": ["title"], "then": ["firstLine", "lower", "shorten:24"], "required": true },
+    "camera": { "from": ["title"], "then": ["firstLine", "lower", "shorten:24"], "required": true, "hold": "30m" },
     "event": {
       "from": ["text", "bigText"],
       "regex": "(?i)(?P<v>someone(?: is)? at the door|someone rang the doorbell|doorbell rang|package (?:seen|detected|delivered)|person (?:seen|detected)|motion (?:seen|detected)|animal (?:seen|detected))",
       "lang": ["en"],
       "then": ["lower"],
       "map": { "someone is at the door": "someone at the door", "someone rang the doorbell": "doorbell", "doorbell rang": "doorbell", "person detected": "person seen", "motion detected": "motion", "motion seen": "motion", "package detected": "package seen" },
-      "required": true
+      "hold": "30m",
+      "stale": "2h"
+    },
+    "door": {
+      "from": ["text"],
+      "regex": "(?i)\\b(?P<v>left open|opened|open|unlocked|locked|closed)\\b",
+      "lang": ["en"],
+      "then": ["lower"],
+      "map": { "opened": "open", "left open": "open" }
     }
   },
   "faces": [
-    { "kind": "headline", "title": "{event}", "line": "{camera} · {time}" }
+    { "kind": "headline", "title": "{camera} {door}", "line": "{posted|since}", "when": ["door!=closed", "door!=locked"] },
+    { "kind": "headline", "title": "{event}", "line": "{camera} · {posted|ago}", "picture": "picture" }
   ],
   "tap": "notification"
 }
