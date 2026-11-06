@@ -6,7 +6,9 @@
 # Drafted recipes never merge themselves (README, "Drafted recipes wait for the owner"): a pull
 # request from a draft/* branch, or one with a recipe whose status is "learned", whose notes say a
 # model touched it ("by AI", what the intake's drafting job writes), or a fixture whose source is
-# "learned", waits for the owner's merge.
+# "learned", waits for the owner's merge. So does an owner's edit shared from a phone (README, "Edits
+# from phones wait for the owner"): a pull request from an edit/* branch (the relay's), or one with a
+# recipe whose notes start "Edited on a phone" (what Glint's tile editor writes).
 # App categories (README.md, "App categories"): categories.json and categories-overrides.json are
 # checked by tools/check_categories.py (schema, allowed categories, package names, no personal data, at
 # most 60 apps changed per pull request) and merge on their own when they pass.
@@ -96,7 +98,7 @@ jobs:
           persist-credentials: false
           fetch-depth: 0 # main too, to see whether the pull request fast-forwards it
 
-      - name: Drafted? Then it waits for the owner
+      - name: Drafted or edited on a phone? Then it waits for the owner
         id: drafted
         if: steps.scope.outputs.ok == 'true'
         env:
@@ -105,7 +107,10 @@ jobs:
           HEAD_REF: ${{ github.event.pull_request.head.ref }}
         run: |
           why=""
-          case "$HEAD_REF" in draft/*) why="it comes from a draft/ branch" ;; esac
+          case "$HEAD_REF" in
+            draft/*) why="it comes from a draft/ branch" ;;
+            edit/*) why="it is an edit shared from a phone (an edit/ branch)" ;;
+          esac
           files="$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/files" --jq '.[] | select(.status != "removed") | .filename')"
           while IFS= read -r f; do
             [ -n "$why" ] && break
@@ -114,13 +119,15 @@ jobs:
               recipes/*.json)
                 if jq -e '(.meta.status // "") == "learned" or ((.meta.notes // "") | test("\\bby AI\\b"))' "$f" >/dev/null 2>&1; then
                   why="$f was learned or touched by a model"
+                elif jq -e '(.meta.notes // "") | test("^Edited on a phone"; "i")' "$f" >/dev/null 2>&1; then
+                  why="$f is an edit shared from a phone"
                 fi ;;
               fixtures/*.json)
                 if jq -e '(.source // "") == "learned"' "$f" >/dev/null 2>&1; then why="$f holds learned shapes"; fi ;;
             esac
           done <<< "$files"
           if [ -n "$why" ]; then
-            echo "::notice::Not auto-merged: a drafted recipe waits for the owner's merge ($why)."
+            echo "::notice::Not auto-merged: a drafted or phone-edited recipe waits for the owner's merge ($why)."
             echo "held=true" >> "$GITHUB_OUTPUT"
           else
             echo "held=false" >> "$GITHUB_OUTPUT"

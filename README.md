@@ -34,7 +34,8 @@ and describes text, nothing more.
    phone number or link.
 3. When the check passes and the pull request comes from a branch of this repo and touches nothing
    else, it is merged automatically (main fast-forwards to its commits, so the pull request must be
-   on top of main), unless it is a drafted recipe (below), which waits for the owner's merge.
+   on top of main), unless it is a drafted recipe or an edit shared from a phone (below), which
+   waits for the owner's merge.
 4. `publish.yml` then checks the catalog again, builds the index, signs it, verifies the signature
    against the committed public key and publishes the site.
 
@@ -70,6 +71,21 @@ that shows a draft beats the generic tile (it draws something the generic one wo
 its shapes), and model-written words restricted to a known vocabulary (the common-word list and the
 learner's own words). Even merged, a `learned` recipe isn't dealt or turned on by Glint on its own
 (see the index's `status`).
+
+### Edits from phones wait for the owner
+
+Glint's tile settings › "edit what it shows" lets a phone's owner pick which of a recipe's own fields
+go on a tile's lines and the order of its faces (never free text), and optionally share that edit
+through the tile exchange. The relay (the intake's `POST /recipe`, `glint.recipe-submit/1`) checks
+it and opens a pull request here from an `edit/<id>-<hash>` branch, with one commit that changes only
+`recipes/<id>.json`: one rev up, `meta.status` `unverified`, its notes starting "Edited on a phone
+with Glint's tile editor" and saying what changed.
+
+An edit is never merged automatically. `check.yml` holds back any pull request from an `edit/*`
+branch, and any that changes a recipe whose notes start "Edited on a phone". The check still runs (an
+edit of a recipe the catalog has no fixtures for, such as one learned on the phone, fails it until
+fixtures come). The owner reads the diff, sets the status back (`verified` once it's checked on
+samples) and merges by hand, or closes it.
 
 `checker/sync-from-glint.sh <path-to-glint-checkout>` re-copies the checker's sources from Glint, and
 the scrubber's common-word list (`checker/src/main/resources/glint/common-words.txt`);
