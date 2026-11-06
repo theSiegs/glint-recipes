@@ -3,7 +3,7 @@
   "package": "com.google.android.apps.tasks",
   "source": "synthetic",
   "scrubbed": true,
-  "notes": "Synthetic due-task reminders.",
+  "notes": "Synthetic due-task reminders: the app's own due words, a due time later today, one within the hour.",
   "samples": [
     {
       "name": "due today",
@@ -17,7 +17,17 @@
     {
       "name": "timed",
       "notification": { "posted": 1767000000000, "when": 1767013200000, "category": "reminder", "title": "Pay the water bill" },
-      "expect": { "title": "pay the water bill", "line": "due 1:00 pm" }
+      "expect": { "title": "pay the water bill", "line": "due 1:00 pm", "faces": 1 }
+    },
+    {
+      "name": "due soon",
+      "notification": { "posted": 1767000000000, "when": 1767000720000, "category": "reminder", "title": "Move the car" },
+      "expect": { "title": "move the car", "line": "due in 11 min" }
+    },
+    {
+      "name": "no time",
+      "notification": { "posted": 1767000000000, "category": "reminder", "title": "Call the plumber" },
+      "expect": { "title": "call the plumber", "line": "task" }
     }
   ]
 }

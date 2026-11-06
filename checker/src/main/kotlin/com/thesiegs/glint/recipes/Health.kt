@@ -31,7 +31,7 @@ enum class HealthStatus {
     Probation,
     /** A required field missing [Recipes.UNWELL_AFTER] times running: the plain app tile, "needs update". */
     Unwell,
-    /** The app posts, but nothing has matched for the recipe's stale days: "needs update". */
+    /** The recipe matched here before; the app keeps posting useful notifications, but nothing matched for its stale days: "needs update". */
     NeedsUpdate,
 }
 
@@ -61,9 +61,10 @@ object HealthWatch {
 
     fun status(h: RecipeHealth, recipe: Recipe, now: Long, probation: Boolean): HealthStatus = when {
         h.missesRunning >= Recipes.UNWELL_AFTER -> HealthStatus.Unwell
-        // The app keeps posting, nothing matched in staleDays (counted from the first look when it never matched).
-        h.lastAppPost > 0 && now - h.lastAppPost < recipe.staleDays * DAY &&
-            now - maxOf(h.lastMatch, h.firstSeen ?: now) > recipe.staleDays * DAY -> HealthStatus.NeedsUpdate
+        // The app keeps posting (promos and the like don't count: Evaluation.unmatched) and nothing matched in
+        // staleDays. A recipe that never matched on this phone has no data yet, not a broken shape.
+        h.lastMatch > 0 && h.lastAppPost > 0 && now - h.lastAppPost < recipe.staleDays * DAY &&
+            now - h.lastMatch > recipe.staleDays * DAY -> HealthStatus.NeedsUpdate
         probation -> HealthStatus.Probation
         else -> HealthStatus.Well
     }

@@ -3,12 +3,12 @@
   "package": "com.google.android.youtube",
   "source": "synthetic",
   "scrubbed": true,
-  "notes": "Synthetic: a new upload from a followed channel, and an upload in progress.",
+  "notes": "Synthetic: a new upload from a followed channel (its thumbnail behind the count), and an upload in progress.",
   "samples": [
     {
       "name": "new upload",
-      "notification": { "posted": 1767000000000, "category": "social", "template": "BigPictureStyle", "title": "Garden Weekly uploaded: Planting bulbs in fall", "text": "Garden Weekly" },
-      "expect": { "kind": "count", "title": "1", "line": "new video" }
+      "notification": { "posted": 1767000000000, "category": "social", "template": "BigPictureStyle", "hasPicture": true, "title": "Garden Weekly uploaded: Planting bulbs in fall", "text": "Garden Weekly" },
+      "expect": { "kind": "count", "title": "1", "line": "new video", "peek": "from Garden Weekly", "picture": true, "faces": 1 }
     },
     {
       "name": "uploading",

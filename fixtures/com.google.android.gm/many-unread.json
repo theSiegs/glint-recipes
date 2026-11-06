@@ -11,7 +11,7 @@
     {
       "name": "newest",
       "notification": { "posted": 1767000600000, "category": "email", "group": "alex@example.com", "title": "Library", "text": "Your hold is ready" },
-      "expect": { "kind": "count", "title": "12", "line": "new mail", "faces": 2 }
+      "expect": { "kind": "count", "title": "12", "line": "new mail", "peek": "latest from Library", "titles": ["12", "Your hold is ready"] }
     }
   ]
 }

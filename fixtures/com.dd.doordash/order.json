@@ -3,7 +3,7 @@
   "package": "com.dd.doordash",
   "source": "synthetic",
   "scrubbed": true,
-  "notes": "Synthetic: one order from confirmed to delivered. Replace with captured samples.",
+  "notes": "Synthetic: one order from confirmed to delivered, and running late. Replace with captured samples.",
   "samples": [
     {
       "name": "preparing",
@@ -11,7 +11,7 @@
         "posted": 1767000000000, "ongoing": true, "group": "order", "progress": 1, "max": 4,
         "title": "Preparing your order", "text": "Estimated arrival 9:55 AM from Corner Noodle Bar"
       },
-      "expect": { "kind": "progress", "title": "preparing", "line": "arrives 9:55 am" }
+      "expect": { "kind": "progress", "title": "preparing", "line": "arrives in 34 min", "faces": 1 }
     },
     {
       "name": "on the way",
@@ -19,7 +19,16 @@
         "posted": 1767001200000, "ongoing": true, "group": "order", "progress": 3, "max": 4,
         "title": "Your Dasher is on the way", "text": "Arriving at 9:52 AM"
       },
-      "expect": { "kind": "progress", "title": "on the way", "line": "arrives 9:52 am", "faces": 3 }
+      "expect": { "kind": "progress", "title": "on the way", "line": "arrives in 11 min", "faces": 1 }
+    },
+    {
+      "name": "running late",
+      "notification": {
+        "posted": 1767001200000, "ongoing": true, "group": "order", "progress": 3, "max": 4,
+        "title": "Your Dasher is on the way", "text": "Arriving at 9:52 AM"
+      },
+      "now": 1767002100000,
+      "expect": { "kind": "progress", "title": "on the way", "line": "was due 9:52 am", "faces": 1 }
     },
     {
       "name": "delivered",

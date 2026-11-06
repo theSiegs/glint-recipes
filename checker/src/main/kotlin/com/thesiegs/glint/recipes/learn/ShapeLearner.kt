@@ -187,7 +187,7 @@ object ShapeLearner {
     private fun isStatic(w: String): Boolean =
         w.length >= 3 && w.any { it != 'x' } && w !in Placeholders && w !in Stop
 
-    /** The calm face set: progress (when the app shows a bar), a headline from its title and text, a count past one. */
+    /** The calm face ladder: progress (when the app shows a bar), else a headline from its title and text; a count past one as a flip. */
     private fun facesOf(chosen: List<NotificationSample>): List<FaceRule> {
         fun share(p: (NotificationSample) -> Boolean) = chosen.count(p).toDouble() / chosen.size
         val title = share { !it.title.isNullOrBlank() }
@@ -203,7 +203,7 @@ object ShapeLearner {
             } else {
                 add(FaceRule(kind = FaceKind.Headline, title = head, peek = "{time}"))
             }
-            add(FaceRule(kind = FaceKind.Count, count = "{count}", label = "new", whenAll = listOf("count>1")))
+            add(FaceRule(kind = FaceKind.Count, count = "{count}", label = "new", whenAll = listOf("count>1"), flip = true))
         }
     }
 

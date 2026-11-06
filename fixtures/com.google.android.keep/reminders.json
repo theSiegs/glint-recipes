@@ -3,7 +3,7 @@
   "package": "com.google.android.keep",
   "source": "synthetic",
   "scrubbed": true,
-  "notes": "Synthetic reminders.",
+  "notes": "Synthetic reminders: a later one (its clock time), one that just went off (minutes ago), an untitled one.",
   "samples": [
     {
       "name": "timed reminder",
@@ -12,7 +12,13 @@
         "title": "Call the dentist", "text": "Ask about the Thursday opening",
         "actions": [ { "title": "Done" }, { "title": "Snooze" } ]
       },
-      "expect": { "title": "call the dentist", "line": "reminder · 4:00 pm" }
+      "expect": { "title": "call the dentist", "line": "reminder · 4:00 pm", "faces": 1 }
+    },
+    {
+      "name": "just went off",
+      "notification": { "posted": 1767000000000, "when": 1767000000000, "category": "reminder", "title": "Take the bread out" },
+      "now": 1767000300000,
+      "expect": { "title": "take the bread out", "line": "reminder · 5 min ago" }
     },
     {
       "name": "untitled note",

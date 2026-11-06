@@ -3,7 +3,7 @@
   "package": "com.amazon.mShop.android.shopping",
   "source": "synthetic",
   "scrubbed": true,
-  "notes": "Synthetic: two orders up at once; the newest leads, the count face says two packages.",
+  "notes": "Synthetic: two orders up at once; the newest leads, the other order is its own face, and the count of packages is a flip.",
   "together": true,
   "samples": [
     {
@@ -13,7 +13,7 @@
     {
       "name": "newer order",
       "notification": { "posted": 1767005000000, "tag": "order-1", "title": "Arriving today", "text": "Your package with Wireless earbuds will arrive today by 8 PM." },
-      "expect": { "title": "arriving today", "faces": 4 }
+      "expect": { "title": "arriving today", "titles": ["arriving today", "shipped", "2"] }
     }
   ]
 }

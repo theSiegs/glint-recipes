@@ -1,6 +1,5 @@
 Vendored from Glint's :glint-recipes module (glint-recipes/src/main/kotlin).
-Glint commit: 736af40c8d465466267757b6145026b485f7e205
-Glint branch: glint/xlearner
-Synced: 2026-11-04
+Glint commit: c23f89fc6c57d5adb59088783cdeaee883a5a14f
+Glint branch: feature/start-home
+Synced: 2026-11-06
 Update with: checker/sync-from-glint.sh <path-to-glint-checkout>
-Also: Scrub.kt and resources/glint/common-words.txt from Glint branch glint/xscrub (2026-11-05), ahead of the rest.

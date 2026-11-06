@@ -50,7 +50,8 @@ class RecipeBook(bundled: List<Recipe>, imported: List<Recipe> = emptyList(), le
 
 /**
  * The generic recipe, used for any app with notifications and no recipe of its own: its newest
- * notification's title as a calm headline, and how many are up when there's more than one. Bundled
+ * notification's title as a calm headline, the next ones as flips, and how many are up when there's
+ * more than one. Bundled
  * as recipes/bundled/generic.json too; this copy is the fallback when that can't be read.
  */
 object Generic {
@@ -59,11 +60,11 @@ object Generic {
         name = "app",
         app = RecipeApp(packageName = Recipes.ANY_APP, label = "Any app"),
         meta = RecipeMeta(status = "verified", author = "Glint", notes = "Any app's newest notification, and the count."),
-        source = RecipeSource(NotificationSource(match = RecipeMatch(notCategories = listOf("promo", "recommendation", "sys", "status")))),
+        source = RecipeSource(NotificationSource(match = RecipeMatch(notCategories = listOf("promo", "recommendation", "sys", "status")), fade = "6h")),
         faces = listOf(
-            FaceRule(kind = FaceKind.Headline, title = "{title}", line = "{text}", peek = "{time}"),
-            FaceRule(kind = FaceKind.Headline, title = "{title}", peek = "{time}", whenAll = listOf("!text")),
-            FaceRule(kind = FaceKind.Count, count = "{count}", label = "new", whenAll = listOf("count>1")),
+            FaceRule(kind = FaceKind.Headline, title = "{title}", line = "{text}", peek = "{posted|ago}", picture = "picture"),
+            FaceRule(kind = FaceKind.Headline, title = "{title}", line = "{posted|ago}", picture = "picture"),
+            FaceRule(kind = FaceKind.Count, count = "{count}", label = "new", whenAll = listOf("count>1"), flip = true),
         ),
     )
 }

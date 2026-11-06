@@ -1,14 +1,14 @@
 {
   "recipe": "glint.recipe/1",
   "id": "tasks-reminder",
-  "rev": 2,
+  "rev": 3,
   "name": "tasks",
   "app": { "package": "com.google.android.apps.tasks", "label": "Google Tasks" },
   "meta": {
     "status": "built-in",
     "author": "Glint",
-    "updated": "2026-11-03",
-    "notes": "Built in, from public knowledge; still to be checked on real samples. Due-task reminders: category reminder, the task as the title, a due line as the text. The same shape as keep-reminder. The category isn't relied on (reminder when set): tasks assigned from Docs or Chat, sync and system ones are left out."
+    "updated": "2026-11-05",
+    "notes": "Built in, from public knowledge; still to be checked on real samples. Due-task reminders: category reminder, the task as the title, a due line as the text. The same shape as keep-reminder. The category isn't relied on (reminder when set): tasks assigned from Docs or Chat, sync and system ones are left out. A due time within the hour reads \"due in 12 min\". Each task up is one face; the count is a flip."
   },
   "source": {
     "notification": {
@@ -28,10 +28,10 @@
     "due": { "from": ["text"], "regex": "(?i)(?P<v>due\\s.{1,24}|overdue)", "lang": ["en"], "then": ["lower"] }
   },
   "faces": [
-    { "kind": "headline", "title": "{task}", "line": "{due}", "when": "due" },
-    { "kind": "headline", "title": "{task}", "line": "due {at}", "when": ["!due", "at"] },
-    { "kind": "headline", "title": "{task}", "line": "task", "when": ["!due", "!at"] },
-    { "kind": "count", "count": "{count}", "label": "tasks due", "when": "count>1" }
+    { "kind": "headline", "title": "{task}", "line": "{due}" },
+    { "kind": "headline", "title": "{task}", "line": "due {when|near}" },
+    { "kind": "headline", "title": "{task}", "line": "task" },
+    { "kind": "count", "count": "{count}", "label": "tasks due", "when": "count>1", "flip": true }
   ],
   "tap": "notification"
 }
