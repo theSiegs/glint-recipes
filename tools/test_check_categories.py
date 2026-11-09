@@ -12,10 +12,12 @@ def doc(apps):
     return {"format": cc.FORMAT, "apps": apps}
 
 
-def e(category, name=None):
+def e(category, name=None, glance=None):
     out = {"category": category, "source": "play:GAME_PUZZLE", "checked": "2026-11-05"}
     if name:
         out["name"] = name
+    if glance:
+        out["glance"] = glance
     return out
 
 
@@ -68,6 +70,35 @@ class CheckTest(unittest.TestCase):
             "com.b.b": {"name": "B"},
             "com.d.d": {"category": "audio"},
             "com.e.e": {"category": "maps", "name": "E"},
+        })
+
+
+    def test_glance(self):
+        apps = cc.check_categories(doc({"com.example.gallery": e("image", "Gallery", "photos"),
+                                        "com.example.car": e("unknown", glance="car")}))
+        self.assertEqual(apps["com.example.gallery"]["glance"], "photos")
+        for g in ["Photos", "cinema", "", 3, None]:
+            self.bad(doc({"com.example.a": {**e("image"), "glance": g}}))
+        o = cc.check_overrides({"format": cc.OVERRIDES_FORMAT, "apps": {
+            "com.a.b": {"glance": "clock"}, "com.c.d": {"category": "audio", "name": "Player", "glance": "none"}}})
+        self.assertEqual(len(o), 2)
+        for bad in [{"com.a.b": {"glance": "radio"}}, {"com.a.b": {"glance": ["music"]}}]:
+            with self.assertRaises(cc.Bad):
+                cc.check_overrides({"format": cc.OVERRIDES_FORMAT, "apps": bad})
+
+    def test_glance_changes_count(self):
+        old = {"com.a.a": e("image"), "com.b.b": e("audio", glance="music")}
+        new = {"com.a.a": e("image", glance="photos"), "com.b.b": {**e("audio", glance="music"), "checked": "2027-01-01"}}
+        self.assertEqual(cc.changes(old, new), ["com.a.a"])
+
+    def test_merged_carries_glance_and_overrides_win(self):
+        cats = {"com.a.a": e("image", "A", "photos"), "com.b.b": e("unknown", glance="weather"), "com.c.c": e("audio", glance="music")}
+        over = {"com.c.c": {"glance": "none"}, "com.d.d": {"glance": "car"}, "com.a.a": "video"}
+        self.assertEqual(cc.merged(cats, over), {
+            "com.a.a": {"category": "video", "name": "A", "glance": "photos"},
+            "com.b.b": {"glance": "weather"},
+            "com.c.c": {"category": "audio", "glance": "none"},
+            "com.d.d": {"glance": "car"},
         })
 
 

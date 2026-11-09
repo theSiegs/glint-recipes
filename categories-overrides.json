@@ -1,5 +1,24 @@
 {
   "format": "glint.categories-overrides/1",
   "apps": {
+    "au.com.shiftyjelly.pocketcasts": {"glance": "music"},
+    "com.accuweather.android": {"glance": "weather"},
+    "com.ford.fordpass": {"glance": "car"},
+    "com.google.android.GoogleCamera": {"glance": "photos"},
+    "com.google.android.apps.photos": {"glance": "photos"},
+    "com.google.android.apps.weather": {"glance": "weather"},
+    "com.google.android.apps.youtube.music": {"glance": "music"},
+    "com.google.android.calendar": {"glance": "calendar"},
+    "com.google.android.deskclock": {"glance": "clock"},
+    "com.handmark.expressweather": {"glance": "weather"},
+    "com.samsung.android.calendar": {"glance": "calendar"},
+    "com.sec.android.app.camera": {"glance": "photos"},
+    "com.sec.android.app.clockpackage": {"glance": "clock"},
+    "com.sec.android.daemonapp": {"glance": "weather"},
+    "com.sec.android.gallery3d": {"glance": "photos"},
+    "com.spotify.music": {"glance": "music"},
+    "com.teslamotors.tesla": {"glance": "car"},
+    "com.toyota.oneapp": {"glance": "car"},
+    "com.weather.Weather": {"glance": "weather"}
   }
 }

@@ -7,10 +7,11 @@ categories.json (written by the intake's nightly classifier) and categories-over
 hand; it always wins) must pass:
   - schema: their format, an "apps" object, and per app only the known keys with the right types
   - categories in the allowed set (Hearth HA's APP_CATEGORIES plus messaging, or "unknown")
+  - a glance, when there is one, in the allowed set (which of Glint's glances an app's tile borrows)
   - package names in Android's format
   - no personal data: a name is one short line with no email address, link or phone number, and
     every other value has a fixed form (a source tag, a date)
-  - with --base: at most CAP apps added, removed or changed category against the old file
+  - with --base: at most CAP apps added, removed or changed category or glance against the old file
 Also merges the two into what is published (merged()), used by tools/build_index.py.
 """
 import argparse
@@ -23,6 +24,10 @@ FORMAT = "glint.categories/1"
 OVERRIDES_FORMAT = "glint.categories-overrides/1"
 CATEGORIES = ("game", "video", "audio", "image", "social", "news", "maps", "productivity", "accessibility", "messaging")
 UNKNOWN = "unknown"
+# Which of Glint's glances an app's tile borrows when it has nothing waiting: Glint's own photos, music,
+# calendar, clock and weather glances; "car", reserved for a car glance Glint doesn't have yet (Glint
+# falls back to its own guess); "none", the app's own glance, never a borrowed one.
+GLANCES = ("photos", "music", "calendar", "clock", "weather", "car", "none")
 CAP = 60
 PACKAGE = re.compile(r"^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z0-9_]+)+$")
 SOURCE = re.compile(r"^(play|ai|ai-search)(:[A-Z0-9_]{1,40})?$")
@@ -31,7 +36,8 @@ NAME_MAX = 60
 EMAIL = re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")
 LINK = re.compile(r"(https?://|www\.|\b[\w-]+\.(com|net|org|io|app)\b)", re.I)
 PHONE = re.compile(r"\+?\d[\d\s().-]{6,}\d")
-ENTRY_KEYS = {"category", "name", "source", "checked"}
+ENTRY_KEYS = {"category", "name", "source", "checked", "glance"}
+PUBLISHED = ("category", "name", "glance")
 
 
 class Bad(Exception):
@@ -50,6 +56,11 @@ def check_name(where, name):
 def check_package(where, pkg):
     if not isinstance(pkg, str) or len(pkg) > 255 or not PACKAGE.match(pkg):
         raise Bad(f"{where}: {pkg!r} is not an Android package name")
+
+
+def check_glance(where, glance):
+    if not isinstance(glance, str) or glance not in GLANCES:
+        raise Bad(f"{where}: glance {glance!r} is not one of {GLANCES}")
 
 
 def load_json(path):
@@ -81,12 +92,14 @@ def check_categories(data):
             raise Bad(f"{where}: checked must be a yyyy-mm-dd date")
         if "name" in e:
             check_name(where, e["name"])
+        if "glance" in e:
+            check_glance(where, e["glance"])
     return data["apps"]
 
 
 def check_overrides(data):
     """The apps of a categories-overrides.json document, checked: each a category (or "unknown"), or
-    an object with a category and/or a name."""
+    an object with a category, a name and/or a glance."""
     if not isinstance(data, dict) or data.get("format") != OVERRIDES_FORMAT or not isinstance(data.get("apps"), dict):
         raise Bad(f'categories-overrides.json: must be {{"format": "{OVERRIDES_FORMAT}", "apps": {{...}}}}')
     if set(data) - {"format", "apps"}:
@@ -96,19 +109,23 @@ def check_overrides(data):
         check_package(where, pkg)
         if isinstance(v, str):
             v = {"category": v}
-        if not isinstance(v, dict) or not v or set(v) - {"category", "name"}:
-            raise Bad(f'{where}: a category, or {{"category": ..., "name": ...}}')
+        if not isinstance(v, dict) or not v or set(v) - set(PUBLISHED):
+            raise Bad(f'{where}: a category, or {{"category": ..., "name": ..., "glance": ...}}')
         if "category" in v and v["category"] not in CATEGORIES + (UNKNOWN,):
             raise Bad(f"{where}: category {v['category']!r} is not one of {CATEGORIES + (UNKNOWN,)}")
         if "name" in v:
             check_name(where, v["name"])
+        if "glance" in v:
+            check_glance(where, v["glance"])
     return data["apps"]
 
 
 def changes(old, new):
-    """Apps added, removed or with another category in [new] than in [old]."""
-    return sorted(p for p in set(old) | set(new)
-                  if (old.get(p) or {}).get("category") != (new.get(p) or {}).get("category") or (p in old) != (p in new))
+    """Apps added, removed or with another category or glance in [new] than in [old]."""
+    def kind(apps, p):
+        e = apps.get(p) or {}
+        return e.get("category"), e.get("glance")
+    return sorted(p for p in set(old) | set(new) if kind(old, p) != kind(new, p) or (p in old) != (p in new))
 
 
 def load(root):
@@ -119,18 +136,18 @@ def load(root):
 
 
 def merged(categories, overrides):
-    """What phones get: {package: {"category"?, "name"?}}, overrides winning; "unknown" categories and
-    the classifier's bookkeeping (source, checked) left out; an app with neither is left out."""
+    """What phones get: {package: {"category"?, "name"?, "glance"?}}, overrides winning; "unknown"
+    categories and the classifier's bookkeeping (source, checked) left out; an app with none is left out."""
     out = {}
     for pkg in sorted(set(categories) | set(overrides)):
-        e = {k: v for k, v in (categories.get(pkg) or {}).items() if k in ("category", "name")}
+        e = {k: v for k, v in (categories.get(pkg) or {}).items() if k in PUBLISHED}
         o = overrides.get(pkg)
         if o is not None:
             e.update({"category": o} if isinstance(o, str) else o)
         if e.get("category") == UNKNOWN:
             del e["category"]
         if e:
-            out[pkg] = {k: e[k] for k in ("category", "name") if k in e}
+            out[pkg] = {k: e[k] for k in PUBLISHED if k in e}
     return out
 
 
@@ -152,7 +169,8 @@ def main():
         print(f"check_categories: {e}", file=sys.stderr)
         return 1
     out = merged(cats, overrides)
-    print(f"categories: {len(cats)} classified, {len(overrides)} overridden, {sum('category' in v for v in out.values())} published with a category")
+    print(f"categories: {len(cats)} classified, {len(overrides)} overridden, {sum('category' in v for v in out.values())} published with a category, "
+          f"{sum('glance' in v for v in out.values())} with a glance")
     return 0
 
 
