@@ -65,6 +65,8 @@ object RecipeCheck {
         if (!name.removeSuffix(".json").equals(recipe.id, ignoreCase = false)) {
             problems += Problem("id", "the file is named after the id: ${recipe.id}.json", error = false)
         }
+        // A card alone reads no notifications: nothing to run over fixtures, no coverage (§4.3).
+        if (!recipe.readsNotifications) return RecipeReport(name, recipe, problems, null, emptyList())
         val mine = fixtures.mapNotNull { it.fixture }.filter { recipe.isGeneric || it.packageName == recipe.app.packageName }
         if (mine.isEmpty() && !recipe.isGeneric) problems += Problem("fixtures", "no fixtures in fixtures/${recipe.app.packageName}/", error = false)
         val failures = mutableListOf<String>()
@@ -147,6 +149,7 @@ object RecipeCheck {
                     out("    coverage ${c.score}%: ${c.summary()}")
                     if (rec.fields.isNotEmpty() && c.matched > 0) out("    fields: " + rec.fields.keys.joinToString(", ") { "$it ${c.fieldPercent(it)}%" })
                 }
+                rec.card?.let { c -> out("    card: ${c.look}, tap ${c.shortcut}" + (c.color?.let { ", color $it" } ?: "") + if (!rec.readsNotifications) " (a card alone)" else "") }
             }
             rr.problems.forEach { out("    $it") }
             rr.failures.forEach { out("    fail: $it") }

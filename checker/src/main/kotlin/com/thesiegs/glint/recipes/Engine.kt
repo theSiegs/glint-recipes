@@ -89,7 +89,8 @@ object RecipeEngine {
     fun evaluate(recipe: Recipe, samples: List<NotificationSample>, ctx: RecipeContext, held: HeldState = HeldState.Empty): Evaluation {
         val src = recipe.notification
         val expire = Durations.parse(src.expire)
-        val ofApp = samples.filter { appMatches(recipe, it) }
+        // A card alone (no source) reads no notifications.
+        val ofApp = if (recipe.source.notification == null) emptyList() else samples.filter { appMatches(recipe, it) }
         val matched = ofApp.filter { matches(recipe, it, ctx) && (expire == null || ctx.now - it.posted <= expire) }
             // A group summary (read only with "summaries": true) never wins over the notifications it sums up.
             .let { order(it, src.pick).sortedBy { n -> n.summary } }

@@ -70,34 +70,62 @@ class SubmitClient(relay: String, private val attestor: Attestor, private val ti
     fun send(s: Submission): Outcome {
         if (base.isEmpty()) return Outcome.Off
         if (SubmitPayload.problems(s).isNotEmpty()) return Outcome.Refused(0, "not scrubbed")
-        return try {
-            val c = post("challenge", SubmitCodec.challenge(s.packageName, s.rev).toByteArray(Charsets.UTF_8), null)
-            when (c.code) {
-                200 -> {}
-                429 -> return Outcome.Limited(c.retryAfter())
-                else -> return Outcome.Refused(c.code, SubmitCodec.error(c.text).error.take(120))
-            }
-            val token = SubmitCodec.token(c.text) ?: return Outcome.Failed("no token")
-            val b64 = Base64.getEncoder()
-            val chain = attestor.chain(token.toByteArray(Charsets.UTF_8)).map { b64.encodeToString(it) }
-            if (chain.isEmpty()) return Outcome.Failed("no attestation")
-            val body = SubmitCodec.encode(s.copy(token = token, attestation = chain)).toByteArray(Charsets.UTF_8)
-            val sig = b64.encodeToString(attestor.sign(body))
-            val r = post("submit", body, sig)
-            when (r.code) {
-                200, 201, 202 -> Outcome.Sent(SubmitCodec.accepted(r.text).orEmpty())
-                409 -> Outcome.Duplicate
-                429 -> Outcome.Limited(r.retryAfter())
-                else -> Outcome.Refused(r.code, SubmitCodec.error(r.text).error.take(120))
-            }
-        } catch (e: IOException) {
-            Outcome.Failed(e.javaClass.simpleName)
-        } catch (e: java.security.GeneralSecurityException) {
-            Outcome.Failed(e.javaClass.simpleName)
-        } catch (e: RuntimeException) {
-            // AndroidKeyStore throws ProviderException when a device can't attest.
-            Outcome.Failed(e.javaClass.simpleName)
+        return exchange("submit", SubmitCodec.challenge(s.packageName, s.rev)) { token, chain ->
+            SubmitCodec.encode(s.copy(token = token, attestation = chain))
         }
+    }
+
+    /**
+     * Sends an owner's edited recipe (`glint.recipe-submit/1`, built by [RecipeShare.build] and
+     * checked against the recipe it was made from, [base]), the same way: `POST R challenge` with
+     * `{"format":"glint.recipe-submit/1","package","rev"}` (rev: the shared recipe's), then `POST R recipe`
+     * with the signed body ([RecipeShare.encode]: format, package, rev, basedOn, recipe, token,
+     * attestation). The relay checks it as `submit` (token, chain, signature, limits), checks the
+     * recipe, and opens a pull request on the catalog changing only recipes/<id>.json, which waits
+     * for the owner's merge. 202 `{"id":"<pull request>"}`, 409 duplicate, 429, 4xx as for `submit`.
+     * Never throws.
+     */
+    fun sendRecipe(s: RecipeSubmission, base: com.thesiegs.glint.recipes.Recipe): Outcome {
+        if (this.base.isEmpty()) return Outcome.Off
+        if (RecipeShare.problems(base, s).isNotEmpty()) return Outcome.Refused(0, "not a plain edit")
+        val challenge = SubmitCodec.json.encodeToString(
+            SubmitCodec.ChallengeRequest.serializer(), SubmitCodec.ChallengeRequest(RecipeShare.FORMAT, s.packageName, s.rev),
+        )
+        return exchange("recipe", challenge) { token, chain -> RecipeShare.encode(s.copy(token = token, attestation = chain)) }
+    }
+
+    /** The challenge → signed post exchange both sends share; [body] writes the post's body with the token and chain. */
+    private fun exchange(path: String, challenge: String, body: (String, List<String>) -> String): Outcome = try {
+        val c = post("challenge", challenge.toByteArray(Charsets.UTF_8), null)
+        when (c.code) {
+            200 -> {
+                val token = SubmitCodec.token(c.text)
+                if (token == null) Outcome.Failed("no token") else {
+                    val b64 = Base64.getEncoder()
+                    val chain = attestor.chain(token.toByteArray(Charsets.UTF_8)).map { b64.encodeToString(it) }
+                    if (chain.isEmpty()) Outcome.Failed("no attestation") else {
+                        val bytes = body(token, chain).toByteArray(Charsets.UTF_8)
+                        val sig = b64.encodeToString(attestor.sign(bytes))
+                        val r = post(path, bytes, sig)
+                        when (r.code) {
+                            200, 201, 202 -> Outcome.Sent(SubmitCodec.accepted(r.text).orEmpty())
+                            409 -> Outcome.Duplicate
+                            429 -> Outcome.Limited(r.retryAfter())
+                            else -> Outcome.Refused(r.code, SubmitCodec.error(r.text).error.take(120))
+                        }
+                    }
+                }
+            }
+            429 -> Outcome.Limited(c.retryAfter())
+            else -> Outcome.Refused(c.code, SubmitCodec.error(c.text).error.take(120))
+        }
+    } catch (e: IOException) {
+        Outcome.Failed(e.javaClass.simpleName)
+    } catch (e: java.security.GeneralSecurityException) {
+        Outcome.Failed(e.javaClass.simpleName)
+    } catch (e: RuntimeException) {
+        // AndroidKeyStore throws ProviderException when a device can't attest.
+        Outcome.Failed(e.javaClass.simpleName)
     }
 
     private class Answer(val code: Int, val text: String, val retryHeader: String?) {

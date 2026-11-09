@@ -52,10 +52,40 @@ data class Recipe(
     val tap: Tap = Tap.Notification,
     /** Days the app may post without this recipe matching before it's flagged "needs update". */
     @JsonNames("stale_days") val staleDays: Int = Recipes.STALE_DAYS,
+    /**
+     * The card the app's tile wears at rest ([RecipeCard], recipes/SPEC.md §4.3), or none. A recipe
+     * may be a card alone, with no source and no faces.
+     */
+    val card: RecipeCard? = null,
 ) {
     val notification: NotificationSource get() = source.notification ?: NotificationSource()
     val isGeneric: Boolean get() = id == Recipes.GENERIC_ID
+    /** Whether it reads the app's notifications into faces (a live tile); false for a card alone. */
+    val readsNotifications: Boolean get() = source.notification != null && faces.isNotEmpty()
 }
+
+/**
+ * The card an app's tile wears at rest (recipes/SPEC.md §4.3): a loyalty, gift or membership card,
+ * drawn by Glint, never artwork from anywhere. Data only, a closed set: [look] "plain" (the app's
+ * color, or [color], with its glyph and name), [tap] which of the app's own shortcuts a tap opens,
+ * picked by Glint from the shortcuts' labels (no ids, URLs or intents), and [color] "#rrggbb".
+ */
+@Serializable
+data class RecipeCard(
+    val look: String = "plain",
+    val tap: CardTap? = null,
+    val color: String? = null,
+) {
+    /** The shortcut a tap opens ("pay"), or "app" for the app itself. */
+    val shortcut: String get() = tap?.shortcut ?: Recipes.CARD_APP
+
+    /** [color] as 0xRRGGBB, or null for the app icon's own color. */
+    val rgb: Int? get() = color?.takeIf { Recipes.CardColor.matches(it) }?.drop(1)?.toInt(16)
+}
+
+/** What a tap on a card opens: one of [Recipes.CardShortcuts]. */
+@Serializable
+data class CardTap(val shortcut: String = Recipes.CARD_APP)
 
 @Serializable
 data class RecipeApp(
@@ -272,6 +302,13 @@ object Recipes {
     /** The generic recipe's id: any app with notifications, when it has no recipe of its own. */
     const val GENERIC_ID = "generic"
 
+    /** A card's looks ([RecipeCard.look]). */
+    val CardLooks = setOf("plain")
+    /** The app shortcuts a card's tap may open ([CardTap.shortcut]), found by their labels; "app" is the app itself. */
+    val CardShortcuts = listOf("pay", "scan", "order", "reload", "app")
+    const val CARD_APP = "app"
+    internal val CardColor = Regex("^#[0-9A-Fa-f]{6}$")
+
     /** The [RecipeMeta.status] values a recipe may have. */
     val Statuses = setOf("unverified", "built-in", "verified", "draft", "learned")
     const val ANY_APP = "*"
@@ -363,7 +400,7 @@ object Recipes {
     }
 
     private val KnownKeys = setOf(
-        "recipe", "id", "rev", "name", "app", "meta", "enabled", "source", "fields", "faces", "tap", "staleDays", "stale_days",
+        "recipe", "id", "rev", "name", "app", "meta", "enabled", "source", "fields", "faces", "tap", "staleDays", "stale_days", "card",
         "\$schema", "comment",
     )
 
@@ -379,8 +416,17 @@ object Recipes {
         } else if (!PackageShape.matches(pkg)) add(Problem("app.package", "an Android package name (\"com.google.android.gm\")"))
         if (pkg in PeopleApps) add(Problem("app.package", "$pkg is a messaging app: its conversations stay on People tiles, never a recipe"))
         r.app.versions?.let { if (Versions.parse(it) == null) add(Problem("app.versions", "a versionCode range: \">=1240000\", \"<2000\" or \"1200-1300\"")) }
-        if (r.source.notification == null) add(Problem("source", "v0 reads notifications: \"source\": { \"notification\": { ... } }"))
-        if (r.faces.isEmpty()) add(Problem("faces", "at least one face"))
+        // A recipe reads notifications into faces, or is a card alone, or both (§4.3).
+        val reads = r.source.notification != null
+        if (!reads && r.card == null) add(Problem("source", "v0 reads notifications: \"source\": { \"notification\": { ... } } (or the recipe is a \"card\" alone)"))
+        if (!reads && r.card != null && r.faces.isNotEmpty()) add(Problem("source", "faces read notifications: add \"source\": { \"notification\": { ... } }, or leave the faces out for a card alone"))
+        if (r.faces.isEmpty() && (reads || r.card == null)) add(Problem("faces", "at least one face"))
+        r.card?.let { c ->
+            if (pkg == ANY_APP) add(Problem("card", "a card is for one app, never the generic recipe"))
+            if (c.look !in CardLooks) add(Problem("card.look", "\"${c.look}\" isn't a card look (${CardLooks.joinToString()})"))
+            c.tap?.let { if (it.shortcut !in CardShortcuts) add(Problem("card.tap.shortcut", "\"${it.shortcut}\" isn't a card tap (${CardShortcuts.joinToString()})")) }
+            c.color?.let { if (!CardColor.matches(it)) add(Problem("card.color", "a hex color, \"#00704a\"")) }
+        }
         if (r.faces.size > MAX_FACES) add(Problem("faces", "at most $MAX_FACES faces"))
         if (r.faces.isNotEmpty() && r.faces.all { it.optIn }) add(Problem("faces", "at least one face that isn't optIn, so the tile has a rest face"))
         if (r.fields.size > MAX_FIELDS) add(Problem("fields", "at most $MAX_FIELDS fields"))
@@ -394,7 +440,7 @@ object Recipes {
         val textRegexes = m.anchors.map { "anchors" to it } + m.titles.map { "titles" to it } + m.exclude.map { "exclude" to it }
         textRegexes.forEach { (k, a) -> regexProblem(a)?.let { add(Problem("source.notification.match.$k", it)) } }
         if (textRegexes.isNotEmpty() && m.lang.isEmpty()) add(Problem("source.notification.match.lang", "text regexes name the language they're written for (\"lang\": [\"en\"])", error = false))
-        if (m.channels.isEmpty() && m.categories.isEmpty() && m.templates.isEmpty() && m.groups.isEmpty() && !r.isGeneric) {
+        if (reads && m.channels.isEmpty() && m.categories.isEmpty() && m.templates.isEmpty() && m.groups.isEmpty() && !r.isGeneric) {
             add(Problem("source.notification.match", "no untranslated signal (channels, categories, templates, groups): the recipe leans on wording alone", error = false))
         }
         if (!Keys.isKnown(src.key, r.fields.keys)) add(Problem("source.notification.key", "\"tag\", \"group\", \"id\" or \"field:<a field>\""))
