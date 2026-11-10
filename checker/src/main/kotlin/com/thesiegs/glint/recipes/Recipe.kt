@@ -98,6 +98,11 @@ data class RecipeApp(
      * Outside it the recipe runs on probation: it still draws, and tile info says "app updated, checking".
      */
     val versions: String? = null,
+    /**
+     * A **kind recipe** (review 2026-11-10 §2.3): with `"package": "*"`, one recipe for every app of
+     * this kind ("car", "charging"), as the catalog's `kind` names them ([RecipeContext.kindOf]).
+     */
+    val kind: String? = null,
 )
 
 @Serializable
@@ -255,6 +260,13 @@ enum class FaceKind {
     @SerialName("message") Message,
     /** A headline over a track: a delivery, a download, a flight under way. */
     @SerialName("progress") Progress,
+    /**
+     * A value toward a limit (review 2026-11-10 §2.3): "charging · 62%" over a track that ends at
+     * [FaceRule.max] (a charge limit, a budget), with the limit marked. Phone battery, a car, an e-bike.
+     */
+    @SerialName("gauge") Gauge,
+    /** When something arrives or ends, big ("arrives 3:10 pm"), and the route or place under it. A flight, a ride, a delivery. */
+    @SerialName("eta") Eta,
 }
 
 @Serializable
@@ -317,11 +329,7 @@ object Recipes {
      * Apps whose notifications are people's messages: they stay on the People path (People tiles,
      * Arrivals), never a recipe (recipes research 2 §4).
      */
-    val PeopleApps = setOf(
-        "com.whatsapp", "com.whatsapp.w4b", "com.google.android.apps.messaging", "com.samsung.android.messaging",
-        "org.thoughtcrime.securesms", "org.telegram.messenger", "com.facebook.orca", "com.discord",
-        "com.google.android.apps.googlevoice", "com.Slack", "com.microsoft.teams", "com.snapchat.android",
-    )
+    val PeopleApps: Set<String> get() = AppKinds.Chat
 
     @OptIn(ExperimentalSerializationApi::class)
     val json = Json {
@@ -379,7 +387,7 @@ object Recipes {
         return Parsed(recipe, problems)
     }
 
-    private val FaceKinds = listOf("headline", "count", "message", "progress")
+    private val FaceKinds = listOf("headline", "count", "message", "progress", "gauge", "eta")
 
     /** What a face's `picture` may be ([FaceRule.picture]). */
     val Pictures = setOf("picture", "largeIcon")
@@ -412,7 +420,7 @@ object Recipes {
         if (r.name.length > MAX_LITERAL) add(Problem("name", "at most $MAX_LITERAL characters"))
         val pkg = r.app.packageName
         if (pkg == ANY_APP) {
-            if (r.id != GENERIC_ID) add(Problem("app.package", "\"*\" is only for the generic recipe"))
+            if (r.id != GENERIC_ID && r.app.kind == null) add(Problem("app.package", "\"*\" is only for the generic recipe, or a kind recipe (\"kind\": \"car\")"))
         } else if (!PackageShape.matches(pkg)) add(Problem("app.package", "an Android package name (\"com.google.android.gm\")"))
         if (pkg in PeopleApps) add(Problem("app.package", "$pkg is a messaging app: its conversations stay on People tiles, never a recipe"))
         r.app.versions?.let { if (Versions.parse(it) == null) add(Problem("app.versions", "a versionCode range: \">=1240000\", \"<2000\" or \"1200-1300\"")) }
@@ -494,6 +502,8 @@ object Recipes {
                 FaceKind.Count -> if (f.count == null) add(Problem(at, "a count face needs a count (\"{count}\")"))
                 FaceKind.Message -> if (f.person == null || f.line == null) add(Problem(at, "a message face needs a person and a line"))
                 FaceKind.Progress -> if (f.title == null || f.value == null) add(Problem(at, "a progress face needs a title and a value"))
+                FaceKind.Gauge -> if (f.title == null || f.value == null) add(Problem(at, "a gauge face needs a title and a value (and a max: the limit)"))
+                FaceKind.Eta -> if (f.title == null) add(Problem(at, "an eta face needs a title: when (\"{eta|clock}\")"))
             }
             f.whenAll.forEach { c -> Conditions.problem(c, known)?.let { add(Problem("$at.when", it)) } }
             f.picture?.let { p ->

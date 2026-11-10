@@ -16,6 +16,8 @@ data class RecipeContext(
     val optIn: Set<Int> = emptySet(),
     val zone: ZoneId = ZoneId.systemDefault(),
     val h24: Boolean = false,
+    /** An app's kind as the catalog names it ("car", "charging"), for kind recipes ([RecipeApp.kind]); null when unknown. */
+    val kindOf: (String) -> String? = { null },
 )
 
 /**
@@ -90,7 +92,7 @@ object RecipeEngine {
         val src = recipe.notification
         val expire = Durations.parse(src.expire)
         // A card alone (no source) reads no notifications.
-        val ofApp = if (recipe.source.notification == null) emptyList() else samples.filter { appMatches(recipe, it) }
+        val ofApp = if (recipe.source.notification == null) emptyList() else samples.filter { appMatches(recipe, it, ctx) }
         val matched = ofApp.filter { matches(recipe, it, ctx) && (expire == null || ctx.now - it.posted <= expire) }
             // A group summary (read only with "summaries": true) never wins over the notifications it sums up.
             .let { order(it, src.pick).sortedBy { n -> n.summary } }
@@ -237,13 +239,16 @@ object RecipeEngine {
         return rest to flips
     }
 
-    fun appMatches(recipe: Recipe, n: NotificationSample): Boolean =
-        if (recipe.app.packageName == Recipes.ANY_APP) n.packageName !in Recipes.PeopleApps
-        else n.packageName == recipe.app.packageName
+    fun appMatches(recipe: Recipe, n: NotificationSample, ctx: RecipeContext? = null): Boolean = when {
+        // A kind recipe: every app of its kind, as the catalog names them.
+        recipe.app.kind != null -> recipe.app.packageName == Recipes.ANY_APP && ctx?.kindOf?.invoke(n.packageName) == recipe.app.kind
+        recipe.app.packageName == Recipes.ANY_APP -> n.packageName !in Recipes.PeopleApps
+        else -> n.packageName == recipe.app.packageName
+    }
 
     /** Whether [n] is one of the notifications [recipe] reads (its app's, and every match rule). */
     fun matches(recipe: Recipe, n: NotificationSample, ctx: RecipeContext): Boolean {
-        if (!appMatches(recipe, n)) return false
+        if (!appMatches(recipe, n, ctx)) return false
         val m = recipe.notification.match
         if (n.summary && !m.summaries) return false
         if (m.channels.isNotEmpty() && m.channels.none { like(it, n.channel) }) return false
@@ -368,6 +373,19 @@ object RecipeEngine {
         if (w.posted > 0) put("posted", w.posted.toString())
         if (w.whenTime > 0) put("when", w.whenTime.toString())
         if (w.chronometer) Times.chrono(w.whenTime, w.countDown, ctx.now)?.let { put("chrono", it) }
+        // Typed facts from the words ([Facts], review 2026-11-10 §2.3): one vocabulary with Live Updates and the Car tile.
+        val t = Sources.factText(w)
+        if (t.isNotEmpty()) {
+            val (level, limit) = Facts.levelAndLimit(t)
+            if (!containsKey("percent")) level?.let { put("percent", "$it%") }
+            limit?.let { put("limitPercent", "$it%") }
+            Facts.distance(t)?.let { (v, unit) -> put("distance", (if (v % 1.0 == 0.0) v.toLong().toString() else v.toString()) + " " + unit) }
+            Facts.powerKw(t)?.takeIf { it > 0 }?.let { put("power", (if (it % 1.0 == 0.0) it.toLong().toString() else it.toString()) + " kW") }
+            val eta = Facts.doneBy(t, w.posted.takeIf { it > 0 } ?: ctx.now, java.util.TimeZone.getTimeZone(ctx.zone))
+                ?: Facts.minutesLeft(t)?.let { (w.posted.takeIf { p -> p > 0 } ?: ctx.now) + it * 60_000L }
+            eta?.let { put("eta", it.toString()) }
+            Facts.route(t)?.let { (a, b) -> put("route", "${a.lowercase()} → ${b.lowercase()}") }
+        }
     }
 
     private fun draw(i: Int, f: FaceRule, values: Map<String, String>, ctx: RecipeContext, from: NotificationSample?): DrawnFace? {
@@ -396,6 +414,21 @@ object RecipeEngine {
                 if (number <= 0) return null
                 val (ok, label) = need(f.label)
                 if (!ok) null else DrawnFace(i, f.kind, if (number > 99) "99+" else number.toString(), label, peek, picture = picture)
+            }
+            FaceKind.Eta -> {
+                // When, big; the route or place under it.
+                val title = fill(f.title) ?: return null
+                val (ok, line) = need(f.line)
+                if (!ok) null else DrawnFace(i, f.kind, title, line, peek, picture = picture)
+            }
+            FaceKind.Gauge -> {
+                // A value toward a limit: [max] is the limit ("{limitPercent}"); 100 when a percent has none.
+                val title = fill(f.title) ?: return null
+                val v = fill(f.value)?.trim()?.removeSuffix("%")?.trim()?.toFloatOrNull() ?: return null
+                val max = (if (f.max != null) fill(f.max)?.trim()?.removeSuffix("%")?.trim()?.toFloatOrNull() ?: return null else 100f)
+                if (max <= 0f) return null
+                val (ok, line) = need(f.line)
+                if (!ok) null else DrawnFace(i, f.kind, title, line, peek, (v / max).coerceIn(0f, 1f))
             }
             FaceKind.Progress -> {
                 val title = fill(f.title) ?: return null

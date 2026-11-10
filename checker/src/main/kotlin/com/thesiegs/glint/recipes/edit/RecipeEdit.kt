@@ -74,7 +74,7 @@ object RecipeEdits {
 
     /** What the face's top line is called on [kind]: the title, or a message face's person; null where it can't change (a count). */
     fun topSlot(kind: FaceKind): String? = when (kind) {
-        FaceKind.Headline, FaceKind.Progress -> "title"
+        FaceKind.Headline, FaceKind.Progress, FaceKind.Gauge, FaceKind.Eta -> "title"
         FaceKind.Message -> "person"
         FaceKind.Count -> null
     }
@@ -83,11 +83,11 @@ object RecipeEdits {
     fun underSlot(kind: FaceKind): String? = if (kind == FaceKind.Count) null else "line"
 
     /** Whether the line under may be left empty: a message face always says something. */
-    fun underMayBeEmpty(kind: FaceKind): Boolean = kind == FaceKind.Headline || kind == FaceKind.Progress
+    fun underMayBeEmpty(kind: FaceKind): Boolean = kind == FaceKind.Headline || kind == FaceKind.Progress || kind == FaceKind.Gauge || kind == FaceKind.Eta
 
     /** [f]'s top line template as written. */
     fun topOf(f: FaceRule): String? = when (f.kind) {
-        FaceKind.Headline, FaceKind.Progress -> f.title
+        FaceKind.Headline, FaceKind.Progress, FaceKind.Gauge, FaceKind.Eta -> f.title
         FaceKind.Message -> f.person
         FaceKind.Count -> f.count
     }
@@ -104,7 +104,7 @@ object RecipeEdits {
             else -> written
         }
         return when (f.kind) {
-            FaceKind.Headline, FaceKind.Progress -> f.copy(
+            FaceKind.Headline, FaceKind.Progress, FaceKind.Gauge, FaceKind.Eta -> f.copy(
                 title = pick(e.top, f.title, false),
                 line = pick(e.under, f.line, true),
             )

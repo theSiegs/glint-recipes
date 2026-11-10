@@ -10,7 +10,7 @@ import kotlinx.serialization.json.jsonObject
  * One app in the catalog's categories file: its [category] (one of [AppCategories.ALL]), its display
  * [name], and which of Glint's glances its tile borrows ([glance], one of [AppCategories.GLANCES]).
  */
-data class CatalogApp(val category: String?, val name: String?, val glance: String? = null)
+data class CatalogApp(val category: String?, val name: String?, val glance: String? = null, val kind: String? = null)
 
 /**
  * The tile exchange's app categories (format glint.categories/1, the catalog's README "App
@@ -28,10 +28,19 @@ object AppCategories {
 
     /**
      * The glances an app may borrow (owner 2026-11-09): Glint's photos, music, calendar, clock and
-     * weather glances; `car`, reserved for a car glance Glint doesn't have yet; `none`, the app's own
-     * glance, never a borrowed one.
+     * weather glances; `car`, reserved for a car glance Glint doesn't have yet; `calls`, a calling app
+     * (owner 2026-11-10, Google Voice the first) whose tile wears voicemail, missed call and text faces
+     * and whose voicemail Arrivals deals, its glance its own items'; `none`, the app's own glance,
+     * never a borrowed one.
      */
-    val GLANCES = setOf("photos", "music", "calendar", "clock", "weather", "car", "none")
+    val GLANCES = setOf("photos", "music", "calendar", "clock", "weather", "car", "calls", "none")
+
+    /**
+     * The kinds an app may be (review 2026-11-10 §2.3, owner 2026-11-10): what kind recipes and the
+     * Car tile key on instead of hand lists of packages. `charging`: a charger network's app (its
+     * session fuses into the Car tile's).
+     */
+    val KINDS = setOf("car", "charging", "airline", "delivery", "ride")
 
     private const val MAX_APPS = 50_000
     private const val NAME_MAX = 60
@@ -53,10 +62,11 @@ object AppCategories {
                     (v["category"] as? JsonPrimitive)?.takeIf { it.isString }?.content?.takeIf { it in ALL },
                     (v["name"] as? JsonPrimitive)?.takeIf { it.isString }?.content?.trim()?.take(NAME_MAX)?.takeIf { it.isNotEmpty() },
                     (v["glance"] as? JsonPrimitive)?.takeIf { it.isString }?.content?.takeIf { it in GLANCES },
+                    (v["kind"] as? JsonPrimitive)?.takeIf { it.isString }?.content?.takeIf { it in KINDS },
                 )
                 else -> null
             } ?: continue
-            if (app.category != null || app.name != null || app.glance != null) out[pkg] = app
+            if (app.category != null || app.name != null || app.glance != null || app.kind != null) out[pkg] = app
         }
         return out
     }

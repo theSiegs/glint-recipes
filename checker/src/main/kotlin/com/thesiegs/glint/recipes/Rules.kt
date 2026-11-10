@@ -38,8 +38,15 @@ object Sources {
     val Names = listOf(
         "title", "text", "bigText", "subText", "infoText", "summaryText", "conversationTitle", "shortCritical",
         "lines", "lines[n]", "message", "sender", "messages", "progress", "max", "when", "posted",
-        "channel", "category", "group", "tag", "template", "all", "action:<semantic>",
+        "channel", "category", "group", "tag", "template", "all", "action:<semantic>", "fact:<name>",
     )
+
+    /**
+     * Typed facts read from the notification's words by [Facts] (title · text · subText): `fact:percent`
+     * ("62"), `fact:limitPercent` ("80"), `fact:distance` ("69"), `fact:distanceUnit` ("mi"),
+     * `fact:power` ("7.2", kW), `fact:minutesLeft` ("45"), `fact:doneBy` (a time in ms), `fact:route` ("BWI → CUN").
+     */
+    val FactNames = setOf("percent", "limitPercent", "distance", "distanceUnit", "power", "minutesLeft", "doneBy", "route")
     private val Plain = setOf(
         "title", "text", "bigText", "subText", "infoText", "summaryText", "conversationTitle", "shortCritical",
         "lines", "message", "messages.last", "sender", "messages", "progress", "max", "when", "posted",
@@ -48,7 +55,8 @@ object Sources {
     private val LineAt = Regex("^lines\\[(\\d{1,2})]$")
 
     fun isKnown(name: String): Boolean = name in Plain || LineAt.matches(name) ||
-        name.startsWith("action:") && name.removePrefix("action:") in Semantics.Names
+        name.startsWith("action:") && name.removePrefix("action:") in Semantics.Names ||
+        name.startsWith("fact:") && name.removePrefix("fact:") in FactNames
 
     fun read(name: String, n: NotificationSample): String? = when (name) {
         "title" -> n.title
@@ -76,9 +84,28 @@ object Sources {
         else -> when {
             LineAt.matches(name) -> n.lines.getOrNull(LineAt.matchEntire(name)!!.groupValues[1].toInt())
             name.startsWith("action:") -> name.removePrefix("action:").let { s -> n.actions.firstOrNull { it.semantic == s }?.title }
+            name.startsWith("fact:") -> fact(name.removePrefix("fact:"), n)
             else -> null
         }
     }?.takeIf { it.isNotBlank() }
+
+    /** The words [Facts] reads: title, text and sub text, as a car app's charging line is read. */
+    fun factText(n: NotificationSample): String = listOfNotNull(n.title, n.text, n.subText).map { it.trim() }.filter { it.isNotEmpty() }.joinToString(" · ")
+
+    private fun fact(name: String, n: NotificationSample): String? {
+        val t = factText(n).takeIf { it.isNotEmpty() } ?: return null
+        return when (name) {
+            "percent" -> Facts.levelAndLimit(t).first?.toString()
+            "limitPercent" -> Facts.levelAndLimit(t).second?.toString()
+            "distance" -> Facts.distance(t)?.first?.let { if (it % 1.0 == 0.0) it.toLong().toString() else it.toString() }
+            "distanceUnit" -> Facts.distance(t)?.second
+            "power" -> Facts.powerKw(t)?.let { if (it % 1.0 == 0.0) it.toLong().toString() else it.toString() }
+            "minutesLeft" -> Facts.minutesLeft(t)?.toString()
+            "doneBy" -> Facts.doneBy(t, n.posted, java.util.TimeZone.getDefault())?.toString()
+            "route" -> Facts.route(t)?.let { (a, b) -> "$a → $b" }
+            else -> null
+        }
+    }
 }
 
 /**
@@ -92,11 +119,11 @@ object Fields {
     val BuiltIn = setOf(
         "title", "text", "bigText", "subText", "infoText", "summaryText", "conversationTitle", "shortCritical",
         "sender", "message", "progress", "max", "percent", "count", "keys", "lineCount", "time", "at", "app",
-        "posted", "when", "chrono",
+        "posted", "when", "chrono", "limitPercent", "distance", "power", "eta", "route",
     )
 
     /** Built-ins that are a time in ms, only worth showing through a format. */
-    val RawTimes = setOf("posted", "when")
+    val RawTimes = setOf("posted", "when", "eta")
 
     /** Built-ins that change as the clock runs, so a face showing one needs the minute tick. */
     val Ticking = setOf("chrono")
@@ -115,7 +142,7 @@ object Times {
     private const val MIN = 60_000L
     private const val HOUR = 60 * MIN
     private const val DAY = 24 * HOUR
-    private val Clock = Regex("(?i)\\b(\\d{1,2})(?::(\\d{2}))?\\s*([ap])\\.?\\s*m\\b\\.?|\\b(\\d{1,2}):(\\d{2})\\b")
+    private val Clock = Facts.Clock
 
     fun format(format: String, value: String, ctx: RecipeContext): String? {
         val t = parse(value, ctx) ?: return null
@@ -197,8 +224,8 @@ object Times {
 object Transforms {
     val Names = listOf("trim", "lower", "upper", "title", "collapse", "firstLine", "firstWord", "digits", "number", "time", "shorten:<n>")
     private val Shorten = Regex("^shorten:(\\d{1,3})$")
-    private val Time = Regex("(?i)\\b(\\d{1,2}):(\\d{2})\\s*([ap])\\.?\\s*m\\.?\\b")
-    private val Num = Regex("-?\\d[\\d,]*(?:\\.\\d+)?")
+    private val Time = Facts.ClockMinutes
+    private val Num = Facts.Number
 
     fun isKnown(t: String): Boolean = t in Names || Shorten.matches(t)
 
