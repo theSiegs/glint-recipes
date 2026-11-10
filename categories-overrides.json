@@ -6,6 +6,7 @@
     "com.ford.fordpass": {"glance": "car"},
     "com.google.android.GoogleCamera": {"glance": "photos"},
     "com.google.android.apps.photos": {"glance": "photos"},
+    "com.google.android.apps.googlevoice": {"glance": "calls"},
     "com.google.android.apps.weather": {"glance": "weather"},
     "com.google.android.apps.youtube.music": {"glance": "music"},
     "com.google.android.calendar": {"glance": "calendar"},

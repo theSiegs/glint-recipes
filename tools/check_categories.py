@@ -26,8 +26,9 @@ CATEGORIES = ("game", "video", "audio", "image", "social", "news", "maps", "prod
 UNKNOWN = "unknown"
 # Which of Glint's glances an app's tile borrows when it has nothing waiting: Glint's own photos, music,
 # calendar, clock and weather glances; "car", reserved for a car glance Glint doesn't have yet (Glint
+# "calls": a calling app (Google Voice and the like) whose voicemails, missed calls and texts get the calling-app faces (Glint 2026-11-10).
 # falls back to its own guess); "none", the app's own glance, never a borrowed one.
-GLANCES = ("photos", "music", "calendar", "clock", "weather", "car", "none")
+GLANCES = ("photos", "music", "calendar", "clock", "weather", "car", "calls", "none")
 CAP = 60
 PACKAGE = re.compile(r"^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z0-9_]+)+$")
 SOURCE = re.compile(r"^(play|ai|ai-search)(:[A-Z0-9_]{1,40})?$")
