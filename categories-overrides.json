@@ -3,10 +3,14 @@
   "apps": {
     "au.com.shiftyjelly.pocketcasts": {"glance": "music"},
     "com.accuweather.android": {"glance": "weather"},
+    "com.blinknetwork.mobile2": {"kind": "charging"},
+    "com.coulombtech": {"kind": "charging"},
+    "com.driivz.mobile.android.evgo.driver": {"kind": "charging"},
+    "com.ea.evowner": {"kind": "charging"},
     "com.ford.fordpass": {"glance": "car"},
     "com.google.android.GoogleCamera": {"glance": "photos"},
-    "com.google.android.apps.photos": {"glance": "photos"},
     "com.google.android.apps.googlevoice": {"glance": "calls"},
+    "com.google.android.apps.photos": {"glance": "photos"},
     "com.google.android.apps.weather": {"glance": "weather"},
     "com.google.android.apps.youtube.music": {"glance": "music"},
     "com.google.android.calendar": {"glance": "calendar"},
@@ -18,7 +22,7 @@
     "com.sec.android.daemonapp": {"glance": "weather"},
     "com.sec.android.gallery3d": {"glance": "photos"},
     "com.spotify.music": {"glance": "music"},
-    "com.teslamotors.tesla": {"glance": "car"},
+    "com.teslamotors.tesla": {"glance": "car", "kind": "charging"},
     "com.toyota.oneapp": {"glance": "car"},
     "com.weather.Weather": {"glance": "weather"}
   }

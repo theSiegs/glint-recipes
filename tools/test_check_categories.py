@@ -101,6 +101,37 @@ class CheckTest(unittest.TestCase):
             "com.d.d": {"glance": "car"},
         })
 
+    def test_kind(self):
+        apps = cc.check_categories(doc({"com.example.charge": {**e("maps"), "kind": "charging"}}))
+        self.assertEqual(apps["com.example.charge"]["kind"], "charging")
+        for k in ["Charging", "charger", "", 3, None, ["charging"]]:
+            self.bad(doc({"com.example.a": {**e("maps"), "kind": k}}))
+        o = cc.check_overrides({"format": cc.OVERRIDES_FORMAT, "apps": {
+            "com.a.b": {"kind": "charging"}, "com.c.d": {"glance": "car", "kind": "charging"},
+            "com.e.f": {"category": "maps", "name": "Rides", "kind": "ride"}}})
+        self.assertEqual(len(o), 3)
+        for bad in [{"com.a.b": {"kind": "ev"}}, {"com.a.b": {"kind": ["charging"]}}, {"com.a.b": {"kinds": "charging"}}]:
+            with self.assertRaises(cc.Bad):
+                cc.check_overrides({"format": cc.OVERRIDES_FORMAT, "apps": bad})
+
+    def test_kinds_match_glint(self):
+        # Glint's AppCategories.KINDS (glint-recipes/.../exchange/AppCategories.kt), in the vendored checker too.
+        self.assertEqual(set(cc.KINDS), {"car", "charging", "airline", "delivery", "ride"})
+
+    def test_kind_changes_count(self):
+        old = {"com.a.a": e("maps"), "com.b.b": {**e("maps"), "kind": "charging"}}
+        new = {"com.a.a": {**e("maps"), "kind": "charging"}, "com.b.b": {**e("maps"), "kind": "charging", "checked": "2027-01-01"}}
+        self.assertEqual(cc.changes(old, new), ["com.a.a"])
+
+    def test_merged_carries_kind_beside_glance(self):
+        cats = {"com.a.a": {**e("maps", "A"), "kind": "charging"}, "com.b.b": e("unknown")}
+        over = {"com.t.t": {"glance": "car", "kind": "charging"}, "com.b.b": {"kind": "ride"}}
+        self.assertEqual(cc.merged(cats, over), {
+            "com.a.a": {"category": "maps", "name": "A", "kind": "charging"},
+            "com.b.b": {"kind": "ride"},
+            "com.t.t": {"glance": "car", "kind": "charging"},
+        })
+
 
 if __name__ == "__main__":
     unittest.main()

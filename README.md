@@ -120,6 +120,13 @@ Without one, Glint guesses on the phone (galleries it knows, what the app handle
 catalog's word wins over the guess while the tile exchange is on. Older Glint ignores the key, and Glint
 skips a value it doesn't know, so new values can come later.
 
+An entry may also say what kind of app it is (`kind`, optional), which Glint's kind recipes and Car
+tile key on instead of hand lists of packages: `charging` (a charger network's app, such as
+Electrify America or ChargePoint: its charging session joins the Car tile's when it matches the car's
+own), `car`, `airline`, `delivery` or `ride`. An app can have both a `glance` and a `kind` (Tesla's app
+is a car app and a Supercharger app: `{"glance": "car", "kind": "charging"}`). Older Glint ignores the
+key, and Glint skips a value it doesn't know.
+
 The intake's nightly classifier writes it: Google Play's own genre for the app, mapped by a fixed rule;
 an AI only for genres too broad to map (Entertainment, Lifestyle, Education...) and apps not on Play,
 and `unknown` when it isn't sure. It writes a `glance` only where Play's genre says it cleanly
@@ -127,9 +134,9 @@ and `unknown` when it isn't sure. It writes a `glance` only where Play's genre s
 address, link or phone number), `source` says where the category came from, `checked` when. About 40
 new apps a night, plus a re-check of entries older than 90 days. Its pull requests from a
 `categories/*` branch **merge on their own** when `tools/check_categories.py` passes: the schema,
-categories and glances from the lists above, Android package names, no personal data (a name is one
+categories, glances and kinds from the lists above, Android package names, no personal data (a name is one
 short line; every other value has a fixed form), and at most 60 apps added, removed or changed
-(category or glance) per pull request.
+(category, glance or kind) per pull request.
 
 ### Changing a category
 
@@ -143,13 +150,14 @@ Never edit `categories.json` by hand (the classifier owns it). Put the fix in
     "com.example.player": "video",
     "com.example.notagame": "unknown",
     "com.example.maps": {"category": "maps", "name": "Example Maps"},
-    "com.example.gallery": {"glance": "photos"}
+    "com.example.gallery": {"glance": "photos"},
+    "com.example.charger": {"kind": "charging"}
   }
 }
 ```
 
 A value is a category, `unknown` (publish no category for that app), or an object with a `category`, a
-`name` and/or a `glance` (each overrides only that key). The classifier leaves an app alone when its
+`name`, a `glance` and/or a `kind` (each overrides only that key). The classifier leaves an app alone when its
 override sets the category; one that only names the app or its glance still gets its category from
 the classifier. Either commit to `main` (the push
 publishes) or open a one-line pull request from a branch of this repo: it is checked and merged on its
@@ -175,8 +183,8 @@ Base URL (configurable in Glint; default `https://thesiegs.github.io/glint-recip
   tile, and turns an app's tile live by itself, only for a `verified` or `built-in` entry; an
   `unverified` or `learned` one is held off until it is checked against real notifications.
 - `c/<hash>.json`: the app categories, `{"format":"glint.categories/1","apps":{"<package>":{"category":"game","name":"Roblox"}}}`,
-  with the overrides applied and `unknown` left out (an app may have only a `name` or a `glance`); an
-  app may carry a `"glance"` (above), which older Glint ignores. Named by its
+  with the overrides applied and `unknown` left out (an app may have only a `name`, a `glance` or a `kind`); an
+  app may carry a `"glance"` and a `"kind"` (above), which older Glint ignores. Named by its
   content, so it never changes under a cached index; trusted only if its SHA-256 equals the index's
   `categories` entry. An index without `categories` is fine (older Glint ignores the key).
 - `index.json.sig`: base64 (standard, no line breaks) of the raw 64-byte **Ed25519** signature over
