@@ -3,15 +3,15 @@
   "package": "com.google.android.gm",
   "source": "synthetic",
   "scrubbed": true,
-  "notes": "Synthetic: two threads up but the summary counts 12 unread; the summary's number wins, and the newest thread (not the summary) is the headline.",
+  "notes": "Synthetic: two threads up but the summary's Notification.number says 12 unread; the number (never the summary's words) is the corner, and the newest thread (not the summary) is the face.",
   "together": true,
   "samples": [
-    { "name": "older", "notification": { "posted": 1767000000000, "category": "email", "group": "alex@example.com", "title": "Sam", "text": "Photos from Saturday" } },
-    { "name": "summary", "notification": { "posted": 1767000600000, "category": "email", "group": "alex@example.com", "summary": true, "template": "InboxStyle", "title": "12 new messages", "text": "alex@example.com", "lines": ["Library   Your hold is ready", "Sam   Photos from Saturday"] } },
+    { "name": "older", "notification": { "posted": 1767000000000, "category": "email", "group": "alex@example.com", "subText": "alex@example.com", "title": "Sam", "text": "Photos from Saturday" } },
+    { "name": "summary", "notification": { "posted": 1767000600000, "category": "email", "group": "alex@example.com", "subText": "alex@example.com", "summary": true, "number": 12, "template": "InboxStyle", "title": "12 new messages", "text": "alex@example.com", "lines": ["Library   Your hold is ready", "Sam   Photos from Saturday"] } },
     {
       "name": "newest",
-      "notification": { "posted": 1767000600000, "category": "email", "group": "alex@example.com", "title": "Library", "text": "Your hold is ready" },
-      "expect": { "kind": "count", "title": "12", "line": "new mail", "peek": "latest from Library", "titles": ["12", "Your hold is ready"] }
+      "notification": { "posted": 1767000600000, "category": "email", "group": "alex@example.com", "subText": "alex@example.com", "title": "Library", "text": "Your hold is ready" },
+      "expect": { "kind": "headline", "title": "Your hold is ready", "line": "Library", "corner": "12", "titles": ["Your hold is ready", "Photos from Saturday"] }
     }
   ]
 }

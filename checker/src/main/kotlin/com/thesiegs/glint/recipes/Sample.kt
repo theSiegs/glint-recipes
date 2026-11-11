@@ -61,6 +61,8 @@ data class NotificationSample(
     val points: List<Int> = emptyList(),
     /** ProgressStyle draws a tracker icon (a car, a plane) at the progress. */
     val tracker: Boolean = false,
+    /** `Notification.number`: how many it stands for (a mail summary's unread count, no words); 0 when unset. */
+    val number: Int = 0,
     /** A picture is there (BigPicture's, or its icon): only that it is, never the image. */
     val hasPicture: Boolean = false,
     /** A large icon is there: only that it is. */
@@ -137,6 +139,10 @@ data class Expect(
     val points: Int? = null,
     /** The faces' titles in order, rest face first, when the flips matter. */
     val titles: List<String>? = null,
+    /** The rest face's corner number ([FaceRule.corner]); "" for none. */
+    val corner: String? = null,
+    /** The rest face's detail line ([FaceRule.detail]); "" for none. */
+    val detail: String? = null,
 )
 
 object Fixtures {

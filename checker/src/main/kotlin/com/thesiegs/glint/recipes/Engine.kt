@@ -18,6 +18,16 @@ data class RecipeContext(
     val h24: Boolean = false,
     /** An app's kind as the catalog names it ("car", "charging"), for kind recipes ([RecipeApp.kind]); null when unknown. */
     val kindOf: (String) -> String? = { null },
+    /**
+     * Whether a notification is from someone the owner knows (a People tile or a contact), for
+     * [Pick.People]; worked out on the phone, never part of a sample.
+     */
+    val known: (NotificationSample) -> Boolean = { false },
+    /**
+     * The one account the tile follows ([Accounts.key] of the account [NotificationSource.account]
+     * names), or null for every account. A recipe without an account source ignores it.
+     */
+    val account: String? = null,
 )
 
 /**
@@ -44,6 +54,12 @@ data class DrawnFace(
     val faded: Boolean = false,
     val item: Int = 0,
     val key: String? = null,
+    /** A small number in the corner ([FaceRule.corner]): how many wait, from 2 up. */
+    val corner: String? = null,
+    /** The quiet extra line on a large wide tile ([FaceRule.detail]): a mail's snippet. */
+    val detail: String? = null,
+    /** An idle face ([FaceRule.idle]): nothing is up. */
+    val idle: Boolean = false,
 )
 
 /** A field's last value for one subject: [value], the time of the notification it came from, and when it was last seen up. */
@@ -53,7 +69,15 @@ data class HeldValue(val value: String, val posted: Long, val seen: Long)
  * Values kept between notifications (recipes/SPEC.md §4.3: `hold`): by subject, then field. Only on
  * the phone, in memory: never in a backup. [latest] is the subject seen most recently.
  */
-data class HeldState(val subjects: Map<String, Map<String, HeldValue>> = emptyMap(), val latest: String? = null) {
+data class HeldState(
+    val subjects: Map<String, Map<String, HeldValue>> = emptyMap(),
+    val latest: String? = null,
+    /**
+     * The last lead's values an idle face names ("last mail 9:40 · Alex Rivera"), kept for the day
+     * only (memory only, never written), whatever the owner did with its notification.
+     */
+    val last: Map<String, String> = emptyMap(),
+) {
     companion object { val Empty = HeldState() }
 }
 
@@ -77,8 +101,11 @@ data class Evaluation(
     val unmatched: Int,
     /** Each matched notification's subject, by its key ([HeldState] is kept by subject). */
     val subjects: Map<String, String> = emptyMap(),
+    /** The accounts seen in what it read ([NotificationSource.account]), newest first; empty without an account source. */
+    val accounts: List<String> = emptyList(),
 ) {
-    val drew: Boolean get() = faces.isNotEmpty()
+    /** It drew from what is up (an idle face, "nothing new", says nothing is). */
+    val drew: Boolean get() = faces.any { !it.idle }
 }
 
 /**
@@ -93,14 +120,19 @@ object RecipeEngine {
         val expire = Durations.parse(src.expire)
         // A card alone (no source) reads no notifications.
         val ofApp = if (recipe.source.notification == null) emptyList() else samples.filter { appMatches(recipe, it, ctx) }
-        val matched = ofApp.filter { matches(recipe, it, ctx) && (expire == null || ctx.now - it.posted <= expire) }
+        val read = ofApp.filter { matches(recipe, it, ctx) && (expire == null || ctx.now - it.posted <= expire) }
+        // The accounts seen, newest first; the tile follows one when the owner chose it ([RecipeContext.account]).
+        val accounts = src.account?.let { a -> read.sortedByDescending { it.posted }.mapNotNull { Accounts.of(a, it) }.distinctBy { it.lowercase() } }.orEmpty()
+        val matched = read.filter { n -> src.account == null || ctx.account == null || Accounts.of(src.account, n)?.let(Accounts::key) == ctx.account }
             // A group summary (read only with "summaries": true) never wins over the notifications it sums up.
-            .let { order(it, src.pick).sortedBy { n -> n.summary } }
+            .let { order(it, src.pick, ctx.known).sortedBy { n -> n.summary } }
+        val idles = recipe.faces.any { it.idle }
         val notApplicable = recipe.fields.filterValues { !applies(it, ctx) }.keys
         val perNote = matched.associate { it.key to extract(recipe, it, ctx) }
         val subjectOf = matched.associate { it.key to subject(src.key, it, perNote[it.key].orEmpty()) }
         val subjects = matched.mapTo(LinkedHashSet()) { subjectOf.getValue(it.key) }
-        val winner = matched.firstOrNull()
+        // With an idle face a summary alone is no news (it may outlive its threads): the idle face shows.
+        val winner = matched.firstOrNull()?.takeUnless { it.summary && idles }
         val subject = winner?.let { subjectOf.getValue(it.key) } ?: held.latest
 
         // The winner's own values, then (merge) its subject's other notifications', newest first.
@@ -137,14 +169,23 @@ object RecipeEngine {
         // {count} counts what a summary sums up, not the summary too (a lone summary counts itself).
         val count = matched.count { !it.summary }.takeIf { it > 0 } ?: matched.size
         builtIns(winner, count, subjects.size, ctx).forEach { (k, v) -> all[k] = v }
+        all["total"] = total(matched).toString()
         all.putAll(values)
         if (winner == null) {
             // Nothing up: only held values draw, never a "0" count or an empty headline.
-            all.remove("count"); all.remove("keys")
+            all.remove("count"); all.remove("keys"); all.remove("total")
         }
         val leadPosted = winner?.posted ?: keptForSubject.values.maxOfOrNull { it.posted }
-        val faces = if (winner == null && values.isEmpty()) emptyList()
-        else tileFaces(recipe, all, ctx, winner, leadPosted, Lead(matched, subject, subjectOf, perNote, held, count, subjects.size))
+        // What an idle face names of the last lead, kept for the day ([HeldState.last]).
+        val last = when {
+            !idles -> emptyMap()
+            winner != null -> idleFields(recipe).mapNotNull { k -> all[k]?.let { k to it } }.toMap()
+            else -> held.last.takeIf { sameDay(it["posted"]?.toLongOrNull(), ctx) }.orEmpty()
+        }
+        val faces = when {
+            winner == null && values.isEmpty() -> if (idles) idleFaces(recipe, last, ctx) else emptyList()
+            else -> tileFaces(recipe, all, ctx, winner, leadPosted, Lead(matched, subject, subjectOf, perNote, held, count, subjects.size, all["total"]))
+        }
         return Evaluation(
             recipeId = recipe.id,
             matched = matched,
@@ -154,24 +195,58 @@ object RecipeEngine {
             missingRequired = missingRequired,
             notApplicable = notApplicable,
             probation = !Versions.inRange(recipe.app.versions, ctx.versionCode),
-            held = newHeld,
+            held = newHeld.copy(last = last),
             // Only what could carry the app's state counts (promos, summaries and the like say nothing about the recipe).
             unmatched = ofApp.count { n -> !n.summary && ShapeLearner.isUseful(n) && matched.none { it.key == n.key } },
             subjects = subjectOf,
+            accounts = accounts,
         )
+    }
+
+    /**
+     * How many wait in every group read (`{total}`): a summary's own number (`Notification.number`,
+     * no words) when it set one, else the notifications it sums up; a summary alone with no number
+     * counts nothing (it may outlive its threads).
+     */
+    fun total(matched: List<NotificationSample>): Int =
+        matched.groupBy { it.group ?: "k:${it.key}" }.values.sumOf { g ->
+            val kids = g.count { !it.summary }
+            val number = g.filter { it.summary }.maxOfOrNull { it.number } ?: 0
+            if (number > 0) maxOf(number, kids) else kids
+        }
+
+    /** The fields an idle face names: what [HeldState.last] keeps of the lead. */
+    private fun idleFields(recipe: Recipe): Set<String> = recipe.faces.filter { it.idle }
+        .flatMap { f -> listOfNotNull(f.title, f.line, f.peek, f.detail).flatMap(Templates::fields) }.toSet()
+
+    private fun sameDay(t: Long?, ctx: RecipeContext): Boolean {
+        if (t == null || t <= 0) return false
+        val day = { ms: Long -> java.time.Instant.ofEpochMilli(ms).atZone(ctx.zone).toLocalDate() }
+        return day(t) == day(ctx.now)
+    }
+
+    /** Nothing up: the first idle face that draws ("nothing new"), from what's kept of the last lead; its peek is left off without it. */
+    private fun idleFaces(recipe: Recipe, last: Map<String, String>, ctx: RecipeContext): List<DrawnFace> {
+        val values = LinkedHashMap(last)
+        ctx.appLabel?.takeIf { it.isNotBlank() }?.let { values["app"] = it }
+        return listOfNotNull(recipe.faces.withIndex().firstNotNullOfOrNull { (i, f) ->
+            if (!f.idle || f.optIn && i !in ctx.optIn || !f.whenAll.all { Conditions.holds(it, values) }) null
+            else draw(i, f, values, ctx, null)?.copy(idle = true, detail = f.detail?.let { Templates.fill(it, values, ctx) })
+        })
     }
 
     /** [held] without [subjects]: the owner dismissed their notifications, so nothing of them is kept. */
     fun forget(held: HeldState, subjects: Set<String>): HeldState {
         if (subjects.isEmpty() || subjects.none { it in held.subjects }) return held
         val kept = held.subjects - subjects
-        return HeldState(kept, held.latest?.takeIf { it in kept })
+        return HeldState(kept, held.latest?.takeIf { it in kept }, held.last)
     }
 
     /** What the other subjects' faces are read from, besides the lead's own values. */
     private class Lead(
         val matched: List<NotificationSample>, val subject: String?, val subjectOf: Map<String, String>,
         val perNote: Map<String, Map<String, String>>, val held: HeldState, val count: Int, val keys: Int,
+        val total: String? = null,
     )
 
     /**
@@ -191,6 +266,7 @@ object RecipeEngine {
             .take(Recipes.MAX_ITEMS - 1).toList()
         val more = others.mapIndexedNotNull { i, n ->
             val v = LinkedHashMap(builtIns(n, lead.count, lead.keys, ctx))
+            lead.total?.let { v["total"] = it }
             v.putAll(subjectValues(recipe, n, lead.subjectOf.getValue(n.key), lead, ctx))
             item(recipe, v, ctx, n, i + 1, n.posted).first
         }
@@ -231,8 +307,13 @@ object RecipeEngine {
         val faded = fade != null && posted != null && ctx.now - posted > fade
         fun drawn(i: Int, f: FaceRule): DrawnFace? {
             if (f.optIn && i !in ctx.optIn) return null
-            if (!f.whenAll.all { Conditions.holds(it, values) }) return null
-            return draw(i, f, values, ctx, from)?.copy(item = item, key = from?.key, faded = faded)
+            if (f.idle || !f.whenAll.all { Conditions.holds(it, values) }) return null
+            return draw(i, f, values, ctx, from)?.copy(
+                item = item, key = from?.key, faded = faded,
+                corner = f.corner?.let { Templates.fill(it, values, ctx) }?.trim()?.replace(",", "")?.toLongOrNull()?.takeIf { it > 1 }
+                    ?.let { if (it > 99) "99+" else it.toString() },
+                detail = f.detail?.let { Templates.fill(it, values, ctx) },
+            )
         }
         val rest = recipe.faces.withIndex().firstNotNullOfOrNull { (i, f) -> if (f.flip) null else drawn(i, f) }
         val flips = if (item > 0) emptyList() else recipe.faces.withIndex().mapNotNull { (i, f) -> if (f.flip) drawn(i, f) else null }
@@ -281,8 +362,10 @@ object RecipeEngine {
         else -> true
     }
 
-    fun order(list: List<NotificationSample>, pick: Pick): List<NotificationSample> = when (pick) {
+    fun order(list: List<NotificationSample>, pick: Pick, known: (NotificationSample) -> Boolean = { false }): List<NotificationSample> = when (pick) {
         Pick.Newest -> list.sortedByDescending { it.posted }
+        // Someone the owner knows first (a People tile, a contact), then the newest.
+        Pick.People -> list.sortedWith(compareByDescending<NotificationSample> { !it.summary && known(it) }.thenByDescending { it.posted })
         Pick.Ongoing -> list.sortedWith(compareByDescending<NotificationSample> { it.ongoing || it.promoted }.thenByDescending { it.posted })
     }
 

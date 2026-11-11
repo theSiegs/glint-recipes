@@ -1,14 +1,14 @@
 {
   "recipe": "glint.recipe/1",
   "id": "gmail-new",
-  "rev": 3,
+  "rev": 5,
   "name": "gmail",
   "app": { "package": "com.google.android.gm", "label": "Gmail" },
   "meta": {
     "status": "built-in",
     "author": "Glint",
-    "updated": "2026-11-05",
-    "notes": "Built in, from public knowledge; still to be checked on real samples. New mail as Gmail posts it: one notification per thread (title the sender, text the subject, big text subject and snippet, sub text the account, Archive and Reply), grouped per account under an InboxStyle summary (\"3 new messages\", a line per thread). The unread count comes from that summary's number (English), else the threads up. The category isn't relied on (email when set); sending, sync and errors, Chat (MessagingStyle) and Meet calls are left out. Never shows the account. One new thread: its subject, how long ago, and who it is from (as the plain Gmail tile shows the sender). Several: the unread count with the latest sender, flipping to the latest subject. The sender as the big line is an optIn face."
+    "updated": "2026-11-11",
+    "notes": "Built in, from public knowledge; still to be checked on real samples. New mail as Gmail posts it: one notification per thread (title the sender, text the subject, big text subject and snippet, sub text the account, Archive and Reply), grouped per account under an InboxStyle summary. One mail per face (calm tiles): the subject big, the sender, how long ago; the faces turn through the waiting mails, someone the owner knows first (pick people), then the newest. The total waiting is a small corner number from 2 up: each account's summary number (Notification.number) when set, else its threads, never from words. A large wide tile adds the snippet as one quiet line. With nothing up, a calm \"nothing new\" face, with the last mail's time and sender when one was seen today (memory only). The tile follows one account (account: subText, chosen by the owner); the account is never drawn. Sending, sync and errors, Chat (MessagingStyle) and Meet calls are left out. A subject line that is only an address is left out, while a subject with an @ in it (\"Dinner @ 7\") still shows. A sender may start with a digit (\"1Password\"); a summary's \"3 new messages\" is never a sender. The sender as the big line is an optIn face."
   },
   "source": {
     "notification": {
@@ -21,21 +21,21 @@
         "exclude": ["(?i)^(?:sending|couldn't send|could not send|syncing|sync is off|outbox|unsent)\\b"],
         "lang": ["en"]
       },
-      "key": "group",
-      "merge": true
+      "key": "id",
+      "pick": "people",
+      "account": "subText"
     }
   },
   "fields": {
-    "subject": { "from": ["text", "bigText"], "regex": "^(?P<v>[^@\\n]+)(?:\\n|$)", "then": ["firstLine", "shorten:60"] },
-    "unread": { "from": ["title"], "regex": "(?i)^(?P<v>\\d{1,4})\\s+new\\b", "lang": ["en"] },
-    "who": { "from": ["title"], "regex": "^(?P<v>[^\\d\\n][^\\n]*)$", "then": ["shorten:24"] }
+    "subject": { "from": ["text", "bigText"], "regex": "^(?P<v>[^@\\n]+|[^\\n]*[ \\t][^\\n]*)(?:\\n|$)", "then": ["firstLine", "shorten:60"] },
+    "who": { "from": ["title"], "regex": "^(?P<v>[^\\d\\n][^\\n]*|\\d+[^\\d\\s][^\\n]*|\\d+[ \\t]+(?:[^nN\\n]|[nN][^eE\\n]|[nN][eE][^wW\\n])[^\\n]*)$", "then": ["shorten:24"] },
+    "snippet": { "from": ["bigText"], "regex": "^[^\\n]*\\n+(?P<v>[^\\n]+)", "then": ["collapse", "shorten:90"] }
   },
   "faces": [
-    { "kind": "count", "count": "{unread}", "label": "new mail", "peek": "latest from {who}", "when": "unread>1" },
-    { "kind": "count", "count": "{count}", "label": "new mail", "peek": "latest from {who}", "when": "count>1" },
-    { "kind": "headline", "title": "{subject}", "line": "new mail · {posted|ago}", "peek": "from {who}" },
-    { "kind": "headline", "title": "{subject}", "line": "latest · {posted|ago}", "peek": "from {who}", "when": "unread>1|count>1", "flip": true },
-    { "kind": "message", "person": "{title}", "line": "{subject}", "peek": "{posted|ago}", "optIn": true, "flip": true }
+    { "kind": "message", "person": "{who}", "line": "{subject}", "peek": "{posted|ago}", "corner": "{total}", "detail": "{snippet}", "optIn": true },
+    { "kind": "headline", "title": "{subject}", "line": "{who}", "peek": "{posted|ago}", "corner": "{total}", "detail": "{snippet}" },
+    { "kind": "headline", "title": "{subject}", "line": "{posted|ago}", "corner": "{total}", "detail": "{snippet}" },
+    { "kind": "headline", "title": "nothing new", "peek": "last mail {posted|clock} · {who}", "idle": true }
   ],
   "tap": "notification"
 }

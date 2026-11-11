@@ -1,0 +1,18 @@
+{
+  "fixture": 1,
+  "package": "com.google.android.gm",
+  "source": "synthetic",
+  "scrubbed": true,
+  "notes": "Synthetic: two accounts, each with its summary's Notification.number (2 and 5): the corner is their sum, 7, never one account's count; the newest mail of either leads.",
+  "together": true,
+  "samples": [
+    { "name": "home thread", "notification": { "posted": 1767000000000, "category": "email", "group": "home@example.com", "subText": "home@example.com", "template": "BigTextStyle", "title": "Alex Rivera", "text": "Lunch Thursday?", "bigText": "Lunch Thursday?\nWant to try the new place by the park?" } },
+    { "name": "home summary", "notification": { "posted": 1767000000000, "category": "email", "group": "home@example.com", "subText": "home@example.com", "summary": true, "number": 2, "template": "InboxStyle", "title": "2 new messages" } },
+    { "name": "work summary", "notification": { "posted": 1767000060000, "category": "email", "group": "work@example.com", "subText": "work@example.com", "summary": true, "number": 5, "template": "InboxStyle", "title": "5 new messages" } },
+    {
+      "name": "work thread",
+      "notification": { "posted": 1767000060000, "category": "email", "group": "work@example.com", "subText": "work@example.com", "template": "BigTextStyle", "title": "Corner Shop", "text": "Your receipt for order 1042", "bigText": "Your receipt for order 1042\nThanks for shopping with us." },
+      "expect": { "kind": "headline", "title": "Your receipt for order 1042", "line": "Corner Shop", "peek": "1 min ago", "corner": "7", "detail": "Thanks for shopping with us.", "titles": ["Your receipt for order 1042", "Lunch Thursday?"] }
+    }
+  ]
+}

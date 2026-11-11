@@ -3,7 +3,7 @@
   "package": "com.google.android.gm",
   "source": "synthetic",
   "scrubbed": true,
-  "notes": "Synthetic: one new thread, with and without a category; the group summary alone; what Gmail posts besides mail (left alone).",
+  "notes": "Synthetic: one new thread, with and without a category; an @ in a subject and a sender starting with a digit; the group summary alone; what Gmail posts besides mail (left alone).",
   "samples": [
     {
       "name": "one thread",
@@ -13,7 +13,7 @@
         "subText": "alex@example.com",
         "actions": [ { "title": "Archive", "semantic": "archive" }, { "title": "Reply", "semantic": "reply" } ]
       },
-      "expect": { "kind": "headline", "title": "Lunch on Friday?", "line": "new mail · 1 min ago", "peek": "from Alex Rivera", "faces": 1 }
+      "expect": { "kind": "headline", "title": "Lunch on Friday?", "line": "Alex Rivera", "peek": "1 min ago", "corner": "", "detail": "There's a new place near the park.", "faces": 1 }
     },
     {
       "name": "no category",
@@ -21,22 +21,35 @@
         "posted": 1767000000000, "template": "BigTextStyle", "title": "Sam", "text": "Photos from Saturday",
         "bigText": "Photos from Saturday\nHere they are.", "subText": "alex@example.com"
       },
-      "expect": { "kind": "headline", "title": "Photos from Saturday", "line": "new mail · 1 min ago", "peek": "from Sam", "faces": 1 }
+      "expect": { "kind": "headline", "title": "Photos from Saturday", "line": "Sam", "peek": "1 min ago", "faces": 1 }
     },
     {
-      "name": "summary alone",
+      "name": "summary alone (no news: the tile shows nothing new)",
       "notification": {
         "posted": 1767000000000, "category": "email", "summary": true, "template": "InboxStyle", "group": "alex@example.com",
         "title": "2 new messages", "text": "alex@example.com", "subText": "alex@example.com",
         "lines": ["Alex Rivera   Lunch on Friday?", "Sam   Photos from Saturday"]
       },
-      "expect": { "kind": "count", "title": "2", "line": "new mail", "faces": 1 }
+      "expect": { "match": false }
     },
     {
       "name": "an hour later",
       "notification": { "posted": 1767000000000, "category": "email", "template": "BigTextStyle", "title": "Library", "text": "Your hold is ready" },
       "now": 1767007200000,
-      "expect": { "kind": "headline", "title": "Your hold is ready", "line": "new mail · 2 h ago", "peek": "from Library" }
+      "expect": { "kind": "headline", "title": "Your hold is ready", "line": "Library", "peek": "2 h ago" }
+    },
+    {
+      "name": "an @ in the subject",
+      "notification": {
+        "posted": 1767000000000, "category": "email", "template": "BigTextStyle", "title": "Alex Rivera", "text": "Dinner @ 7?",
+        "bigText": "Dinner @ 7?\nThe usual place."
+      },
+      "expect": { "kind": "headline", "title": "Dinner @ 7?", "line": "Alex Rivera", "peek": "1 min ago", "faces": 1 }
+    },
+    {
+      "name": "a sender starting with a digit",
+      "notification": { "posted": 1767000000000, "category": "email", "template": "BigTextStyle", "title": "7 Eleven", "text": "Your receipt" },
+      "expect": { "kind": "headline", "title": "Your receipt", "line": "7 Eleven", "peek": "1 min ago" }
     },
     {
       "name": "sending",

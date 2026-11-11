@@ -119,7 +119,7 @@ object Fields {
     val BuiltIn = setOf(
         "title", "text", "bigText", "subText", "infoText", "summaryText", "conversationTitle", "shortCritical",
         "sender", "message", "progress", "max", "percent", "count", "keys", "lineCount", "time", "at", "app",
-        "posted", "when", "chrono", "limitPercent", "distance", "power", "eta", "route",
+        "posted", "when", "chrono", "limitPercent", "distance", "power", "eta", "route", "total",
     )
 
     /** Built-ins that are a time in ms, only worth showing through a format. */

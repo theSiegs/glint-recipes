@@ -147,6 +147,12 @@ data class NotificationSource(
     val expire: String? = null,
     /** Faces from a notification older than this draw dimmed ("4h"): still true, but not news. */
     val fade: String? = null,
+    /**
+     * The source that names the account a notification belongs to ("subText": a mail app's), when
+     * the app has several. A tile then follows one account, as the owner chose ([RecipeContext.account]);
+     * the account itself is never drawn.
+     */
+    val account: String? = null,
 )
 
 /**
@@ -247,6 +253,15 @@ data class FaceRule(
      * "largeIcon" (a cover, a product photo; only when it's big enough). Without one the face draws plain.
      */
     val picture: String? = null,
+    /** A small number in the face's corner ("{total}"), drawn from 2 up: how many wait in all. */
+    val corner: String? = null,
+    /** One quiet extra line, drawn only on a large wide tile ("{snippet}"); left off without its fields. */
+    val detail: String? = null,
+    /**
+     * Not a rung of the ladder: drawn only when nothing is up ("nothing new"), instead of the plain
+     * app tile. Its fields are the last lead's, kept for the day in memory only; a peek without them is left off.
+     */
+    val idle: Boolean = false,
 )
 
 /** Glint's face kinds a recipe may map to (recipes/SPEC.md §6). An unknown kind is an error. */
@@ -274,6 +289,23 @@ enum class Pick {
     @SerialName("newest") Newest,
     /** Ongoing ones first, then the newest. */
     @SerialName("ongoing") Ongoing,
+    /** From someone the owner knows first (a People tile, a contact; [RecipeContext.known]), then the newest. */
+    @SerialName("people") People,
+}
+
+/**
+ * A tile's account ([NotificationSource.account]): kept only as [key], a short hash of the address,
+ * so the layout never holds the address itself. Pure.
+ */
+object Accounts {
+    /** [n]'s account as [source] names it, or null. */
+    fun of(source: String, n: NotificationSample): String? = Sources.read(source, n)?.trim()?.takeIf { it.isNotEmpty() }
+
+    /** A stable key for [account]: the first 16 hex digits of SHA-256 of it, lowercase and trimmed. */
+    fun key(account: String): String {
+        val d = java.security.MessageDigest.getInstance("SHA-256").digest(account.trim().lowercase().toByteArray(Charsets.UTF_8))
+        return d.take(8).joinToString("") { "%02x".format(it) }
+    }
 }
 
 @Serializable
@@ -401,7 +433,7 @@ object Recipes {
         if (src.hold != null || src.expire != null || src.fade != null) return true
         if (r.fields.values.any { it.hold != null || it.stale != null }) return true
         return r.faces.any { f ->
-            listOfNotNull(f.title, f.line, f.peek, f.count, f.label, f.person, f.value, f.max).any { t ->
+            listOfNotNull(f.title, f.line, f.peek, f.count, f.label, f.person, f.value, f.max, f.corner, f.detail).any { t ->
                 Placeholder.findAll(t).any { it.groupValues[2].isNotEmpty() || it.groupValues[1] in Fields.Ticking }
             }
         }
@@ -436,7 +468,9 @@ object Recipes {
             c.color?.let { if (!CardColor.matches(it)) add(Problem("card.color", "a hex color, \"#00704a\"")) }
         }
         if (r.faces.size > MAX_FACES) add(Problem("faces", "at most $MAX_FACES faces"))
-        if (r.faces.isNotEmpty() && r.faces.all { it.optIn }) add(Problem("faces", "at least one face that isn't optIn, so the tile has a rest face"))
+        if (r.faces.isNotEmpty() && r.faces.all { it.optIn || it.idle }) add(Problem("faces", "at least one face that isn't optIn or idle, so the tile has a rest face"))
+        r.faces.forEachIndexed { i, f -> if (f.idle && f.flip) add(Problem("faces[$i]", "an idle face shows when nothing is up: never a flip")) }
+        r.source.notification?.account?.let { if (!Sources.isKnown(it)) add(Problem("source.notification.account", "unknown source \"$it\" (${Sources.Names.joinToString()})")) }
         if (r.fields.size > MAX_FIELDS) add(Problem("fields", "at most $MAX_FIELDS fields"))
         val src = r.notification
         val m = src.match
@@ -497,6 +531,7 @@ object Recipes {
             template("title", f.title); template("line", f.line); template("peek", f.peek)
             template("count", f.count); template("label", f.label); template("person", f.person)
             template("value", f.value); template("max", f.max)
+            template("corner", f.corner); template("detail", f.detail)
             when (f.kind) {
                 FaceKind.Headline -> if (f.title == null) add(Problem(at, "a headline face needs a title"))
                 FaceKind.Count -> if (f.count == null) add(Problem(at, "a count face needs a count (\"{count}\")"))

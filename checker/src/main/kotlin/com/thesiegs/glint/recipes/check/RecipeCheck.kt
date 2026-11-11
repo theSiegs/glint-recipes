@@ -96,6 +96,8 @@ object RecipeCheck {
                 expect.title?.let { if (it != rest.title) failures += "$label: title \"${rest.title}\", expected \"$it\"" }
                 expect.line?.let { if (it != rest.line) failures += "$label: line \"${rest.line}\", expected \"$it\"" }
                 expect.peek?.let { if (it != rest.peek) failures += "$label: peek \"${rest.peek}\", expected \"$it\"" }
+                expect.corner?.let { if (it != rest.corner.orEmpty()) failures += "$label: corner \"${rest.corner}\", expected \"$it\"" }
+                expect.detail?.let { if (it != rest.detail.orEmpty()) failures += "$label: detail \"${rest.detail}\", expected \"$it\"" }
                 expect.faces?.let { if (it != e.faces.size) failures += "$label: ${e.faces.size} faces drew, expected $it" }
                 expect.titles?.let { if (it != e.faces.map { f -> f.title }) failures += "$label: faces ${e.faces.map { f -> f.title }}, expected $it" }
                 expect.faded?.let { if (it != rest.faded) failures += "$label: rest face ${if (rest.faded) "faded" else "not faded"}, expected ${if (it) "faded" else "not"}" }
