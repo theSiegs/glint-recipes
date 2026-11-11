@@ -123,7 +123,9 @@ skips a value it doesn't know, so new values can come later.
 An entry may also say what kind of app it is (`kind`, optional), which Glint's kind recipes and Car
 tile key on instead of hand lists of packages: `charging` (a charger network's app, such as
 Electrify America or ChargePoint: its charging session joins the Car tile's when it matches the car's
-own), `car`, `airline`, `delivery` or `ride`. An app can have both a `glance` and a `kind` (Tesla's app
+own), `assistant` (an AI assistant or bot app, such as Claude or ChatGPT: its replies come as chat
+notifications, but no person writes in it, so Glint never treats it as people talking), `car`,
+`airline`, `delivery` or `ride`. An app has one kind at most. An app can have both a `glance` and a `kind` (Tesla's app
 is a car app and a Supercharger app: `{"glance": "car", "kind": "charging"}`). Older Glint ignores the
 key, and Glint skips a value it doesn't know.
 

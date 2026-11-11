@@ -33,8 +33,9 @@ UNKNOWN = "unknown"
 GLANCES = ("photos", "music", "calendar", "clock", "weather", "car", "calls", "none")
 # What kind of app it is, which Glint's kind recipes and Car tile key on instead of hand lists of
 # packages (Glint's AppCategories.KINDS, owner 2026-11-10): "charging", a charger network's app whose
-# session fuses into the Car tile's; "car", "airline", "delivery", "ride".
-KINDS = ("car", "charging", "airline", "delivery", "ride")
+# session fuses into the Car tile's; "car", "airline", "delivery", "ride"; "assistant", an AI assistant
+# or bot app (Claude, ChatGPT, Gemini) whose chat-style replies are never a person writing (2026-11-11).
+KINDS = ("car", "charging", "airline", "delivery", "ride", "assistant")
 CAP = 60
 PACKAGE = re.compile(r"^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z0-9_]+)+$")
 SOURCE = re.compile(r"^(play|ai|ai-search)(:[A-Z0-9_]{1,40})?$")

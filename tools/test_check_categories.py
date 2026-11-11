@@ -116,7 +116,7 @@ class CheckTest(unittest.TestCase):
 
     def test_kinds_match_glint(self):
         # Glint's AppCategories.KINDS (glint-recipes/.../exchange/AppCategories.kt), in the vendored checker too.
-        self.assertEqual(set(cc.KINDS), {"car", "charging", "airline", "delivery", "ride"})
+        self.assertEqual(set(cc.KINDS), {"car", "charging", "airline", "delivery", "ride", "assistant"})
 
     def test_kind_changes_count(self):
         old = {"com.a.a": e("maps"), "com.b.b": {**e("maps"), "kind": "charging"}}
