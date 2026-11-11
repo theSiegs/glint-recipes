@@ -1,12 +1,16 @@
 {
   "format": "glint.categories-overrides/1",
   "apps": {
+    "ai.character.app": {"kind": "assistant"},
+    "ai.inflection.pi": {"kind": "assistant"},
     "ai.perplexity.app.android": {"kind": "assistant"},
+    "ai.x.grok": {"kind": "assistant"},
     "au.com.shiftyjelly.pocketcasts": {"glance": "music"},
     "com.accuweather.android": {"glance": "weather"},
     "com.anthropic.claude": {"kind": "assistant"},
     "com.blinknetwork.mobile2": {"kind": "charging"},
     "com.coulombtech": {"kind": "charging"},
+    "com.deepseek.chat": {"kind": "assistant"},
     "com.driivz.mobile.android.evgo.driver": {"kind": "charging"},
     "com.ea.evowner": {"kind": "charging"},
     "com.ford.fordpass": {"glance": "car"},
