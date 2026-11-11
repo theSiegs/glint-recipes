@@ -38,9 +38,10 @@ object AppCategories {
     /**
      * The kinds an app may be (review 2026-11-10 §2.3, owner 2026-11-10): what kind recipes and the
      * Car tile key on instead of hand lists of packages. `charging`: a charger network's app (its
-     * session fuses into the Car tile's).
+     * session fuses into the Car tile's). `assistant`: an AI assistant or bot app (Claude, ChatGPT,
+     * Gemini): it may post chat-style notifications, but no person writes in it ([com.thesiegs.glint.recipes.AppKinds.isAssistant]).
      */
-    val KINDS = setOf("car", "charging", "airline", "delivery", "ride")
+    val KINDS = setOf("car", "charging", "airline", "delivery", "ride", "assistant")
 
     private const val MAX_APPS = 50_000
     private const val NAME_MAX = 60

@@ -29,6 +29,18 @@ object AppKinds {
         "fm.castbox.audiobook.radio.podcast", "com.storytel",
     )
 
+    /**
+     * AI assistants and chat bots: their replies come as chat-style notifications, but no person writes
+     * in them, so they're never a chat app (owner 2026-11-11: "size when someone writes" on Claude).
+     */
+    val Assistant: Set<String> = setOf(
+        "com.anthropic.claude", "com.openai.chatgpt", "com.google.android.apps.bard", "com.microsoft.copilot",
+        "ai.perplexity.app.android", "ai.x.grok", "com.deepseek.chat", "ai.character.app", "ai.inflection.pi",
+    )
+
+    /** The catalog's kind that means an AI assistant ([com.thesiegs.glint.recipes.exchange.AppCategories.KINDS]). */
+    const val ASSISTANT_KIND = "assistant"
+
     /** The catalog's categories that mean a chat app. */
     val ChatCategories = setOf("messaging")
 
@@ -41,6 +53,10 @@ object AppKinds {
      */
     fun isChat(packageName: String, catalog: String? = null): Boolean =
         catalog in ChatCategories || packageName in Chat
+
+    /** Whether [packageName] is an AI assistant or bot: the catalog's [kind] says so, or the seed list does. */
+    fun isAssistant(packageName: String, kind: String? = null): Boolean =
+        kind == ASSISTANT_KIND || packageName in Assistant
 
     /** Whether [packageName] is a music, podcast or audiobook app, as [isChat] decides. */
     fun isAudio(packageName: String, catalog: String? = null): Boolean =

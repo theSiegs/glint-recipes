@@ -1,5 +1,5 @@
 Vendored from Glint's :glint-recipes module (glint-recipes/src/main/kotlin).
-Glint commit: b05368daf49abe7712e9761f9ee796e15a0a0c8f
+Glint commit: 9b187e8846b22683ae55b2e0e6a0fa8cef78350c
 Glint branch: main
-Synced: 2026-11-10
+Synced: 2026-11-11
 Update with: checker/sync-from-glint.sh <path-to-glint-checkout>
