@@ -13,11 +13,13 @@ with the tile exchange switched on, it fetches the rest from here.
 | `fixtures/<package>/*.json` | Synthetic or scrubbed sample notifications for one app, each with what its recipe should draw. |
 | `categories.json` | App categories: one line per Android package, written by the intake's nightly classifier (below). |
 | `categories-overrides.json` | Hand corrections to the categories; they always win. |
+| `catalog/` | The cross-platform app catalog: `keys.json` (Xbox, Microsoft Store, Windows, Steam, Switch and web keys), `apps.json` (app slugs), `overrides.json`, `evidence/` (the reviewer agent's records) and `normalize-vectors.json` (see "App catalog"). |
 | `revoked.txt` | Recipes withdrawn from the exchange: one `id` or `id@rev` per line. |
 | `keys/exchange-1.pub`, `keys/exchange-2.pub` | The publishing public keys (base64 of the raw 32-byte Ed25519 key). |
 | `checker/` | A standalone copy of Glint's recipe checker and shape learner (Kotlin), with its own Gradle build. |
 | `tools/build_index.py` | Builds and signs the published site (Python, standard library only). |
 | `tools/check_categories.py` | Checks the two categories files and merges them for publishing (and `tools/test_check_categories.py`). |
+| `tools/check_catalog.py` | Checks the app catalog, computes each entry's state and builds its shards (and `tools/test_check_catalog.py`). |
 
 Only recipe files and synthetic or scrubbed fixtures live here. There is no one's real notification
 content, and there are no app icons, logos or other artwork: a recipe names an app by its package
@@ -47,6 +49,7 @@ Run the same steps locally (JDK 17 or newer, Python 3):
 ./checker/gradlew -p checker learn --args="fixtures/com.dd.doordash"   # the shape learner, no AI
 ./checker/gradlew -p checker installDist                              # both as jars, for the intake's drafting job
 python tools/check_categories.py                                       # the categories files
+python tools/check_catalog.py                                          # the app catalog (add --base <old tree> for the caps)
 python -m unittest discover -s tools                                   # the checker's tests
 python tools/build_index.py --out site                                 # unsigned dry run
 python tools/build_index.py --out site --key test.pem --verify test.pub
@@ -159,11 +162,82 @@ Never edit `categories.json` by hand (the classifier owns it). Put the fix in
 ```
 
 A value is a category, `unknown` (publish no category for that app), or an object with a `category`, a
-`name`, a `glance` and/or a `kind` (each overrides only that key). The classifier leaves an app alone when its
+`name`, a `glance`, a `kind`, a `detail` and/or an `app` slug (each overrides only that key; see "App catalog"
+for `detail` and `app`). The classifier leaves an app alone when its
 override sets the category; one that only names the app or its glance still gets its category from
 the classifier. Either commit to `main` (the push
 publishes) or open a one-line pull request from a branch of this repo: it is checked and merged on its
 own, and the merge publishes. Phones pick it up at their next update check with the tile exchange on.
+
+## App catalog
+
+The app categories above grow into a catalog of app facts across platforms, for Glint and for Hearth HA's
+screen time (which fetches it itself). Glint's catalog owns, writes and signs it; Hearth only reads it. The
+published URL, `glint.exchange/1` and `glint.catalog/1` are stable for both.
+
+### Keys
+
+Every key is `<namespace>:<id>`. One app has many keys; each key carries the app's **slug** (`app`), listed in
+`catalog/apps.json`, so keys that share a slug are the same app.
+
+| Namespace | Id | Example |
+|---|---|---|
+| `android` | package (in `categories.json`, without the prefix) | `android:com.example.player` |
+| `msstore` | Microsoft Store product id, 12 characters, upper case: the Microsoft anchor | `msstore:9NBLGGH2JHXJ` |
+| `xbox` | Xbox title id, decimal (the Store's `XboxTitleId`) | `xbox:1828326430` |
+| `pfn` | Windows package family name, lower case | `pfn:microsoft.minecraftuwp_8wekyb3d8bbwe` |
+| `steam` | Steam appid | `steam:1172470` |
+| `switch` | Nintendo application id, 16 hex, upper case | `switch:0100152000022000` |
+| `web` | registrable domain (curated only) | `web:example.com` |
+| `name` | `name:<xbox\|msstore\|switch\|steam>:<normalized title>`, built from the entries' names | `name:switch:example kart` |
+| `fs` | Family Safety's own id; **not accepted yet** (not known to be the same across accounts) | |
+
+The name normalizer: drop the trademark, registered and copyright signs; Unicode NFKD without combining marks;
+lower case; one trailing " for nintendo switch", " nintendo switch edition", " - nintendo switch", " standard
+edition" or " edition" removed; every run of other characters than a-z and 0-9 becomes one space; trimmed.
+`catalog/normalize-vectors.json` pins it, and Hearth's matches it. A name two apps share is left out.
+
+### Fields
+
+| Field | Values |
+|---|---|
+| `category` | The ten above, **frozen**: older Glint and Hearth drop a value they don't know. |
+| `detail` | `youtube`, `streaming` (both under `video`), `education`, `companion`, `system` (under `productivity` or no category). Only added to, never changed. Educational games are `game` with no detail. |
+| `app`, `name` | The slug and the app's title. |
+| `state` | `confirmed` or `suggested`, **computed when publishing, never written in a source file**. |
+| `source` | `override`, `play`, `store`, `steam`, `platform`, `ai`, `match` or `review`. |
+| `checked` | When the facts were last read. |
+
+**When an entry is confirmed:** an override (`categories-overrides.json`, `catalog/overrides.json`, by key or by
+`app:<slug>`; a key's beats its app's); a store rule (Play's genre in the classifier's fixed map, the Microsoft
+Store's `ProductKind` Game, Steam's type game with no software genre, every Switch title); or a review whose
+evidence record passes the rule below. Anything else (an AI answer, a match by name, a Store application, Steam
+software) is `suggested`. A `detail` shows on a confirmed entry only when an override or a passing review gave
+it; on a suggested entry it shows as suggested. Glint and Hearth never let a suggested value loosen a limit.
+
+**The evidence rule** (`catalog/evidence/<id>.json`, `glint.catalog-evidence/1`, written by the intake's reviewer
+agent). A record confirms its key's proposed category and detail only when its verdict is `approve`, two judges
+with different prompts both answered exactly that, at least one fact is a store or web page on
+`displaycatalog.mp.microsoft.com`, `play.google.com`, `store.steampowered.com`, `www.nintendo.com`,
+`ec.nintendo.com` or `en.wikipedia.org`, and no game signal stands against a value that isn't a game. The check
+enforces it on every pull request and publish, so nothing loosens a limit without a recorded, passing review.
+
+**Changes.** `check.yml` runs `tools/check_catalog.py --base` on pull requests: at most 60 keys added, removed or
+changed, and no confirmed game stops being one without an override or a review. The classifier's pull requests
+(`categories/*`) merge on their own. The reviewer agent's escalations come as a weekly `escalate/<date>` pull
+request that waits for the owner: merging it accepts its overrides, closing it rejects them. A pull request from
+a bot's branch (`categories/*`, `draft/*`, `edit/*`) that touches an overrides file waits for the owner too.
+
+### Published (`glint.catalog/1`)
+
+The index gains `"catalog": {"format": "glint.catalog/1", "shards": {"<platform>": {"path":
+"k/<platform>.<first 16 hex of sha256>.json", "sha256": "...", "count": n}}}`, one shard per platform that has
+keys. A shard is `{"format": "glint.catalog/1", "platform": "xbox", "keys": {"xbox:1828326430": {"app":
+"minecraft", "name": "Minecraft", "category": "game", "state": "confirmed", "source": "store", "checked":
+"2026-11-13"}}}`, trusted only when its SHA-256 equals the signed index's entry. The categories file
+(`c/<hash>.json`) also gains each entry's `detail`, `state` and `source`; older Glint ignores them, and Glint
+still reads only that file, never the shards. Readers ignore unknown keys and skip values and namespaces they
+don't know; a change that can't be made that way gets a new format published beside this one for a year.
 
 ## Published format (`glint.exchange/1`)
 
@@ -204,7 +278,8 @@ The private keys exist only as the repository secrets `EXCHANGE_SIGNING_KEY` (si
 half `keys/exchange-1.pub`) and `EXCHANGE_SIGNING_KEY_NEXT` (unused until a rotation, public half
 `keys/exchange-2.pub`). Glint ships both public keys. To rotate:
 
-1. Make sure the Glint release in people's hands carries both public keys.
+1. Make sure the Glint release **and the Hearth release** in people's hands carry both public keys (Hearth HA
+   pins them to verify the app catalog; see "App catalog").
 2. Put the next key into `EXCHANGE_SIGNING_KEY` and set `EXCHANGE_PUBLIC_KEY` in `publish.yml` to
    `keys/exchange-2.pub`; publish.
 3. Generate a new next key, commit its public half as `keys/exchange-3.pub`, set it as
@@ -225,6 +300,11 @@ or anything else for it. When it is **on**:
   (`Xxxx`) and digits by `9`. Never the content of your notifications, and no account, user or device
   ids.
 - Nothing is ever shared for health, payment or chat apps.
+
+Hearth HA reads the same signed files and sends nothing to fetch them. With its own tile exchange setting turned on
+by an HA administrator (asked once, off until then), it may send the store ids and store titles of public apps
+the catalog lacks, and corrections an adult chooses to share: no household, person or device id, no usage and
+no times. The intake only looks them up at their store; they never set a value here by themselves.
 
 Shared layouts go to a private intake, where they may help draft a recipe; only finished recipes and
 synthetic fixtures are ever published here. This notice describes how the software works; it is not
