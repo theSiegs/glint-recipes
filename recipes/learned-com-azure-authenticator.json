@@ -1,0 +1,63 @@
+{
+  "recipe": "glint.recipe/1",
+  "id": "learned-com-azure-authenticator",
+  "rev": 1,
+  "name": "authenticator",
+  "app": {
+    "package": "com.azure.authenticator",
+    "label": "Authenticator"
+  },
+  "meta": {
+    "status": "learned",
+    "author": "Glint",
+    "notes": "Learned from 30 notification shapes over 2 days.",
+    "updated": "2026-11-13"
+  },
+  "source": {
+    "notification": {
+      "match": {
+        "channels": [
+          "NotificationChannelXx"
+        ],
+        "notCategories": [
+          "alarm",
+          "call",
+          "msg",
+          "promo",
+          "recommendation",
+          "sys",
+          "transport"
+        ],
+        "anchors": [
+          "(?i)\\b(?:approve|request|sign)\\b"
+        ],
+        "lang": [
+          "en"
+        ]
+      }
+    }
+  },
+  "faces": [
+    {
+      "title": "{title}",
+      "line": "{text}",
+      "peek": "{time}"
+    },
+    {
+      "title": "{title}",
+      "peek": "{time}",
+      "when": [
+        "!text"
+      ]
+    },
+    {
+      "kind": "count",
+      "count": "{count}",
+      "label": "new",
+      "when": [
+        "count>1"
+      ],
+      "flip": true
+    }
+  ]
+}
