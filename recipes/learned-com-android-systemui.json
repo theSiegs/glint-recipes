@@ -1,0 +1,58 @@
+{
+  "recipe": "glint.recipe/1",
+  "id": "learned-com-android-systemui",
+  "rev": 1,
+  "name": "system ui",
+  "app": {
+    "package": "com.android.systemui",
+    "label": "System UI"
+  },
+  "meta": {
+    "status": "learned",
+    "author": "Glint",
+    "notes": "Learned from 27 notification shapes over 3 days.",
+    "updated": "2026-11-13"
+  },
+  "source": {
+    "notification": {
+      "match": {
+        "channels": [
+          "XXXXXX",
+          "xxxx_xxxxxxxx_xxxxxx_xx"
+        ],
+        "notCategories": [
+          "alarm",
+          "call",
+          "msg",
+          "promo",
+          "recommendation",
+          "sys",
+          "transport"
+        ]
+      }
+    }
+  },
+  "faces": [
+    {
+      "title": "{title}",
+      "line": "{text}",
+      "peek": "{time}"
+    },
+    {
+      "title": "{title}",
+      "peek": "{time}",
+      "when": [
+        "!text"
+      ]
+    },
+    {
+      "kind": "count",
+      "count": "{count}",
+      "label": "new",
+      "when": [
+        "count>1"
+      ],
+      "flip": true
+    }
+  ]
+}
