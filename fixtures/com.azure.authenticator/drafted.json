@@ -1,0 +1,74 @@
+{
+  "fixture": 1,
+  "package": "com.azure.authenticator",
+  "source": "synthetic",
+  "scrubbed": true,
+  "label": "Authenticator",
+  "notes": "Synthetic: 4 scrubbed notification shapes, scrubbed again and re-timed by the tile exchange's drafting job.",
+  "samples": [
+    {
+      "name": "shape 1",
+      "notification": {
+        "posted": 1700000000000,
+        "when": 1700000000000,
+        "channel": "NotificationChannelXx",
+        "importance": 4,
+        "template": "BigTextStyle",
+        "title": "Approve sign-in?",
+        "text": "Request 9A9XX",
+        "bigText": "Request 9A9XX"
+      },
+      "expect": {
+        "recipe": "learned-com-azure-authenticator"
+      }
+    },
+    {
+      "name": "shape 2",
+      "notification": {
+        "posted": 1700043200000,
+        "when": 1700043200000,
+        "channel": "NotificationChannelXx",
+        "importance": 4,
+        "template": "BigTextStyle",
+        "title": "Approve sign-in?",
+        "text": "Request A9XX9",
+        "bigText": "Request A9XX9"
+      },
+      "expect": {
+        "recipe": "learned-com-azure-authenticator"
+      }
+    },
+    {
+      "name": "shape 3",
+      "notification": {
+        "posted": 1700050400000,
+        "when": 1700050400000,
+        "channel": "NotificationChannelXx",
+        "importance": 4,
+        "template": "BigTextStyle",
+        "title": "Approve sign-in?",
+        "text": "Request XX9XX",
+        "bigText": "Request XX9XX"
+      },
+      "expect": {
+        "recipe": "learned-com-azure-authenticator"
+      }
+    },
+    {
+      "name": "shape 4",
+      "notification": {
+        "posted": 1700050400000,
+        "when": 1700050400000,
+        "channel": "NotificationChannelXx",
+        "importance": 4,
+        "template": "BigTextStyle",
+        "title": "Approve sign-in?",
+        "text": "Request XXXXX",
+        "bigText": "Request XXXXX"
+      },
+      "expect": {
+        "recipe": "learned-com-azure-authenticator"
+      }
+    }
+  ]
+}
