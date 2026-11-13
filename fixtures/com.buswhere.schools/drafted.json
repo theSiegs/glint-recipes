@@ -1,0 +1,40 @@
+{
+  "fixture": 1,
+  "package": "com.buswhere.schools",
+  "source": "synthetic",
+  "scrubbed": true,
+  "label": "BusWhere",
+  "notes": "Synthetic: 2 scrubbed notification shapes, scrubbed again and re-timed by the tile exchange's drafting job.",
+  "samples": [
+    {
+      "name": "shape 1",
+      "notification": {
+        "posted": 1700000000000,
+        "when": 1700000000000,
+        "channel": "xxx_xxxxxxxx_notification_channel",
+        "template": "BigTextStyle",
+        "title": "Your bus will be there soon",
+        "text": "XXXX XXXXXX XX - XXXXXX XX - XXXXX BUS - PM is on its way to Depart Xxxx Xxxxxx Xxxxxxxxxx. Tap for real-time map view and updated XXXx.",
+        "bigText": "XXXX XXXXXX XX - XXXXXX XX - XXXXX BUS - PM is on its way to Depart Xxxx Xxxxxx Xxxxxxxxxx. Tap for real-time map view and updated XXXx."
+      },
+      "expect": {
+        "recipe": "learned-com-buswhere-schools"
+      }
+    },
+    {
+      "name": "shape 2",
+      "notification": {
+        "posted": 1700000000000,
+        "when": 1700000000000,
+        "channel": "xxx_xxxxxxxx_notification_channel",
+        "template": "BigTextStyle",
+        "title": "Your bus will be there soon",
+        "text": "XXXX XXXXXX XX - XXXXXX XX - XXXXX BUS - PM is on its way to Xxxxxx Xx & Xxxxxx Xxx. Tap for real-time map view and updated XXXx.",
+        "bigText": "XXXX XXXXXX XX - XXXXXX XX - XXXXX BUS - PM is on its way to Xxxxxx Xx & Xxxxxx Xxx. Tap for real-time map view and updated XXXx."
+      },
+      "expect": {
+        "recipe": "learned-com-buswhere-schools"
+      }
+    }
+  ]
+}

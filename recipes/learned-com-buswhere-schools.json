@@ -1,0 +1,63 @@
+{
+  "recipe": "glint.recipe/1",
+  "id": "learned-com-buswhere-schools",
+  "rev": 1,
+  "name": "buswhere",
+  "app": {
+    "package": "com.buswhere.schools",
+    "label": "BusWhere"
+  },
+  "meta": {
+    "status": "learned",
+    "author": "Glint",
+    "notes": "Learned from 7 notification shapes over 4 days.",
+    "updated": "2026-11-13"
+  },
+  "source": {
+    "notification": {
+      "match": {
+        "channels": [
+          "xxx_xxxxxxxx_notification_channel"
+        ],
+        "notCategories": [
+          "alarm",
+          "call",
+          "msg",
+          "promo",
+          "recommendation",
+          "sys",
+          "transport"
+        ],
+        "anchors": [
+          "(?i)\\b(?:bus|map|real)\\b"
+        ],
+        "lang": [
+          "en"
+        ]
+      }
+    }
+  },
+  "faces": [
+    {
+      "title": "{title}",
+      "line": "{text}",
+      "peek": "{time}"
+    },
+    {
+      "title": "{title}",
+      "peek": "{time}",
+      "when": [
+        "!text"
+      ]
+    },
+    {
+      "kind": "count",
+      "count": "{count}",
+      "label": "new",
+      "when": [
+        "count>1"
+      ],
+      "flip": true
+    }
+  ]
+}
