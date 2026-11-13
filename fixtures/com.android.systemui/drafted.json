@@ -1,0 +1,103 @@
+{
+  "fixture": 1,
+  "package": "com.android.systemui",
+  "source": "synthetic",
+  "scrubbed": true,
+  "label": "System UI",
+  "notes": "Synthetic: 6 scrubbed notification shapes, scrubbed again and re-timed by the tile exchange's drafting job.",
+  "samples": [
+    {
+      "name": "shape 1",
+      "notification": {
+        "posted": 1700003600000,
+        "when": 1700003600000,
+        "channel": "XXXXXX",
+        "importance": 5,
+        "template": "BigTextStyle",
+        "title": "Battery power 99%",
+        "text": "9 h 99 m left. Turn on Power saving to get 9 h 99 m.\n(estimated xxxxx on your xxxxx xxxxxxxx)",
+        "bigText": "9 h 99 m left. Turn on Power saving to get 9 h 99 m.\n(estimated xxxxx on your xxxxx xxxxxxxx)"
+      },
+      "expect": {
+        "recipe": "learned-com-android-systemui"
+      }
+    },
+    {
+      "name": "shape 2",
+      "notification": {
+        "posted": 1700003600000,
+        "when": 1700003600000,
+        "channel": "XXXXXX",
+        "importance": 5,
+        "template": "BigTextStyle",
+        "title": "Battery power 99%",
+        "text": "Battery is low. Turn on Power saving or charge your phone.",
+        "bigText": "Battery is low. Turn on Power saving or charge your phone."
+      },
+      "expect": {
+        "recipe": "learned-com-android-systemui"
+      }
+    },
+    {
+      "name": "shape 3",
+      "notification": {
+        "posted": 1700039600000,
+        "when": 1700039600000,
+        "channel": "xxxx_xxxxxxxx_xxxxxx_xx",
+        "ongoing": true,
+        "importance": 2,
+        "title": "Xxxx xxxxxxxx"
+      },
+      "expect": {
+        "recipe": "learned-com-android-systemui"
+      }
+    },
+    {
+      "name": "shape 4",
+      "notification": {
+        "posted": 1700165600000,
+        "when": 1700165600000,
+        "channel": "XXXXXX",
+        "importance": 5,
+        "template": "BigTextStyle",
+        "title": "Battery power 9%",
+        "text": "9 h 99 m left. Turn on Power saving to get 9 h 99 m.\n(estimated xxxxx on your xxxxx xxxxxxxx)",
+        "bigText": "9 h 99 m left. Turn on Power saving to get 9 h 99 m.\n(estimated xxxxx on your xxxxx xxxxxxxx)"
+      },
+      "expect": {
+        "recipe": "learned-com-android-systemui"
+      }
+    },
+    {
+      "name": "shape 5",
+      "notification": {
+        "posted": 1700165600000,
+        "when": 1700165600000,
+        "channel": "XXXXXX",
+        "importance": 5,
+        "template": "BigTextStyle",
+        "title": "Battery power 99%",
+        "text": "9 h 99 m left. Turn on Power saving to get 9 h 9 m.\n(estimated xxxxx on your xxxxx xxxxxxxx)",
+        "bigText": "9 h 99 m left. Turn on Power saving to get 9 h 9 m.\n(estimated xxxxx on your xxxxx xxxxxxxx)"
+      },
+      "expect": {
+        "recipe": "learned-com-android-systemui"
+      }
+    },
+    {
+      "name": "left alone 1",
+      "notification": {
+        "posted": 1700000000000,
+        "when": 1700000000000,
+        "channel": "XXX_XXXXXXX",
+        "ongoing": true,
+        "title": "Do not xxxxxxx",
+        "text": "On until 9:99 AM tomorrow"
+      },
+      "expect": {
+        "recipe": "learned-com-android-systemui",
+        "match": false
+      }
+    }
+  ]
+}
