@@ -12,6 +12,11 @@
 # App categories (README.md, "App categories"): categories.json and categories-overrides.json are
 # checked by tools/check_categories.py (schema, allowed categories, package names, no personal data, at
 # most 60 apps changed per pull request) and merge on their own when they pass.
+# The app catalog (README.md, "App catalog"): catalog/ is checked by tools/check_catalog.py (keys, details, the
+# evidence rule, at most 60 keys changed, and no confirmed game stops being one without an override or a
+# review). Its files merge on their own too, except: an escalate/* branch (the reviewer agent's escalations)
+# waits for the owner, and a pull request from a bot's branch (categories/*, draft/*, edit/*) that touches an
+# overrides file waits too, so no token but the owner's can confirm a value by override.
 name: check
 
 on:
@@ -50,6 +55,21 @@ jobs:
             python3 tools/check_categories.py
           fi
 
+      - name: Check the app catalog
+        env:
+          IS_PR: ${{ github.event_name == 'pull_request' }}
+        run: |
+          if [ "$IS_PR" = true ]; then
+            base="$RUNNER_TEMP/base-tree"
+            mkdir -p "$base"
+            for path in categories.json categories-overrides.json catalog; do
+              if git cat-file -e "HEAD^1:$path" 2>/dev/null; then git archive HEAD^1 "$path" | tar -x -C "$base"; fi
+            done
+            python3 tools/check_catalog.py --base "$base"
+          else
+            python3 tools/check_catalog.py
+          fi
+
       - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           distribution: temurin
@@ -83,11 +103,11 @@ jobs:
         run: |
           files="$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/files" --jq '.[] | .filename, (.previous_filename // empty)')"
           printf '%s\n' "$files"
-          other="$(printf '%s\n' "$files" | grep -vE '^(recipes/[^/]+\.json|fixtures/[^/]+/[^/]+\.json|revoked\.txt|categories\.json|categories-overrides\.json)$' || true)"
+          other="$(printf '%s\n' "$files" | grep -vE '^(recipes/[^/]+\.json|fixtures/[^/]+/[^/]+\.json|revoked\.txt|categories\.json|categories-overrides\.json|catalog/(keys|apps|overrides|normalize-vectors)\.json|catalog/evidence/[^/]+\.json)$' || true)"
           if [ -n "$files" ] && [ -z "$other" ]; then
             echo "ok=true" >> "$GITHUB_OUTPUT"
           else
-            echo "::notice::Not auto-merged: the pull request changes files outside recipes/, fixtures/, revoked.txt and the categories files."
+            echo "::notice::Not auto-merged: the pull request changes files outside recipes/, fixtures/, revoked.txt, the categories files and catalog/."
             echo "ok=false" >> "$GITHUB_OUTPUT"
           fi
 
@@ -110,6 +130,13 @@ jobs:
           case "$HEAD_REF" in
             draft/*) why="it comes from a draft/ branch" ;;
             edit/*) why="it is an edit shared from a phone (an edit/ branch)" ;;
+            escalate/*) why="it holds the reviewer agent's escalations (an escalate/ branch)" ;;
+          esac
+          case "$HEAD_REF" in
+            categories/*|draft/*|edit/*)
+              if gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/files" --jq '.[].filename' | grep -qE '^(categories-overrides\.json|catalog/overrides\.json)$'; then
+                [ -n "$why" ] || why="a bot's branch changes an overrides file"
+              fi ;;
           esac
           files="$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/files" --jq '.[] | select(.status != "removed") | .filename')"
           while IFS= read -r f; do

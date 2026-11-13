@@ -12,6 +12,11 @@ Writes, per the glint.exchange/1 contract (README.md):
   site/c/<sha256[:16]>.json  the app categories (categories.json with categories-overrides.json
                          applied, tools/check_categories.py), named by content; the index's
                          "categories" entry gives its path, SHA-256 and count
+  site/k/<platform>.<sha256[:16]>.json  the app catalog's shards (glint.catalog/1, tools/check_catalog.py):
+                         one per platform (android, msstore, xbox, pfn, steam, switch, web, name), named
+                         by content; the index's "catalog" entry lists each one's path, SHA-256 and count.
+                         The categories file above also gains each Android entry's detail, state and
+                         source, which older Glint ignores.
   site/index.json.sig    with --key: base64 of the raw 64-byte Ed25519 signature over index.json
                          (signed with `openssl pkeyutl -sign -rawin`)
 With --verify, the signature is checked with openssl against each raw base64 public key given
@@ -32,6 +37,7 @@ import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import check_categories  # noqa: E402
+import check_catalog  # noqa: E402
 
 FORMAT = "glint.exchange/1"
 RANK = {"verified": 3, "built-in": 2, "unverified": 1, "learned": 0}  # "draft" is never published
@@ -165,10 +171,11 @@ def main():
     # App categories (README.md, "App categories"): one file, trusted through the index's SHA-256.
     # An added key, so an older Glint (which ignores unknown keys) reads the index as before.
     try:
-        cats, overrides = check_categories.load(a.root)
-    except check_categories.Bad as e:
+        src = check_catalog.load(a.root)
+    except check_catalog.Bad as e:
         fail(str(e))
-    published = check_categories.merged(cats, overrides)
+    shards = check_catalog.published(src)
+    published = check_catalog.v1_apps(src, shards)
     if published:
         doc = json.dumps({"format": check_categories.FORMAT, "apps": published},
                          ensure_ascii=False, separators=(",", ":")).encode("utf-8")
@@ -179,12 +186,30 @@ def main():
             f.write(doc)
         index["categories"] = {"path": path, "sha256": digest,
                                "count": sum(1 for v in published.values() if "category" in v)}
+    # The app catalog (README.md, "App catalog"): one content-addressed file per platform. An added key,
+    # so older Glint and Hearth read the index as before.
+    if shards:
+        os.makedirs(os.path.join(a.out, "k"))
+        listed = {}
+        for platform in check_catalog.SHARDS:
+            keys = shards.get(platform)
+            if not keys:
+                continue
+            doc = json.dumps({"format": check_catalog.FORMAT, "platform": platform, "keys": keys},
+                             ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+            digest = hashlib.sha256(doc).hexdigest()
+            path = f"k/{platform}.{digest[:16]}.json"
+            with open(os.path.join(a.out, path), "wb") as f:
+                f.write(doc)
+            listed[platform] = {"path": path, "sha256": digest, "count": len(keys)}
+        index["catalog"] = {"format": check_catalog.FORMAT, "shards": listed}
     index_bytes = json.dumps(index, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
     index_path = os.path.join(a.out, "index.json")
     with open(index_path, "wb") as f:
         f.write(index_bytes)
     print(f"index.json: seq {seq}, {len(apps)} apps, {len(revoked)} revoked, "
-          f"{index['categories']['count'] if 'categories' in index else 0} app categories")
+          f"{index['categories']['count'] if 'categories' in index else 0} app categories, "
+          f"{sum(v['count'] for v in index.get('catalog', {}).get('shards', {}).values())} catalog keys")
 
     if a.key:
         sig = sign(index_path, a.key)

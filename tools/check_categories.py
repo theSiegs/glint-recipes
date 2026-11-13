@@ -44,8 +44,10 @@ NAME_MAX = 60
 EMAIL = re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")
 LINK = re.compile(r"(https?://|www\.|\b[\w-]+\.(com|net|org|io|app)\b)", re.I)
 PHONE = re.compile(r"\+?\d[\d\s().-]{6,}\d")
-ENTRY_KEYS = {"category", "name", "source", "checked", "glance", "kind"}
+ENTRY_KEYS = {"category", "name", "source", "checked", "glance", "kind", "detail", "app", "review"}
 PUBLISHED = ("category", "name", "glance", "kind")
+# An override may also set the app's detail and app slug; tools/check_catalog.py checks and publishes those
+OVERRIDE_KEYS = PUBLISHED + ("detail", "app")
 
 
 class Bad(Exception):
@@ -124,8 +126,8 @@ def check_overrides(data):
         check_package(where, pkg)
         if isinstance(v, str):
             v = {"category": v}
-        if not isinstance(v, dict) or not v or set(v) - set(PUBLISHED):
-            raise Bad(f'{where}: a category, or {{"category": ..., "name": ..., "glance": ..., "kind": ...}}')
+        if not isinstance(v, dict) or not v or set(v) - set(OVERRIDE_KEYS):
+            raise Bad(f'{where}: a category, or {{"category": ..., "name": ..., "glance": ..., "kind": ..., "detail": ..., "app": ...}}')
         if "category" in v and v["category"] not in CATEGORIES + (UNKNOWN,):
             raise Bad(f"{where}: category {v['category']!r} is not one of {CATEGORIES + (UNKNOWN,)}")
         if "name" in v:
@@ -160,7 +162,7 @@ def merged(categories, overrides):
         e = {k: v for k, v in (categories.get(pkg) or {}).items() if k in PUBLISHED}
         o = overrides.get(pkg)
         if o is not None:
-            e.update({"category": o} if isinstance(o, str) else o)
+            e.update({"category": o} if isinstance(o, str) else {k: v for k, v in o.items() if k in PUBLISHED})
         if e.get("category") == UNKNOWN:
             del e["category"]
         if e:

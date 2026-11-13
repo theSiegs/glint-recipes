@@ -1,0 +1,44 @@
+{
+  "format": "glint.catalog-apps/1",
+  "apps": {
+    "disney-plus": {
+      "name": "Disney+"
+    },
+    "duolingo": {
+      "name": "Duolingo"
+    },
+    "google-classroom": {
+      "name": "Google Classroom"
+    },
+    "khan-academy": {
+      "name": "Khan Academy"
+    },
+    "minecraft": {
+      "name": "Minecraft"
+    },
+    "minecraft-windows": {
+      "name": "Minecraft for Windows"
+    },
+    "netflix": {
+      "name": "Netflix"
+    },
+    "roblox": {
+      "name": "Roblox"
+    },
+    "sea-of-thieves": {
+      "name": "Sea of Thieves"
+    },
+    "steam-app": {
+      "name": "Steam"
+    },
+    "xbox-app": {
+      "name": "Xbox"
+    },
+    "youtube": {
+      "name": "YouTube"
+    },
+    "youtube-kids": {
+      "name": "YouTube Kids"
+    }
+  }
+}
