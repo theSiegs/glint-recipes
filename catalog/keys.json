@@ -1,0 +1,103 @@
+{
+  "format": "glint.catalog-keys/1",
+  "keys": {
+    "msstore:9MVXMVT8ZKWC": {
+      "app": "minecraft",
+      "name": "Minecraft",
+      "category": "game",
+      "source": "store:Game",
+      "checked": "2026-11-13"
+    },
+    "msstore:9NBLGGH2JHXJ": {
+      "app": "minecraft-windows",
+      "name": "Minecraft for Windows",
+      "category": "game",
+      "source": "store:Game",
+      "checked": "2026-11-13"
+    },
+    "msstore:9NBLGGH537BL": {
+      "app": "minecraft",
+      "name": "Minecraft",
+      "category": "game",
+      "source": "store:Game",
+      "checked": "2026-11-13"
+    },
+    "msstore:9P2N57MC619K": {
+      "app": "sea-of-thieves",
+      "name": "Sea of Thieves",
+      "category": "game",
+      "source": "store:Game",
+      "checked": "2026-11-13"
+    },
+    "msstore:9WZDNCRFJ3TJ": {
+      "app": "netflix",
+      "name": "Netflix",
+      "category": "video",
+      "source": "store:Application",
+      "checked": "2026-11-13"
+    },
+    "pfn:4df9e0f8.netflix_mcm4njqhnhss8": {
+      "app": "netflix",
+      "name": "Netflix",
+      "category": "video",
+      "source": "store:Application",
+      "checked": "2026-11-13"
+    },
+    "pfn:microsoft.186805a1e9e_8wekyb3d8bbwe": {
+      "app": "minecraft",
+      "name": "Minecraft",
+      "category": "game",
+      "source": "store:Game",
+      "checked": "2026-11-13"
+    },
+    "pfn:microsoft.minecraftuwp_8wekyb3d8bbwe": {
+      "app": "minecraft-windows",
+      "name": "Minecraft for Windows",
+      "category": "game",
+      "source": "store:Game",
+      "checked": "2026-11-13"
+    },
+    "pfn:microsoft.minecraftuwpconsole_8wekyb3d8bbwe": {
+      "app": "minecraft",
+      "name": "Minecraft",
+      "category": "game",
+      "source": "store:Game",
+      "checked": "2026-11-13"
+    },
+    "pfn:microsoft.seaofthieves_8wekyb3d8bbwe": {
+      "app": "sea-of-thieves",
+      "name": "Sea of Thieves",
+      "category": "game",
+      "source": "store:Game",
+      "checked": "2026-11-13"
+    },
+    "xbox:1717113201": {
+      "app": "sea-of-thieves",
+      "name": "Sea of Thieves",
+      "category": "game",
+      "source": "store:Game",
+      "checked": "2026-11-13"
+    },
+    "xbox:1828326430": {
+      "app": "minecraft",
+      "name": "Minecraft",
+      "category": "game",
+      "source": "store:Game",
+      "checked": "2026-11-13"
+    },
+    "xbox:327370029": {
+      "app": "netflix",
+      "name": "Netflix",
+      "category": "video",
+      "source": "store:Application",
+      "checked": "2026-11-13"
+    },
+    "xbox:896928775": {
+      "app": "minecraft-windows",
+      "name": "Minecraft for Windows",
+      "category": "game",
+      "source": "store:Game",
+      "checked": "2026-11-13"
+    }
+  }
+}

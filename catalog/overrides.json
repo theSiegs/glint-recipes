@@ -1,0 +1,41 @@
+{
+  "format": "glint.catalog-overrides/1",
+  "keys": {
+    "app:disney-plus": {
+      "category": "video",
+      "detail": "streaming"
+    },
+    "app:duolingo": {
+      "category": "productivity",
+      "detail": "education"
+    },
+    "app:google-classroom": {
+      "category": "productivity",
+      "detail": "education"
+    },
+    "app:khan-academy": {
+      "category": "productivity",
+      "detail": "education"
+    },
+    "app:netflix": {
+      "category": "video",
+      "detail": "streaming"
+    },
+    "app:steam-app": {
+      "category": "productivity",
+      "detail": "companion"
+    },
+    "app:xbox-app": {
+      "category": "productivity",
+      "detail": "companion"
+    },
+    "app:youtube": {
+      "category": "video",
+      "detail": "youtube"
+    },
+    "app:youtube-kids": {
+      "category": "video",
+      "detail": "youtube"
+    }
+  }
+}
