@@ -1,0 +1,92 @@
+{
+  "fixture": 1,
+  "package": "com.google.android.apps.maps",
+  "source": "synthetic",
+  "scrubbed": true,
+  "label": "Maps",
+  "notes": "Synthetic: 6 scrubbed notification shapes, scrubbed again and re-timed by the tile exchange's drafting job.",
+  "samples": [
+    {
+      "name": "shape 1",
+      "notification": {
+        "posted": 1700000000000,
+        "when": 1700000000000,
+        "channel": "9_xxxxxxxxxx_9",
+        "category": "navigation",
+        "ongoing": true,
+        "title": "Starting xxxxxxxxxx…"
+      },
+      "expect": {
+        "recipe": "learned-com-google-android-apps-maps"
+      }
+    },
+    {
+      "name": "shape 2",
+      "notification": {
+        "posted": 1700050400000,
+        "when": 1700050400000,
+        "channel": "555-0100",
+        "title": "9 hr 9 min to work",
+        "text": "9 min xxxxxx than usual · Heavy traffic"
+      },
+      "expect": {
+        "recipe": "learned-com-google-android-apps-maps"
+      }
+    },
+    {
+      "name": "shape 3",
+      "notification": {
+        "posted": 1700050400000,
+        "when": 1700050400000,
+        "channel": "555-0100",
+        "title": "99 min delay • Xxxxxxxxxx 999",
+        "text": "Xxxxxxxx • 9.9 xx xxxxx"
+      },
+      "expect": {
+        "recipe": "learned-com-google-android-apps-maps"
+      }
+    },
+    {
+      "name": "shape 4",
+      "notification": {
+        "posted": 1700050400000,
+        "when": 1700050400000,
+        "channel": "9_xxxxxxxxxx_9",
+        "category": "navigation",
+        "ongoing": true,
+        "title": "Driving with Google Maps"
+      },
+      "expect": {
+        "recipe": "learned-com-google-android-apps-maps"
+      }
+    },
+    {
+      "name": "shape 5",
+      "notification": {
+        "posted": 1700054000000,
+        "when": 1700054000000,
+        "channel": "9_xxxxxxxxxx_9",
+        "category": "navigation",
+        "ongoing": true,
+        "title": "99A"
+      },
+      "expect": {
+        "recipe": "learned-com-google-android-apps-maps"
+      }
+    },
+    {
+      "name": "shape 6",
+      "notification": {
+        "posted": 1700054000000,
+        "when": 1700054000000,
+        "channel": "9_xxxxxxxxxx_9",
+        "category": "navigation",
+        "ongoing": true,
+        "title": "Xxxxxxxx Xxxx"
+      },
+      "expect": {
+        "recipe": "learned-com-google-android-apps-maps"
+      }
+    }
+  ]
+}

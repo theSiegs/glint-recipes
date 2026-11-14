@@ -1,0 +1,50 @@
+{
+  "recipe": "glint.recipe/1",
+  "id": "learned-com-google-android-apps-maps",
+  "rev": 1,
+  "name": "maps",
+  "app": {
+    "package": "com.google.android.apps.maps",
+    "label": "Maps"
+  },
+  "meta": {
+    "status": "learned",
+    "author": "Glint",
+    "notes": "Learned from 30 notification shapes over 4 days.",
+    "updated": "2026-11-14"
+  },
+  "source": {
+    "notification": {
+      "match": {
+        "channels": [
+          "555-0100",
+          "9_xxxxxxxxxx_9"
+        ],
+        "notCategories": [
+          "alarm",
+          "call",
+          "msg",
+          "promo",
+          "recommendation",
+          "sys",
+          "transport"
+        ]
+      }
+    }
+  },
+  "faces": [
+    {
+      "title": "{title}",
+      "peek": "{time}"
+    },
+    {
+      "kind": "count",
+      "count": "{count}",
+      "label": "new",
+      "when": [
+        "count>1"
+      ],
+      "flip": true
+    }
+  ]
+}
