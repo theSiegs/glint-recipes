@@ -1,0 +1,57 @@
+{
+  "recipe": "glint.recipe/1",
+  "id": "learned-com-google-android-calendar",
+  "rev": 1,
+  "name": "calendar",
+  "app": {
+    "package": "com.google.android.calendar",
+    "label": "Calendar"
+  },
+  "meta": {
+    "status": "learned",
+    "author": "Glint",
+    "notes": "Learned from 7 notification shapes over 5 days.",
+    "updated": "2026-11-14"
+  },
+  "source": {
+    "notification": {
+      "match": {
+        "channels": [
+          "REMINDERS"
+        ],
+        "notCategories": [
+          "alarm",
+          "call",
+          "msg",
+          "promo",
+          "recommendation",
+          "sys",
+          "transport"
+        ]
+      }
+    }
+  },
+  "faces": [
+    {
+      "title": "{title}",
+      "line": "{text}",
+      "peek": "{time}"
+    },
+    {
+      "title": "{title}",
+      "peek": "{time}",
+      "when": [
+        "!text"
+      ]
+    },
+    {
+      "kind": "count",
+      "count": "{count}",
+      "label": "new",
+      "when": [
+        "count>1"
+      ],
+      "flip": true
+    }
+  ]
+}
