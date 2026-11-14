@@ -1,0 +1,82 @@
+{
+  "fixture": 1,
+  "package": "com.google.android.calendar",
+  "source": "synthetic",
+  "scrubbed": true,
+  "label": "Calendar",
+  "notes": "Synthetic: 4 scrubbed notification shapes, scrubbed again and re-timed by the tile exchange's drafting job.",
+  "samples": [
+    {
+      "name": "shape 1",
+      "notification": {
+        "posted": 1700000000000,
+        "when": 1700000000000,
+        "channel": "REMINDERS",
+        "category": "event",
+        "importance": 4,
+        "template": "BigTextStyle",
+        "title": "‎‪The Xxxxxx Family‬‎",
+        "text": "‎‪9 – 9 PM‬‎",
+        "bigText": "‎‪9 – 9 PM‬‎\n‎‪Xxxxxxxx Xxxxx Xxxxxxxxxxxx Xxxxxx‬‎",
+        "subText": "alex@example.com"
+      },
+      "expect": {
+        "recipe": "learned-com-google-android-calendar"
+      }
+    },
+    {
+      "name": "shape 2",
+      "notification": {
+        "posted": 1700147600000,
+        "when": 1700147600000,
+        "channel": "REMINDERS",
+        "category": "event",
+        "importance": 4,
+        "template": "BigTextStyle",
+        "title": "‎‪Coffee xxxxxx at Xxxxxxxxxxx 9-9:99am‬‎",
+        "text": "‎‪9:99 – 9:99 AM‬‎",
+        "bigText": "‎‪9:99 – 9:99 AM‬‎\n‎‪Xxxxxxxxxxx Coffee House‬‎",
+        "subText": "alex@example.com"
+      },
+      "expect": {
+        "recipe": "learned-com-google-android-calendar"
+      }
+    },
+    {
+      "name": "shape 3",
+      "notification": {
+        "posted": 1700183600000,
+        "when": 1700183600000,
+        "channel": "REMINDERS",
+        "category": "event",
+        "importance": 4,
+        "template": "BigTextStyle",
+        "title": "‎‪Xxxxx: Xxxxxx‬‎",
+        "text": "‎‪9:99 – 9:99 PM‬‎",
+        "bigText": "‎‪9:99 – 9:99 PM‬‎",
+        "subText": "alex@example.com"
+      },
+      "expect": {
+        "recipe": "learned-com-google-android-calendar"
+      }
+    },
+    {
+      "name": "shape 4",
+      "notification": {
+        "posted": 1700345600000,
+        "when": 1700345600000,
+        "channel": "REMINDERS",
+        "category": "event",
+        "importance": 4,
+        "template": "BigTextStyle",
+        "title": "‎‪Pick up xxxxxxx‬‎",
+        "text": "‎‪9:99 – 9:99 PM‬‎",
+        "bigText": "‎‪9:99 – 9:99 PM‬‎",
+        "subText": "alex@example.com"
+      },
+      "expect": {
+        "recipe": "learned-com-google-android-calendar"
+      }
+    }
+  ]
+}
