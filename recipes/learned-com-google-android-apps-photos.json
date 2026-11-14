@@ -1,0 +1,57 @@
+{
+  "recipe": "glint.recipe/1",
+  "id": "learned-com-google-android-apps-photos",
+  "rev": 1,
+  "name": "photos",
+  "app": {
+    "package": "com.google.android.apps.photos",
+    "label": "Photos"
+  },
+  "meta": {
+    "status": "learned",
+    "author": "Glint",
+    "notes": "Learned from 21 notification shapes over 10 days.",
+    "updated": "2026-11-14"
+  },
+  "source": {
+    "notification": {
+      "match": {
+        "channels": [
+          "new_xxxxxxxx"
+        ],
+        "notCategories": [
+          "alarm",
+          "call",
+          "msg",
+          "promo",
+          "recommendation",
+          "sys",
+          "transport"
+        ]
+      }
+    }
+  },
+  "faces": [
+    {
+      "title": "{title}",
+      "line": "{text}",
+      "peek": "{time}"
+    },
+    {
+      "title": "{title}",
+      "peek": "{time}",
+      "when": [
+        "!text"
+      ]
+    },
+    {
+      "kind": "count",
+      "count": "{count}",
+      "label": "new",
+      "when": [
+        "count>1"
+      ],
+      "flip": true
+    }
+  ]
+}
