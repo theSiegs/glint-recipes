@@ -1,0 +1,63 @@
+{
+  "recipe": "glint.recipe/1",
+  "id": "learned-com-facebook-katana",
+  "rev": 1,
+  "name": "facebook",
+  "app": {
+    "package": "com.facebook.katana",
+    "label": "Facebook"
+  },
+  "meta": {
+    "status": "learned",
+    "author": "Glint",
+    "notes": "Learned from 10 notification shapes over 5 days.",
+    "updated": "2026-11-14"
+  },
+  "source": {
+    "notification": {
+      "match": {
+        "channels": [
+          "99%#$reminders%#$555-0100%#$9"
+        ],
+        "notCategories": [
+          "alarm",
+          "call",
+          "msg",
+          "promo",
+          "recommendation",
+          "sys",
+          "transport"
+        ],
+        "anchors": [
+          "(?i)\\b(?:messages)\\b"
+        ],
+        "lang": [
+          "en"
+        ]
+      }
+    }
+  },
+  "faces": [
+    {
+      "title": "{title}",
+      "line": "{text}",
+      "peek": "{time}"
+    },
+    {
+      "title": "{title}",
+      "peek": "{time}",
+      "when": [
+        "!text"
+      ]
+    },
+    {
+      "kind": "count",
+      "count": "{count}",
+      "label": "new",
+      "when": [
+        "count>1"
+      ],
+      "flip": true
+    }
+  ]
+}
