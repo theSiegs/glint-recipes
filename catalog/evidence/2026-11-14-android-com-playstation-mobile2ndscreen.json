@@ -1,0 +1,47 @@
+{
+ "format": "glint.catalog-evidence/1",
+ "id": "2026-11-14-android-com-playstation-mobile2ndscreen",
+ "key": "android:com.playstation.mobile2ndscreen",
+ "previous": {
+  "category": "game"
+ },
+ "proposed": {
+  "category": "game"
+ },
+ "verdict": "reject",
+ "facts": [
+  {
+   "kind": "store",
+   "url": "https://play.google.com/store/apps/details?id=com.playstation.mobile2ndscreen",
+   "says": "Google Play genre ENTERTAINMENT; title PS4 Second Screen; summary: Use your mobile device to control your PS4™."
+  },
+  {
+   "kind": "web",
+   "url": "https://en.wikipedia.org/wiki/ShadPS4",
+   "says": "shadPS4 is a free and open-source emulator for the PlayStation 4. It supports Windows, Linux and MacOS. As of November 2025, shadPS4 can emulate only certain games to varying degrees of support."
+  }
+ ],
+ "game_signals": [],
+ "judges": [
+  {
+   "model": "gemini-3.5-flash-lite",
+   "prompt": "judge-a/1",
+   "answer": {
+    "category": "productivity",
+    "detail": "companion"
+   },
+   "reason": "The app is used as a second screen to control a PlayStation 4 console."
+  },
+  {
+   "model": "gemini-3.5-flash-lite",
+   "prompt": "judge-b/1",
+   "answer": {
+    "category": "productivity",
+    "detail": "companion"
+   },
+   "reason": "The app serves as a remote control and companion tool for the PlayStation 4 system."
+  }
+ ],
+ "why": null,
+ "reviewed": "2026-11-14"
+}

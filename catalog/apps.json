@@ -1,44 +1,31 @@
 {
   "format": "glint.catalog-apps/1",
   "apps": {
-    "disney-plus": {
-      "name": "Disney+"
-    },
-    "duolingo": {
-      "name": "Duolingo"
-    },
-    "google-classroom": {
-      "name": "Google Classroom"
-    },
-    "khan-academy": {
-      "name": "Khan Academy"
-    },
-    "minecraft": {
-      "name": "Minecraft"
-    },
-    "minecraft-windows": {
-      "name": "Minecraft for Windows"
-    },
-    "netflix": {
-      "name": "Netflix"
-    },
-    "roblox": {
-      "name": "Roblox"
-    },
-    "sea-of-thieves": {
-      "name": "Sea of Thieves"
-    },
-    "steam-app": {
-      "name": "Steam"
-    },
-    "xbox-app": {
-      "name": "Xbox"
-    },
-    "youtube": {
-      "name": "YouTube"
-    },
-    "youtube-kids": {
-      "name": "YouTube Kids"
-    }
+    "among-us": {"name": "Among Us"},
+    "animal-crossing-new-horizons": {"name": "Animal Crossing: New Horizons"},
+    "disney-plus": {"name": "Disney+"},
+    "duolingo": {"name": "Duolingo"},
+    "forza-horizon-5": {"name": "Forza Horizon 5 Standard Edition"},
+    "google-classroom": {"name": "Google Classroom"},
+    "khan-academy": {"name": "Khan Academy"},
+    "mario-kart-8-deluxe": {"name": "Mario Kart 8 Deluxe"},
+    "minecraft": {"name": "Minecraft"},
+    "minecraft-windows": {"name": "Minecraft for Windows"},
+    "netflix": {"name": "Netflix"},
+    "roblox": {"name": "Roblox"},
+    "roblox-windows": {"name": "Roblox - Windows"},
+    "roblox-xbox": {"name": "Roblox - Xbox"},
+    "rocket-league": {"name": "Rocket League®"},
+    "rocket-league-2": {"name": "Rocket League®"},
+    "sea-of-thieves": {"name": "Sea of Thieves"},
+    "stardew-valley": {"name": "Stardew Valley"},
+    "steam-app": {"name": "Steam"},
+    "super-smash-bros-ultimate": {"name": "Super Smash Bros. Ultimate"},
+    "terraria": {"name": "Terraria"},
+    "xbox": {"name": "XBOX"},
+    "xbox-app": {"name": "Xbox"},
+    "youtube": {"name": "YouTube"},
+    "youtube-2": {"name": "YouTube"},
+    "youtube-kids": {"name": "YouTube Kids"}
   }
 }

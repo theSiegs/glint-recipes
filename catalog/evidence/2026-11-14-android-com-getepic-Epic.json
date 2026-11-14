@@ -1,0 +1,47 @@
+{
+ "format": "glint.catalog-evidence/1",
+ "id": "2026-11-14-android-com-getepic-Epic",
+ "key": "android:com.getepic.Epic",
+ "previous": {
+  "category": "productivity"
+ },
+ "proposed": {
+  "category": "productivity"
+ },
+ "verdict": "reject",
+ "facts": [
+  {
+   "kind": "store",
+   "url": "https://play.google.com/store/apps/details?id=com.getepic.Epic",
+   "says": "Google Play genre EDUCATION; title Epic: Kids' Books & Reading; summary: Learn with read-to-me books, ebooks, stories & videos for grade school children"
+  },
+  {
+   "kind": "web",
+   "url": "https://en.wikipedia.org/wiki/Epic!",
+   "says": "Epic! is an American kids subscription-based reading and learning platform. It offers access to books and videos targeted at children ages 12 and under. The service can be used on desktop and mobile devices."
+  }
+ ],
+ "game_signals": [],
+ "judges": [
+  {
+   "model": "gemini-3.5-flash-lite",
+   "prompt": "judge-a/1",
+   "answer": {
+    "category": "productivity",
+    "detail": "education"
+   },
+   "reason": "Epic: Kids' Books & Reading is a subscription-based reading and learning platform for children."
+  },
+  {
+   "model": "gemini-3.5-flash-lite",
+   "prompt": "judge-b/1",
+   "answer": {
+    "category": "productivity",
+    "detail": "education"
+   },
+   "reason": "The app is a subscription-based reading and learning platform designed for children, making it an educational tool rather than a game or general streaming service."
+  }
+ ],
+ "why": null,
+ "reviewed": "2026-11-14"
+}

@@ -1,0 +1,47 @@
+{
+ "format": "glint.catalog-evidence/1",
+ "id": "2026-11-14-android-com-byjus-thelearningapp",
+ "key": "android:com.byjus.thelearningapp",
+ "previous": {
+  "category": "productivity"
+ },
+ "proposed": {
+  "category": "productivity"
+ },
+ "verdict": "reject",
+ "facts": [
+  {
+   "kind": "store",
+   "url": "https://play.google.com/store/apps/details?id=com.byjus.thelearningapp",
+   "says": "Google Play genre EDUCATION; title BYJU'S – The Learning App; summary: Engaging video lessons, live classes, personalised learning, unlimited practice"
+  },
+  {
+   "kind": "web",
+   "url": "https://en.wikipedia.org/wiki/Byju's",
+   "says": "Byju's was an Indian multinational educational technology company, headquartered in Bengaluru. It was founded in 2011 by Byju Raveendran and Divya Gokulnath. At its peak, it was the world's most valuable edtech startup, with a valuation of $22 billion in 2022. However, by October 2024, multiple medi"
+  }
+ ],
+ "game_signals": [],
+ "judges": [
+  {
+   "model": "gemini-3.5-flash-lite",
+   "prompt": "judge-a/1",
+   "answer": {
+    "category": "productivity",
+    "detail": "education"
+   },
+   "reason": "The app is an educational technology tool focused on lessons and learning rather than play."
+  },
+  {
+   "model": "gemini-3.5-flash-lite",
+   "prompt": "judge-b/1",
+   "answer": {
+    "category": "productivity",
+    "detail": "education"
+   },
+   "reason": "The app is described as an educational technology platform offering video lessons, live classes, and personalized learning for students."
+  }
+ ],
+ "why": null,
+ "reviewed": "2026-11-14"
+}

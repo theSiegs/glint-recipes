@@ -1,0 +1,42 @@
+{
+ "format": "glint.catalog-evidence/1",
+ "id": "2026-11-14-android-com-kidslox-app",
+ "key": "android:com.kidslox.app",
+ "previous": {
+  "category": "productivity"
+ },
+ "proposed": {
+  "category": "productivity"
+ },
+ "verdict": "reject",
+ "facts": [
+  {
+   "kind": "store",
+   "url": "https://play.google.com/store/apps/details?id=com.kidslox.app",
+   "says": "Google Play genre PARENTING; title Parental Control - Kidslox; summary: Limit screen time, Block Apps & Games, Monitor with Parental control app"
+  }
+ ],
+ "game_signals": [],
+ "judges": [
+  {
+   "model": "gemini-3.5-flash-lite",
+   "prompt": "judge-a/1",
+   "answer": {
+    "category": "productivity",
+    "detail": "system"
+   },
+   "reason": "The app functions as a parental control tool to limit screen time and block apps, fitting the system detail."
+  },
+  {
+   "model": "gemini-3.5-flash-lite",
+   "prompt": "judge-b/1",
+   "answer": {
+    "category": "productivity",
+    "detail": "system"
+   },
+   "reason": "The app functions as a system-level tool for parental control, screen time limits, and app blocking."
+  }
+ ],
+ "why": null,
+ "reviewed": "2026-11-14"
+}

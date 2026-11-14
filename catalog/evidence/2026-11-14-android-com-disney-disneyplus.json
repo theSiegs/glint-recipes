@@ -1,0 +1,47 @@
+{
+ "format": "glint.catalog-evidence/1",
+ "id": "2026-11-14-android-com-disney-disneyplus",
+ "key": "android:com.disney.disneyplus",
+ "previous": {
+  "category": "video"
+ },
+ "proposed": {
+  "category": "video"
+ },
+ "verdict": "reject",
+ "facts": [
+  {
+   "kind": "store",
+   "url": "https://play.google.com/store/apps/details?id=com.disney.disneyplus",
+   "says": "Google Play genre ENTERTAINMENT; title Disney+; summary: Stream and download your favorite movies, TV shows & Originals on Disney+"
+  },
+  {
+   "kind": "web",
+   "url": "https://en.wikipedia.org/wiki/Disney%2B",
+   "says": "Disney+ is an American subscription video on-demand over-the-top streaming media service owned by the Walt Disney Company and operated through the direct-to-consumer business of Disney Entertainment. The service primarily distributes films and television series produced by Walt Disney Studios and Di"
+  }
+ ],
+ "game_signals": [],
+ "judges": [
+  {
+   "model": "gemini-3.5-flash-lite",
+   "prompt": "judge-a/1",
+   "answer": {
+    "category": "video",
+    "detail": "streaming"
+   },
+   "reason": "Disney+ is a subscription video on-demand streaming service for movies and TV shows."
+  },
+  {
+   "model": "gemini-3.5-flash-lite",
+   "prompt": "judge-b/1",
+   "answer": {
+    "category": "video",
+    "detail": "streaming"
+   },
+   "reason": "Disney+ is a subscription video streaming service that distributes films and television series."
+  }
+ ],
+ "why": null,
+ "reviewed": "2026-11-14"
+}

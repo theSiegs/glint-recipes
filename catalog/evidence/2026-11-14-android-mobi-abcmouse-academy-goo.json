@@ -1,0 +1,38 @@
+{
+ "format": "glint.catalog-evidence/1",
+ "id": "2026-11-14-android-mobi-abcmouse-academy-goo",
+ "key": "android:mobi.abcmouse.academy_goo",
+ "previous": {
+  "category": "productivity"
+ },
+ "proposed": {
+  "category": "productivity"
+ },
+ "verdict": "reject",
+ "facts": [
+  {
+   "kind": "store",
+   "url": "https://play.google.com/store/apps/details?id=mobi.abcmouse.academy_goo",
+   "says": "Google Play genre EDUCATION; title Early Learning Academy; summary: Fun Learning Games for Kids. Educational Activities for Kids Ages 2-8"
+  },
+  {
+   "kind": "web",
+   "url": "https://en.wikipedia.org/wiki/ABCmouse",
+   "says": "ABCmouse.com, doing business as ABCmouse and previously known in full as ABCmouse.com Early Learning Academy, is a digital education program targeted towards children ages 2–8, created by the educational technology company Age of Learning, Inc. The program offers interactive educational content, inc"
+  }
+ ],
+ "game_signals": [],
+ "judges": [
+  {
+   "model": "gemini-3.5-flash-lite",
+   "prompt": "judge-a/1",
+   "answer": {
+    "category": "game",
+    "detail": null
+   },
+   "reason": "The app is an educational game for kids ages 2-8."
+  }
+ ],
+ "why": null,
+ "reviewed": "2026-11-14"
+}

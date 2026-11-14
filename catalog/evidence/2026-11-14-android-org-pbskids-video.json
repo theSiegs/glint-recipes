@@ -1,0 +1,47 @@
+{
+ "format": "glint.catalog-evidence/1",
+ "id": "2026-11-14-android-org-pbskids-video",
+ "key": "android:org.pbskids.video",
+ "previous": {
+  "category": "video"
+ },
+ "proposed": {
+  "category": "video"
+ },
+ "verdict": "reject",
+ "facts": [
+  {
+   "kind": "store",
+   "url": "https://play.google.com/store/apps/details?id=org.pbskids.video",
+   "says": "Google Play genre EDUCATION; title PBS KIDS Video; summary: Educational TV shows, movies & songs for children. Stream, download, & watch."
+  },
+  {
+   "kind": "web",
+   "url": "https://en.wikipedia.org/wiki/PBS_Kids_Go!",
+   "says": "PBS Kids Go! was an American educational television brand used by PBS for programs aimed at early elementary school kids ages 6 to 8, in contrast to the younger, preschool target demographic of PBS Kids. Most PBS member stations aired the PBS Kids Go! block on weekdays during after-school hours, gen"
+  }
+ ],
+ "game_signals": [],
+ "judges": [
+  {
+   "model": "gemini-3.5-flash-lite",
+   "prompt": "judge-a/1",
+   "answer": {
+    "category": "video",
+    "detail": "streaming"
+   },
+   "reason": "The app provides streaming of educational TV shows and movies for children."
+  },
+  {
+   "model": "gemini-3.5-flash-lite",
+   "prompt": "judge-b/1",
+   "answer": {
+    "category": "video",
+    "detail": "streaming"
+   },
+   "reason": "The app provides streaming access to educational children's television shows and movies."
+  }
+ ],
+ "why": null,
+ "reviewed": "2026-11-14"
+}

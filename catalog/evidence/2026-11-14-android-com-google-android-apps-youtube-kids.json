@@ -1,0 +1,47 @@
+{
+ "format": "glint.catalog-evidence/1",
+ "id": "2026-11-14-android-com-google-android-apps-youtube-kids",
+ "key": "android:com.google.android.apps.youtube.kids",
+ "previous": {
+  "category": "video"
+ },
+ "proposed": {
+  "category": "video"
+ },
+ "verdict": "reject",
+ "facts": [
+  {
+   "kind": "store",
+   "url": "https://play.google.com/store/apps/details?id=com.google.android.apps.youtube.kids",
+   "says": "Google Play genre ENTERTAINMENT; title YouTube Kids; summary: An app made just for kids"
+  },
+  {
+   "kind": "web",
+   "url": "https://en.wikipedia.org/wiki/YouTube_Kids",
+   "says": "YouTube Kids is an American video app and website developed by YouTube, a subsidiary of Google. The app provides a version of the service oriented solely towards children, with curated selections of content, parental control features, and filtering of videos deemed inappropriate for viewing by child"
+  }
+ ],
+ "game_signals": [],
+ "judges": [
+  {
+   "model": "gemini-3.5-flash-lite",
+   "prompt": "judge-a/1",
+   "answer": {
+    "category": "video",
+    "detail": "youtube"
+   },
+   "reason": "The app is YouTube Kids, which is a video app developed by YouTube."
+  },
+  {
+   "model": "gemini-3.5-flash-lite",
+   "prompt": "judge-b/1",
+   "answer": {
+    "category": "video",
+    "detail": "youtube"
+   },
+   "reason": "The app is officially developed by YouTube specifically for children, making it a YouTube-related video platform."
+  }
+ ],
+ "why": null,
+ "reviewed": "2026-11-14"
+}

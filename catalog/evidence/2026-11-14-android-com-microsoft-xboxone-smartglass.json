@@ -1,0 +1,47 @@
+{
+ "format": "glint.catalog-evidence/1",
+ "id": "2026-11-14-android-com-microsoft-xboxone-smartglass",
+ "key": "android:com.microsoft.xboxone.smartglass",
+ "previous": {
+  "category": "game"
+ },
+ "proposed": {
+  "category": "game"
+ },
+ "verdict": "reject",
+ "facts": [
+  {
+   "kind": "store",
+   "url": "https://play.google.com/store/apps/details?id=com.microsoft.xboxone.smartglass",
+   "says": "Google Play genre ENTERTAINMENT; title XBOX; summary: The XBOX app keeps you connected to your gaming community."
+  },
+  {
+   "kind": "web",
+   "url": "https://en.wikipedia.org/wiki/Xbox",
+   "says": "Xbox is a video gaming brand that consists of four main home video game console lines, as well as the streaming service Xbox Cloud Gaming, and online services such as the Xbox network and Xbox Game Pass. The brand is owned by the namesake division of Microsoft."
+  }
+ ],
+ "game_signals": [],
+ "judges": [
+  {
+   "model": "gemini-3.5-flash-lite",
+   "prompt": "judge-a/1",
+   "answer": {
+    "category": "productivity",
+    "detail": "companion"
+   },
+   "reason": "The Xbox app acts as a hub to keep users connected to their gaming community."
+  },
+  {
+   "model": "gemini-3.5-flash-lite",
+   "prompt": "judge-b/1",
+   "answer": {
+    "category": "productivity",
+    "detail": "companion"
+   },
+   "reason": "The Xbox app functions as a companion hub to keep users connected to their gaming community and manage their Xbox ecosystem rather than being a game itself."
+  }
+ ],
+ "why": null,
+ "reviewed": "2026-11-14"
+}

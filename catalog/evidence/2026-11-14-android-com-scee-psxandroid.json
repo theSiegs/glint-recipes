@@ -1,0 +1,47 @@
+{
+ "format": "glint.catalog-evidence/1",
+ "id": "2026-11-14-android-com-scee-psxandroid",
+ "key": "android:com.scee.psxandroid",
+ "previous": {
+  "category": "game"
+ },
+ "proposed": {
+  "category": "game"
+ },
+ "verdict": "reject",
+ "facts": [
+  {
+   "kind": "store",
+   "url": "https://play.google.com/store/apps/details?id=com.scee.psxandroid",
+   "says": "Google Play genre ENTERTAINMENT; title PlayStation App; summary: Connect. Discover. Control."
+  },
+  {
+   "kind": "web",
+   "url": "https://en.wikipedia.org/wiki/PlayStation_App",
+   "says": "The PlayStation App is a software application for iOS and Android devices developed by PlayStation Mobile Inc. It serves as a companion app for PlayStation video game consoles, granting access to PlayStation Network community features and remote control."
+  }
+ ],
+ "game_signals": [],
+ "judges": [
+  {
+   "model": "gemini-3.5-flash-lite",
+   "prompt": "judge-a/1",
+   "answer": {
+    "category": "productivity",
+    "detail": "companion"
+   },
+   "reason": "It serves as a companion app for PlayStation video game consoles."
+  },
+  {
+   "model": "gemini-3.5-flash-lite",
+   "prompt": "judge-b/1",
+   "answer": {
+    "category": "productivity",
+    "detail": "companion"
+   },
+   "reason": "The app serves as an official companion for PlayStation consoles, providing community features and remote control capabilities."
+  }
+ ],
+ "why": null,
+ "reviewed": "2026-11-14"
+}

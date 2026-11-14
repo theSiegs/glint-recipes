@@ -1,0 +1,47 @@
+{
+ "format": "glint.catalog-evidence/1",
+ "id": "2026-11-14-android-org-khankids-android",
+ "key": "android:org.khankids.android",
+ "previous": {
+  "category": "productivity"
+ },
+ "proposed": {
+  "category": "productivity"
+ },
+ "verdict": "reject",
+ "facts": [
+  {
+   "kind": "store",
+   "url": "https://play.google.com/store/apps/details?id=org.khankids.android",
+   "says": "Google Play genre EDUCATION; title Khan Academy Kids; summary: No ads, no subscriptions — ever. Reading, math & phonics for kids ages 2–8."
+  },
+  {
+   "kind": "web",
+   "url": "https://en.wikipedia.org/wiki/Khan_Academy",
+   "says": "Khan Academy is an American educational nonprofit organization founded in 2008 by Sal Khan. The organization provides free online learning resources for students and teachers worldwide."
+  }
+ ],
+ "game_signals": [],
+ "judges": [
+  {
+   "model": "gemini-3.5-flash-lite",
+   "prompt": "judge-a/1",
+   "answer": {
+    "category": "productivity",
+    "detail": "education"
+   },
+   "reason": "The app provides free online educational learning resources for children."
+  },
+  {
+   "model": "gemini-3.5-flash-lite",
+   "prompt": "judge-b/1",
+   "answer": {
+    "category": "productivity",
+    "detail": "education"
+   },
+   "reason": "The app is provided by an educational organization and focuses on learning resources such as reading, math, and phonics for children."
+  }
+ ],
+ "why": null,
+ "reviewed": "2026-11-14"
+}

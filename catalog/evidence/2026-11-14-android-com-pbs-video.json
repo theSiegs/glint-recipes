@@ -1,0 +1,47 @@
+{
+ "format": "glint.catalog-evidence/1",
+ "id": "2026-11-14-android-com-pbs-video",
+ "key": "android:com.pbs.video",
+ "previous": {
+  "category": "video"
+ },
+ "proposed": {
+  "category": "video"
+ },
+ "verdict": "reject",
+ "facts": [
+  {
+   "kind": "store",
+   "url": "https://play.google.com/store/apps/details?id=com.pbs.video",
+   "says": "Google Play genre ENTERTAINMENT; title PBS: TV Shows & Documentaries; summary: Stream Live TV, News & Documentaries. Watch Full Seasons with PBS Passport."
+  },
+  {
+   "kind": "web",
+   "url": "https://en.wikipedia.org/wiki/Nova_(American_TV_program)",
+   "says": "Nova is an American popular science television program produced by WGBH in Boston, Massachusetts, since 1974. It is broadcast on PBS in the United States, and in more than 100 other countries. The program has won many major television awards."
+  }
+ ],
+ "game_signals": [],
+ "judges": [
+  {
+   "model": "gemini-3.5-flash-lite",
+   "prompt": "judge-a/1",
+   "answer": {
+    "category": "video",
+    "detail": "streaming"
+   },
+   "reason": "The app streams TV shows, news, and documentaries like a video service."
+  },
+  {
+   "model": "gemini-3.5-flash-lite",
+   "prompt": "judge-b/1",
+   "answer": {
+    "category": "video",
+    "detail": "streaming"
+   },
+   "reason": "The app provides streaming access to TV shows, news, and documentaries similar to other video streaming services."
+  }
+ ],
+ "why": null,
+ "reviewed": "2026-11-14"
+}

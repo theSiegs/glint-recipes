@@ -1,0 +1,47 @@
+{
+ "format": "glint.catalog-evidence/1",
+ "id": "2026-11-14-android-com-duolingo",
+ "key": "android:com.duolingo",
+ "previous": {
+  "category": "productivity"
+ },
+ "proposed": {
+  "category": "productivity"
+ },
+ "verdict": "reject",
+ "facts": [
+  {
+   "kind": "store",
+   "url": "https://play.google.com/store/apps/details?id=com.duolingo",
+   "says": "Google Play genre EDUCATION; title Duolingo: Learn Languages; summary: Make language learning fun with Spanish, French, English, chess, math & music."
+  },
+  {
+   "kind": "web",
+   "url": "https://en.wikipedia.org/wiki/Duolingo",
+   "says": "Duolingo, Inc. is an American educational technology company that produces learning apps and provides language certification. Duolingo offers courses on 42 languages, ranging from English, French, and Spanish to less commonly studied languages such as Hawaiian, Scottish Gaelic, and Navajo, and even"
+  }
+ ],
+ "game_signals": [],
+ "judges": [
+  {
+   "model": "gemini-3.5-flash-lite",
+   "prompt": "judge-a/1",
+   "answer": {
+    "category": "productivity",
+    "detail": "education"
+   },
+   "reason": "Duolingo is an educational technology app whose main use is learning languages and subjects rather than play."
+  },
+  {
+   "model": "gemini-3.5-flash-lite",
+   "prompt": "judge-b/1",
+   "answer": {
+    "category": "productivity",
+    "detail": "education"
+   },
+   "reason": "Duolingo is an educational application focused on language learning and skill development."
+  }
+ ],
+ "why": null,
+ "reviewed": "2026-11-14"
+}

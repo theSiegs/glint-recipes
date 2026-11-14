@@ -1,103 +1,42 @@
 {
   "format": "glint.catalog-keys/1",
   "keys": {
-    "msstore:9MVXMVT8ZKWC": {
-      "app": "minecraft",
-      "name": "Minecraft",
-      "category": "game",
-      "source": "store:Game",
-      "checked": "2026-11-13"
-    },
-    "msstore:9NBLGGH2JHXJ": {
-      "app": "minecraft-windows",
-      "name": "Minecraft for Windows",
-      "category": "game",
-      "source": "store:Game",
-      "checked": "2026-11-13"
-    },
-    "msstore:9NBLGGH537BL": {
-      "app": "minecraft",
-      "name": "Minecraft",
-      "category": "game",
-      "source": "store:Game",
-      "checked": "2026-11-13"
-    },
-    "msstore:9P2N57MC619K": {
-      "app": "sea-of-thieves",
-      "name": "Sea of Thieves",
-      "category": "game",
-      "source": "store:Game",
-      "checked": "2026-11-13"
-    },
-    "msstore:9WZDNCRFJ3TJ": {
-      "app": "netflix",
-      "name": "Netflix",
-      "category": "video",
-      "source": "store:Application",
-      "checked": "2026-11-13"
-    },
-    "pfn:4df9e0f8.netflix_mcm4njqhnhss8": {
-      "app": "netflix",
-      "name": "Netflix",
-      "category": "video",
-      "source": "store:Application",
-      "checked": "2026-11-13"
-    },
-    "pfn:microsoft.186805a1e9e_8wekyb3d8bbwe": {
-      "app": "minecraft",
-      "name": "Minecraft",
-      "category": "game",
-      "source": "store:Game",
-      "checked": "2026-11-13"
-    },
-    "pfn:microsoft.minecraftuwp_8wekyb3d8bbwe": {
-      "app": "minecraft-windows",
-      "name": "Minecraft for Windows",
-      "category": "game",
-      "source": "store:Game",
-      "checked": "2026-11-13"
-    },
-    "pfn:microsoft.minecraftuwpconsole_8wekyb3d8bbwe": {
-      "app": "minecraft",
-      "name": "Minecraft",
-      "category": "game",
-      "source": "store:Game",
-      "checked": "2026-11-13"
-    },
-    "pfn:microsoft.seaofthieves_8wekyb3d8bbwe": {
-      "app": "sea-of-thieves",
-      "name": "Sea of Thieves",
-      "category": "game",
-      "source": "store:Game",
-      "checked": "2026-11-13"
-    },
-    "xbox:1717113201": {
-      "app": "sea-of-thieves",
-      "name": "Sea of Thieves",
-      "category": "game",
-      "source": "store:Game",
-      "checked": "2026-11-13"
-    },
-    "xbox:1828326430": {
-      "app": "minecraft",
-      "name": "Minecraft",
-      "category": "game",
-      "source": "store:Game",
-      "checked": "2026-11-13"
-    },
-    "xbox:327370029": {
-      "app": "netflix",
-      "name": "Netflix",
-      "category": "video",
-      "source": "store:Application",
-      "checked": "2026-11-13"
-    },
-    "xbox:896928775": {
-      "app": "minecraft-windows",
-      "name": "Minecraft for Windows",
-      "category": "game",
-      "source": "store:Game",
-      "checked": "2026-11-13"
-    }
+    "msstore:9MV0B5HZVK9Z": {"app": "xbox", "name": "XBOX", "source": "ai", "checked": "2026-11-14", "category": "productivity", "detail": "companion", "review": "2026-11-14-msstore-9MV0B5HZVK9Z"},
+    "msstore:9MVXMVT8ZKWC": {"app": "minecraft", "name": "Minecraft", "category": "game", "source": "store:Game", "checked": "2026-11-13"},
+    "msstore:9NBLGGH2JHXJ": {"app": "minecraft-windows", "name": "Minecraft for Windows", "category": "game", "source": "store:Game", "checked": "2026-11-13"},
+    "msstore:9NBLGGH537BL": {"app": "minecraft", "name": "Minecraft", "category": "game", "source": "store:Game", "checked": "2026-11-13"},
+    "msstore:9NDP7KTLK7W3": {"app": "youtube-2", "name": "YouTube", "source": "ai", "checked": "2026-11-14", "category": "video", "detail": "youtube"},
+    "msstore:9NKX70BBCDRN": {"app": "forza-horizon-5", "name": "Forza Horizon 5 Standard Edition", "category": "game", "source": "store:Game", "checked": "2026-11-14"},
+    "msstore:9P2N57MC619K": {"app": "sea-of-thieves", "name": "Sea of Thieves", "category": "game", "source": "store:Game", "checked": "2026-11-13"},
+    "msstore:9PMF91N3LZ3M": {"app": "roblox-windows", "name": "Roblox - Windows", "category": "game", "source": "store:Game", "checked": "2026-11-14"},
+    "msstore:9WZDNCRFJ3TJ": {"app": "netflix", "name": "Netflix", "category": "video", "source": "store:Application", "checked": "2026-11-13"},
+    "msstore:BQ1TN1T79V9K": {"app": "roblox-xbox", "name": "Roblox - Xbox", "category": "game", "source": "store:Game", "checked": "2026-11-14"},
+    "msstore:C125W9BG2K0V": {"app": "rocket-league", "name": "Rocket League®", "category": "game", "source": "store:Game", "checked": "2026-11-14"},
+    "pfn:4df9e0f8.netflix_mcm4njqhnhss8": {"app": "netflix", "name": "Netflix", "category": "video", "source": "store:Application", "checked": "2026-11-13"},
+    "pfn:googleinc.youtube_yfg5n0ztvskxp": {"app": "youtube-2", "name": "YouTube", "source": "ai", "checked": "2026-11-14", "category": "video", "detail": "youtube"},
+    "pfn:microsoft.186805a1e9e_8wekyb3d8bbwe": {"app": "minecraft", "name": "Minecraft", "category": "game", "source": "store:Game", "checked": "2026-11-13"},
+    "pfn:microsoft.gamingapp_8wekyb3d8bbwe": {"app": "xbox", "name": "XBOX", "source": "ai", "checked": "2026-11-14", "category": "productivity", "detail": "companion"},
+    "pfn:microsoft.minecraftuwp_8wekyb3d8bbwe": {"app": "minecraft-windows", "name": "Minecraft for Windows", "category": "game", "source": "store:Game", "checked": "2026-11-13"},
+    "pfn:microsoft.minecraftuwpconsole_8wekyb3d8bbwe": {"app": "minecraft", "name": "Minecraft", "category": "game", "source": "store:Game", "checked": "2026-11-13"},
+    "pfn:microsoft.seaofthieves_8wekyb3d8bbwe": {"app": "sea-of-thieves", "name": "Sea of Thieves", "category": "game", "source": "store:Game", "checked": "2026-11-13"},
+    "pfn:psyonixinc.rocketleague_24yhbbr7hv30r": {"app": "rocket-league", "name": "Rocket League®", "category": "game", "source": "store:Game", "checked": "2026-11-14"},
+    "pfn:robloxcorporation.5ad2cfcf-5dbe-4535-9006-55fda781_55nm5eh3cm0pr": {"app": "roblox-xbox", "name": "Roblox - Xbox", "category": "game", "source": "store:Game", "checked": "2026-11-14"},
+    "pfn:robloxcorporation.robloxgdk_55nm5eh3cm0pr": {"app": "roblox-windows", "name": "Roblox - Windows", "category": "game", "source": "store:Game", "checked": "2026-11-14"},
+    "steam:105600": {"app": "terraria", "name": "Terraria", "category": "game", "source": "steam:game", "checked": "2026-11-14"},
+    "steam:252950": {"app": "rocket-league-2", "name": "Rocket League®", "category": "game", "source": "steam:game", "checked": "2026-11-14"},
+    "steam:413150": {"app": "stardew-valley", "name": "Stardew Valley", "category": "game", "source": "steam:game", "checked": "2026-11-14"},
+    "steam:945360": {"app": "among-us", "name": "Among Us", "category": "game", "source": "steam:game", "checked": "2026-11-14"},
+    "switch:0100152000022000": {"app": "mario-kart-8-deluxe", "name": "Mario Kart 8 Deluxe", "category": "game", "source": "platform:switch", "checked": "2026-11-14"},
+    "switch:01006A800016E000": {"app": "super-smash-bros-ultimate", "name": "Super Smash Bros. Ultimate", "category": "game", "source": "platform:switch", "checked": "2026-11-14"},
+    "switch:01006F8002326000": {"app": "animal-crossing-new-horizons", "name": "Animal Crossing: New Horizons", "category": "game", "source": "platform:switch", "checked": "2026-11-14"},
+    "xbox:122001257": {"app": "youtube-2", "name": "YouTube", "source": "ai", "checked": "2026-11-14", "category": "video", "detail": "youtube"},
+    "xbox:1717113201": {"app": "sea-of-thieves", "name": "Sea of Thieves", "category": "game", "source": "store:Game", "checked": "2026-11-13"},
+    "xbox:1746894998": {"app": "roblox-windows", "name": "Roblox - Windows", "category": "game", "source": "store:Game", "checked": "2026-11-14"},
+    "xbox:1828326430": {"app": "minecraft", "name": "Minecraft", "category": "game", "source": "store:Game", "checked": "2026-11-13"},
+    "xbox:327370029": {"app": "netflix", "name": "Netflix", "category": "video", "source": "store:Application", "checked": "2026-11-13"},
+    "xbox:342226876": {"app": "roblox-xbox", "name": "Roblox - Xbox", "category": "game", "source": "store:Game", "checked": "2026-11-14"},
+    "xbox:558797228": {"app": "rocket-league", "name": "Rocket League®", "category": "game", "source": "store:Game", "checked": "2026-11-14"},
+    "xbox:704208617": {"app": "xbox", "name": "XBOX", "source": "ai", "checked": "2026-11-14", "category": "productivity", "detail": "companion", "review": "2026-11-14-xbox-704208617"},
+    "xbox:896928775": {"app": "minecraft-windows", "name": "Minecraft for Windows", "category": "game", "source": "store:Game", "checked": "2026-11-13"}
   }
 }

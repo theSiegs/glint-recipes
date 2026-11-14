@@ -1,0 +1,47 @@
+{
+ "format": "glint.catalog-evidence/1",
+ "id": "2026-11-14-android-com-originatorkids-EndlessAlphabet",
+ "key": "android:com.originatorkids.EndlessAlphabet",
+ "previous": {
+  "category": "productivity"
+ },
+ "proposed": {
+  "category": "productivity"
+ },
+ "verdict": "reject",
+ "facts": [
+  {
+   "kind": "store",
+   "url": "https://play.google.com/store/apps/details?id=com.originatorkids.EndlessAlphabet",
+   "says": "Google Play genre EDUCATION; title Endless Alphabet; summary: Set the stage for reading success with Endless Alphabet."
+  },
+  {
+   "kind": "web",
+   "url": "https://en.wikipedia.org/wiki/Cybils_Award",
+   "says": "The Cybils Awards, or Children's and Young Adult Bloggers' Literary Awards, are a set of annual book awards given by people who blog about children's and young adult books. Co-founded by Kelly Herold and Anne Boles Levy in 2006, the awards were created to address an apparent gap between children's b"
+  }
+ ],
+ "game_signals": [],
+ "judges": [
+  {
+   "model": "gemini-3.5-flash-lite",
+   "prompt": "judge-a/1",
+   "answer": {
+    "category": "productivity",
+    "detail": "education"
+   },
+   "reason": "Endless Alphabet is a study and school tool for reading success."
+  },
+  {
+   "model": "gemini-3.5-flash-lite",
+   "prompt": "judge-b/1",
+   "answer": {
+    "category": "productivity",
+    "detail": "education"
+   },
+   "reason": "The app is classified as an educational tool focused on reading success."
+  }
+ ],
+ "why": null,
+ "reviewed": "2026-11-14"
+}

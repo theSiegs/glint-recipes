@@ -1,0 +1,47 @@
+{
+ "format": "glint.catalog-evidence/1",
+ "id": "2026-11-14-android-com-duolingo-literacy",
+ "key": "android:com.duolingo.literacy",
+ "previous": {
+  "category": "productivity"
+ },
+ "proposed": {
+  "category": "productivity"
+ },
+ "verdict": "reject",
+ "facts": [
+  {
+   "kind": "store",
+   "url": "https://play.google.com/store/apps/details?id=com.duolingo.literacy",
+   "says": "Google Play genre EDUCATION; title Learn to Read - Duolingo ABC; summary: Learn how to read with fun educational games for ages 3-8. Learn phonics & more!"
+  },
+  {
+   "kind": "web",
+   "url": "https://en.wikipedia.org/wiki/Duolingo",
+   "says": "Duolingo, Inc. is an American educational technology company that produces learning apps and provides language certification. Duolingo offers courses on 42 languages, ranging from English, French, and Spanish to less commonly studied languages such as Hawaiian, Scottish Gaelic, and Navajo, and even"
+  }
+ ],
+ "game_signals": [],
+ "judges": [
+  {
+   "model": "gemini-3.5-flash-lite",
+   "prompt": "judge-a/1",
+   "answer": {
+    "category": "game",
+    "detail": null
+   },
+   "reason": "The app is an educational game for learning to read."
+  },
+  {
+   "model": "gemini-3.5-flash-lite",
+   "prompt": "judge-b/1",
+   "answer": {
+    "category": "productivity",
+    "detail": "education"
+   },
+   "reason": "The app is an educational tool designed for learning to read through phonics and games."
+  }
+ ],
+ "why": null,
+ "reviewed": "2026-11-14"
+}

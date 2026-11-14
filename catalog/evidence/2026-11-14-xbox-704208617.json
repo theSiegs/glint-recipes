@@ -1,0 +1,49 @@
+{
+ "format": "glint.catalog-evidence/1",
+ "id": "2026-11-14-xbox-704208617",
+ "key": "xbox:704208617",
+ "previous": {
+  "category": "productivity",
+  "detail": "companion"
+ },
+ "proposed": {
+  "category": "productivity",
+  "detail": "companion"
+ },
+ "verdict": "approve",
+ "facts": [
+  {
+   "kind": "store",
+   "url": "https://displaycatalog.mp.microsoft.com/v7.0/products?bigIds=9MV0B5HZVK9Z&market=US&languages=en-US",
+   "says": "ProductKind=Application; Category=Entertainment; title XBOX; Discover, download, play games, and more with PC Game Pass via the XBOX app for Windows PC. Play hundreds of PC games for one low monthly price. Download and enjoy new games on day one like Starfield from Bethesda Softworks, as well as ico"
+  },
+  {
+   "kind": "web",
+   "url": "https://en.wikipedia.org/wiki/Xbox",
+   "says": "Xbox is a video gaming brand that consists of four main home video game console lines, as well as the streaming service Xbox Cloud Gaming, and online services such as the Xbox network and Xbox Game Pass. The brand is owned by the namesake division of Microsoft."
+  }
+ ],
+ "game_signals": [],
+ "judges": [
+  {
+   "model": "gemini-3.5-flash-lite",
+   "prompt": "judge-a/1",
+   "answer": {
+    "category": "productivity",
+    "detail": "companion"
+   },
+   "reason": "The app is a gaming hub and store used to discover, download, and play games."
+  },
+  {
+   "model": "gemini-3.5-flash-lite",
+   "prompt": "judge-b/1",
+   "answer": {
+    "category": "productivity",
+    "detail": "companion"
+   },
+   "reason": "The Xbox app functions as a platform hub, store, and game launcher for PC Game Pass and Xbox services."
+  }
+ ],
+ "why": null,
+ "reviewed": "2026-11-14"
+}

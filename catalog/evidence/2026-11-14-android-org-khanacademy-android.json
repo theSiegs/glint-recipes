@@ -1,0 +1,47 @@
+{
+ "format": "glint.catalog-evidence/1",
+ "id": "2026-11-14-android-org-khanacademy-android",
+ "key": "android:org.khanacademy.android",
+ "previous": {
+  "category": "productivity"
+ },
+ "proposed": {
+  "category": "productivity"
+ },
+ "verdict": "reject",
+ "facts": [
+  {
+   "kind": "store",
+   "url": "https://play.google.com/store/apps/details?id=org.khanacademy.android",
+   "says": "Google Play genre EDUCATION; title Khan Academy; summary: You can learn anything."
+  },
+  {
+   "kind": "web",
+   "url": "https://en.wikipedia.org/wiki/Khan_Academy",
+   "says": "Khan Academy is an American educational nonprofit organization founded in 2008 by Sal Khan. The organization provides free online learning resources for students and teachers worldwide."
+  }
+ ],
+ "game_signals": [],
+ "judges": [
+  {
+   "model": "gemini-3.5-flash-lite",
+   "prompt": "judge-a/1",
+   "answer": {
+    "category": "productivity",
+    "detail": "education"
+   },
+   "reason": "Khan Academy is an educational nonprofit providing online learning resources for students and teachers."
+  },
+  {
+   "model": "gemini-3.5-flash-lite",
+   "prompt": "judge-b/1",
+   "answer": {
+    "category": "productivity",
+    "detail": "education"
+   },
+   "reason": "Khan Academy is an educational tool for learning and studying, fitting the education detail under productivity."
+  }
+ ],
+ "why": null,
+ "reviewed": "2026-11-14"
+}
