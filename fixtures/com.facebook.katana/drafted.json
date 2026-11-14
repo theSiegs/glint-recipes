@@ -1,0 +1,120 @@
+{
+  "fixture": 1,
+  "package": "com.facebook.katana",
+  "source": "synthetic",
+  "scrubbed": true,
+  "label": "Facebook",
+  "notes": "Synthetic: 7 scrubbed notification shapes, scrubbed again and re-timed by the tile exchange's drafting job.",
+  "samples": [
+    {
+      "name": "shape 1",
+      "notification": {
+        "posted": 1700000000000,
+        "when": 1700000000000,
+        "channel": "99%#$reminders%#$555-0100%#$9",
+        "importance": 2,
+        "template": "BigPictureStyle",
+        "title": "Xxxxx Xxxxxxx",
+        "text": "💬 You have 9 messages and 9 new notifications.",
+        "summaryText": "💬 You have 9 messages and 9 new notifications."
+      },
+      "expect": {
+        "recipe": "learned-com-facebook-katana"
+      }
+    },
+    {
+      "name": "shape 2",
+      "notification": {
+        "posted": 1700028800000,
+        "when": 1700028800000,
+        "channel": "99%#$reminders%#$555-0100%#$9",
+        "importance": 2,
+        "template": "BigTextStyle",
+        "title": "Xxxxx Xxxxxxx",
+        "text": "You have 9 messages and 9 new notifications.",
+        "bigText": "You have 9 messages and 9 new notifications."
+      },
+      "expect": {
+        "recipe": "learned-com-facebook-katana"
+      }
+    },
+    {
+      "name": "shape 3",
+      "notification": {
+        "posted": 1700093600000,
+        "when": 1700093600000,
+        "channel": "99%#$reminders%#$555-0100%#$9",
+        "importance": 2,
+        "template": "BigTextStyle",
+        "title": "Xxxxx Xxxxxxx",
+        "text": "💬 You have 9 messages and 9 new notifications.",
+        "bigText": "💬 You have 9 messages and 9 new notifications."
+      },
+      "expect": {
+        "recipe": "learned-com-facebook-katana"
+      }
+    },
+    {
+      "name": "shape 4",
+      "notification": {
+        "posted": 1700122400000,
+        "when": 1700122400000,
+        "channel": "99%#$reminders%#$555-0100%#$9",
+        "importance": 2,
+        "template": "BigPictureStyle",
+        "title": "Xxxxx Xxxxxxx",
+        "text": "💬 You have 9 messages, 999 photos and 9 other updates from Xxxxxxx /Xxxxxxxxx Xxxxxx History, If you were from Xxxxxxxxxxxx, you would remember... and others.",
+        "summaryText": "💬 You have 9 messages, 999 photos and 9 other updates from Xxxxxxx /Xxxxxxxxx Xxxxxx History, If you were from Xxxxxxxxxxxx, you would remember... and others."
+      },
+      "expect": {
+        "recipe": "learned-com-facebook-katana"
+      }
+    },
+    {
+      "name": "shape 5",
+      "notification": {
+        "posted": 1700183600000,
+        "when": 1700183600000,
+        "channel": "99%#$reminders%#$555-0100%#$9",
+        "importance": 2,
+        "template": "BigTextStyle",
+        "title": "Xxxxxxxxx Xxxxxxxx",
+        "text": "💬 You have 9 group update, 9 messages and 9 new notification.",
+        "bigText": "💬 You have 9 group update, 9 messages and 9 new notification."
+      },
+      "expect": {
+        "recipe": "learned-com-facebook-katana"
+      }
+    },
+    {
+      "name": "shape 6",
+      "notification": {
+        "posted": 1700259200000,
+        "when": 1700259200000,
+        "channel": "99%#$reminders%#$555-0100%#$9",
+        "importance": 2,
+        "template": "BigTextStyle",
+        "title": "Xxxxx Xxxxxxx",
+        "text": "💬 You have 9 messages and 9 new notification.",
+        "bigText": "💬 You have 9 messages and 9 new notification."
+      },
+      "expect": {
+        "recipe": "learned-com-facebook-katana"
+      }
+    },
+    {
+      "name": "left alone 1",
+      "notification": {
+        "posted": 1700295200000,
+        "when": 1700295200000,
+        "channel": "99%#$reminders%#$555-0100%#$9",
+        "importance": 2,
+        "title": "Xxxxx Xxxxxxx"
+      },
+      "expect": {
+        "recipe": "learned-com-facebook-katana",
+        "match": false
+      }
+    }
+  ]
+}
