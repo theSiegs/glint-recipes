@@ -1,0 +1,85 @@
+{
+  "fixture": 1,
+  "package": "com.dunkinbrands.otgo",
+  "source": "synthetic",
+  "scrubbed": true,
+  "label": "Dunkin",
+  "notes": "Synthetic: 5 scrubbed notification shapes, scrubbed again and re-timed by the tile exchange's drafting job.",
+  "samples": [
+    {
+      "name": "shape 1",
+      "notification": {
+        "posted": 1700000000000,
+        "when": 1700000000000,
+        "channel": "xxx_default_channel",
+        "template": "BigTextStyle",
+        "title": "Add a xxxxx to your Monday xxxxxxx🙌",
+        "text": "Mobile Xxxxxxx are xxxxxxx! Order xxxxx and score 999 extra xxxxx points when you order a xxxxxxxx today and every Monday. Xxxxx & xxxx. apply.",
+        "bigText": "Mobile Xxxxxxx are xxxxxxx! Order xxxxx and score 999 extra xxxxx points when you order a xxxxxxxx today and every Monday. Xxxxx & xxxx. apply."
+      },
+      "expect": {
+        "recipe": "learned-com-dunkinbrands-otgo"
+      }
+    },
+    {
+      "name": "shape 2",
+      "notification": {
+        "posted": 1700007200000,
+        "when": 1700007200000,
+        "channel": "xxx_default_channel",
+        "template": "BigTextStyle",
+        "title": "Wake up to 9X points☀️",
+        "text": "Your run just got a whole lot xxxxxx! Activate & get 9X points on Wake-Up Xxxx® Xxxxxxxxxx thru 99/99. Xxxxx & xxxx. apply.",
+        "bigText": "Your run just got a whole lot xxxxxx! Activate & get 9X points on Wake-Up Xxxx® Xxxxxxxxxx thru 99/99. Xxxxx & xxxx. apply."
+      },
+      "expect": {
+        "recipe": "learned-com-dunkinbrands-otgo"
+      }
+    },
+    {
+      "name": "shape 3",
+      "notification": {
+        "posted": 1700115200000,
+        "when": 1700115200000,
+        "channel": "xxx_default_channel",
+        "template": "BigTextStyle",
+        "title": "Don’t xxx this one out 🚫🪑",
+        "text": "Points are waiting for you! Activate and spend $99 or more on an order to earn 999 xxxxx points thru 99/99. Xxxxx & xxxx. apply.",
+        "bigText": "Points are waiting for you! Activate and spend $99 or more on an order to earn 999 xxxxx points thru 99/99. Xxxxx & xxxx. apply."
+      },
+      "expect": {
+        "recipe": "learned-com-dunkinbrands-otgo"
+      }
+    },
+    {
+      "name": "shape 4",
+      "notification": {
+        "posted": 1700115200000,
+        "when": 1700115200000,
+        "channel": "xxx_default_channel",
+        "template": "BigTextStyle",
+        "title": "Xxxxxxxx: 999% xxxxxx of free xxxxxx",
+        "text": "Xxxxxxxxx the xxxxx return of a fan xxxxxxxx! Enjoy a free xxxxxx Xxxxxx Xxxxxx Cloud Xxxxx with purchase from 9PM to 9PM on 99/99. Xxxxx & xxxx. apply.",
+        "bigText": "Xxxxxxxxx the xxxxx return of a fan xxxxxxxx! Enjoy a free xxxxxx Xxxxxx Xxxxxx Cloud Xxxxx with purchase from 9PM to 9PM on 99/99. Xxxxx & xxxx. apply."
+      },
+      "expect": {
+        "recipe": "learned-com-dunkinbrands-otgo"
+      }
+    },
+    {
+      "name": "shape 5",
+      "notification": {
+        "posted": 1700262800000,
+        "when": 1700262800000,
+        "channel": "xxx_default_channel",
+        "template": "BigTextStyle",
+        "title": "Xxxxx points xxxxx 👀",
+        "text": "Get more with your order. Activate and place an order of $99 or more to earn 999 xxxxx points thru 99/99. Xxxxx & xxxx. apply",
+        "bigText": "Get more with your order. Activate and place an order of $99 or more to earn 999 xxxxx points thru 99/99. Xxxxx & xxxx. apply"
+      },
+      "expect": {
+        "recipe": "learned-com-dunkinbrands-otgo"
+      }
+    }
+  ]
+}

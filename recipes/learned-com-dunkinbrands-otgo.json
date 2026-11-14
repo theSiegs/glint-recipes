@@ -1,0 +1,63 @@
+{
+  "recipe": "glint.recipe/1",
+  "id": "learned-com-dunkinbrands-otgo",
+  "rev": 1,
+  "name": "dunkin",
+  "app": {
+    "package": "com.dunkinbrands.otgo",
+    "label": "Dunkin"
+  },
+  "meta": {
+    "status": "learned",
+    "author": "Glint",
+    "notes": "Learned from 5 notification shapes over 4 days.",
+    "updated": "2026-11-14"
+  },
+  "source": {
+    "notification": {
+      "match": {
+        "channels": [
+          "xxx_default_channel"
+        ],
+        "notCategories": [
+          "alarm",
+          "call",
+          "msg",
+          "promo",
+          "recommendation",
+          "sys",
+          "transport"
+        ],
+        "anchors": [
+          "(?i)\\b(?:activate|apply|points)\\b"
+        ],
+        "lang": [
+          "en"
+        ]
+      }
+    }
+  },
+  "faces": [
+    {
+      "title": "{title}",
+      "line": "{text}",
+      "peek": "{time}"
+    },
+    {
+      "title": "{title}",
+      "peek": "{time}",
+      "when": [
+        "!text"
+      ]
+    },
+    {
+      "kind": "count",
+      "count": "{count}",
+      "label": "new",
+      "when": [
+        "count>1"
+      ],
+      "flip": true
+    }
+  ]
+}
