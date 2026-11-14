@@ -1,0 +1,135 @@
+{
+  "fixture": 1,
+  "package": "com.google.android.apps.photos",
+  "source": "synthetic",
+  "scrubbed": true,
+  "label": "Photos",
+  "notes": "Synthetic: 8 scrubbed notification shapes, scrubbed again and re-timed by the tile exchange's drafting job.",
+  "samples": [
+    {
+      "name": "shape 1",
+      "notification": {
+        "posted": 1700000000000,
+        "when": 1700000000000,
+        "channel": "new_xxxxxxxx",
+        "importance": 2,
+        "template": "BigPictureStyle",
+        "title": "A xxxxxxxxx xxxx",
+        "text": "I xxxxx it’s time for a xxxx"
+      },
+      "expect": {
+        "recipe": "learned-com-google-android-apps-photos"
+      }
+    },
+    {
+      "name": "shape 2",
+      "notification": {
+        "posted": 1700061200000,
+        "when": 1700061200000,
+        "channel": "new_xxxxxxxx",
+        "importance": 2,
+        "template": "BigPictureStyle",
+        "title": "Xxxxxxx into the xxx",
+        "text": "Xxxx them close"
+      },
+      "expect": {
+        "recipe": "learned-com-google-android-apps-photos"
+      }
+    },
+    {
+      "name": "shape 3",
+      "notification": {
+        "posted": 1700075600000,
+        "when": 1700075600000,
+        "channel": "new_xxxxxxxx",
+        "importance": 2,
+        "template": "BigPictureStyle",
+        "title": "Xxxxxxxxx lineup",
+        "text": "In good company"
+      },
+      "expect": {
+        "recipe": "learned-com-google-android-apps-photos"
+      }
+    },
+    {
+      "name": "shape 4",
+      "notification": {
+        "posted": 1700147600000,
+        "when": 1700147600000,
+        "channel": "new_xxxxxxxx",
+        "importance": 2,
+        "template": "BigPictureStyle",
+        "title": "Xxxxx of Xxxxxx 9999",
+        "text": "New xxxxxx for you"
+      },
+      "expect": {
+        "recipe": "learned-com-google-android-apps-photos"
+      }
+    },
+    {
+      "name": "shape 5",
+      "notification": {
+        "posted": 1700162000000,
+        "when": 1700162000000,
+        "channel": "new_xxxxxxxx",
+        "importance": 2,
+        "template": "BigPictureStyle",
+        "title": "Xxxxxxxx and Xxxxxxxxxx",
+        "text": "New xxxxxx for you"
+      },
+      "expect": {
+        "recipe": "learned-com-google-android-apps-photos"
+      }
+    },
+    {
+      "name": "shape 6",
+      "notification": {
+        "posted": 1700216000000,
+        "when": 1700216000000,
+        "channel": "new_xxxxxxxx",
+        "importance": 2,
+        "template": "BigPictureStyle",
+        "title": "Xxxxx of October 9999",
+        "text": "New xxxxxx for you"
+      },
+      "expect": {
+        "recipe": "learned-com-google-android-apps-photos"
+      }
+    },
+    {
+      "name": "left alone 1",
+      "notification": {
+        "posted": 1700334800000,
+        "when": 1700334800000,
+        "channel": "sharing",
+        "importance": 2,
+        "template": "BigPictureStyle",
+        "title": "Xxxxxxxx Xxxxxxx",
+        "text": "Added new photos to xxxxxxx sharing",
+        "subText": "alex@example.com"
+      },
+      "expect": {
+        "recipe": "learned-com-google-android-apps-photos",
+        "match": false
+      }
+    },
+    {
+      "name": "left alone 2",
+      "notification": {
+        "posted": 1700572400000,
+        "when": 1700572400000,
+        "channel": "other",
+        "importance": 2,
+        "template": "BigTextStyle",
+        "title": "View your new photo xxxxxx",
+        "text": "Made for you from your recent xxxxxxxxx",
+        "bigText": "Made for you from your recent xxxxxxxxx",
+        "subText": "alex@example.com"
+      },
+      "expect": {
+        "recipe": "learned-com-google-android-apps-photos",
+        "match": false
+      }
+    }
+  ]
+}
